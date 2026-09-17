@@ -454,21 +454,6 @@ export const Landing: React.FC = () => {
         
         {/* Hero Section */}
         <section id="home" className="text-center space-y-6 max-w-3xl mx-auto px-6 py-12 md:py-20">
-          {/* Demo Credentials Banner */}
-          <div className="overflow-hidden flex justify-center">
-            <div className="hero-title-line inline-flex items-center gap-3 bg-[#FFFDF9] border border-[#D4AF37]/30 rounded-full px-5 py-2.5 shadow-sm">
-              <span className="w-2 h-2 rounded-full bg-[#22c55e] animate-pulse shrink-0" />
-              <span className="text-xs font-semibold text-[#1A1A1A] tracking-wide">🎯 Live Demo</span>
-              <span className="text-[11px] text-[#71797E] font-mono hidden sm:block">demo@healthlens.ai / Demo@12345</span>
-              <button
-                onClick={handleCTAClick}
-                className="text-[10px] font-bold text-[#D4AF37] hover:text-[#B8962D] transition-colors cursor-pointer"
-              >
-                Try Now →
-              </button>
-            </div>
-          </div>
-          
           <h1 className="text-5xl sm:text-6xl md:text-7xl font-heading font-light text-[#1A1A1A] leading-[1.12] tracking-tight">
             <span className="block hero-title-line">Smarter Health Insights,</span>
             <span className="block hero-title-line italic font-normal text-[#1a1a1a]/90">Powered by AI</span>
