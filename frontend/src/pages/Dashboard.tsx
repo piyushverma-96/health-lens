@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { 
   LayoutDashboard, 
@@ -25,8 +25,22 @@ import { OnboardingIntake } from "../components/OnboardingIntake";
 
 export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { profile, user, signOut } = useAuth();
-  const [activeTab, setActiveTab] = useState("chat"); // Default is now the Chat Assistant!
+  const initialTab = searchParams.get("tab") || "chat";
+  const [activeTab, setActiveTab] = useState(initialTab);
+
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    if (tabParam && tabParam !== activeTab) {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
+
+  const handleTabChange = (tabId: string) => {
+    setActiveTab(tabId);
+    setSearchParams({ tab: tabId });
+  };
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [chatPreload, setChatPreload] = useState<string | null>(null);
@@ -185,7 +199,7 @@ export const Dashboard: React.FC = () => {
               return (
                 <button
                   key={item.id}
-                  onClick={() => setActiveTab(item.id)}
+                  onClick={() => handleTabChange(item.id)}
                   className={`w-full flex items-center rounded-xl transition-all duration-200 active:scale-[0.98] cursor-pointer group ${
                     sidebarExpanded ? "px-4 py-3 text-left" : "p-3.5 justify-center"
                   } ${

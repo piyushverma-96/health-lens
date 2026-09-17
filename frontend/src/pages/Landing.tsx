@@ -96,6 +96,110 @@ export const Landing: React.FC = () => {
 
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
 
+  // Interactive Pillars State
+  const [activeDayIdx, setActiveDayIdx] = useState<number>(3); // Wednesday
+  const [activeBiomarkerIdx, setActiveBiomarkerIdx] = useState<number>(0); // Ferritin
+  const [activeChatPromptIdx, setActiveChatPromptIdx] = useState<number>(0); // Chat prompt
+
+  const ocrDays = [
+    { label: "S", val: 64, count: 8, confidence: 99.2 },
+    { label: "M", val: 74, count: 12, confidence: 99.6 },
+    { label: "T", val: 57, count: 9, confidence: 98.9 },
+    { label: "W", val: 78, count: 16, confidence: 99.8 },
+    { label: "Th", val: 68, count: 11, confidence: 99.4 },
+    { label: "F", val: 56, count: 10, confidence: 99.1 },
+    { label: "S", val: 65, count: 14, confidence: 99.5 }
+  ];
+
+  const sampleBiomarkers = [
+    {
+      id: "ferritin",
+      name: "Ferritin (Blood Iron)",
+      short: "Ferritin",
+      val: "10.8",
+      unit: "g/dl",
+      status: "Borderline Low",
+      color: "#FF4D6D",
+      badgeBg: "rgba(220, 20, 60, 0.2)",
+      badgeBorder: "rgba(220, 20, 60, 0.35)",
+      ref: "12.0 - 150.0",
+      markerPos: "15%",
+      markerColor: "#EF4444",
+      desc: "Low iron stores detected. Dietary heme iron review suggested."
+    },
+    {
+      id: "vitd",
+      name: "Vitamin D (25-OH)",
+      short: "Vit D",
+      val: "19.5",
+      unit: "ng/mL",
+      status: "Deficiency Alert",
+      color: "#FBBF24",
+      badgeBg: "rgba(245, 158, 11, 0.2)",
+      badgeBorder: "rgba(245, 158, 11, 0.35)",
+      ref: "30.0 - 100.0",
+      markerPos: "20%",
+      markerColor: "#F59E0B",
+      desc: "Sub-optimal vitamin D level. Consider safe sun exposure or supplementation."
+    },
+    {
+      id: "glucose",
+      name: "Fasting Blood Glucose",
+      short: "Glucose",
+      val: "92",
+      unit: "mg/dL",
+      status: "Optimal Range",
+      color: "#4DFFC9",
+      badgeBg: "rgba(16, 185, 129, 0.2)",
+      badgeBorder: "rgba(16, 185, 129, 0.35)",
+      ref: "70.0 - 99.0",
+      markerPos: "55%",
+      markerColor: "#10B981",
+      desc: "Healthy insulin sensitivity & steady glucose regulation."
+    },
+    {
+      id: "cholesterol",
+      name: "Total Cholesterol",
+      short: "Lipid",
+      val: "215",
+      unit: "mg/dL",
+      status: "Borderline High",
+      color: "#F87171",
+      badgeBg: "rgba(239, 68, 68, 0.2)",
+      badgeBorder: "rgba(239, 68, 68, 0.35)",
+      ref: "< 200.0",
+      markerPos: "75%",
+      markerColor: "#EF4444",
+      desc: "Slight elevation. Cardiovascular lifestyle check recommended."
+    }
+  ];
+
+  const aiChatPrompts = [
+    {
+      label: "Iron Stores",
+      q: "What does 10.8 g/dl Ferritin mean?",
+      a: "10.8 g/dL reflects low iron storage before anemia. Recommended: increase iron-rich foods & pair with Vitamin C."
+    },
+    {
+      label: "Vit D Tips",
+      q: "How can I improve my Vitamin D?",
+      a: "Spend 15-20 min in morning sunlight. Add fatty fish, eggs, or consult your GP about 2,000 IU D3 drops."
+    },
+    {
+      label: "Glucose Check",
+      q: "Is 92 mg/dL fasting glucose healthy?",
+      a: "Yes! 92 mg/dL is within the optimal fasting zone (<100 mg/dL), showing well-regulated glycemic metabolism."
+    }
+  ];
+
+  const handlePillarClick = (tab: "upload" | "trends" | "chat") => {
+    if (user) {
+      navigate(`/dashboard?tab=${tab}`);
+    } else {
+      navigate(`/login?tab=${tab}&auto=1`);
+    }
+  };
+
   const faqData: FAQItem[] = [
     {
       question: "Is HealthLens a medical diagnostic tool?",
@@ -365,193 +469,319 @@ export const Landing: React.FC = () => {
         >
           
           {/* Card 1: OCR Analysis */}
-          <div className="clinical-card group/card relative h-[480px] md:h-[530px] rounded-[2.2rem] overflow-hidden shadow-[0_15px_45px_rgba(0,0,0,0.03)] border border-[#EFECE6] bg-[#FFF] flex flex-col justify-end p-5 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(212,175,55,0.06)]">
+          <div 
+            onClick={() => handlePillarClick("upload")}
+            className="clinical-card group/card relative min-h-[520px] md:min-h-[560px] rounded-[2.2rem] overflow-hidden shadow-[0_15px_45px_rgba(0,0,0,0.03)] border border-[#EFECE6] bg-[#FFF] flex flex-col justify-end p-5 transition-all duration-300 hover:-translate-y-1 hover:border-[#D4AF37]/50 hover:shadow-[0_20px_50px_rgba(212,175,55,0.15)] cursor-pointer"
+          >
             {/* Background Portrait */}
             <div className="absolute inset-0 z-0 overflow-hidden">
               <img 
                 src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=800" 
                 alt="Serene Health Analysis" 
-                className="w-full h-full object-cover object-center transition-transform duration-1000 ease-out scale-100 group-hover/card:scale-103 filter brightness-[0.82] contrast-[1.05] saturate-[0.85]"
+                className="w-full h-full object-cover object-center transition-transform duration-1000 ease-out scale-100 group-hover/card:scale-105 filter brightness-[0.82] contrast-[1.05] saturate-[0.85]"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10" />
             </div>
 
-            {/* Top Label */}
-            <div className="absolute top-7 left-7 z-10">
-              <span className="text-xs font-semibold tracking-wider text-white/50 uppercase font-mono">Pillar 01</span>
-              <h3 className="text-2xl font-heading font-medium text-[#FDFBF7] mt-0.5">OCR Analysis</h3>
+            {/* Top Label & Quick Action Badge */}
+            <div className="absolute top-6 left-6 right-6 z-10 flex justify-between items-start">
+              <div>
+                <span className="text-xs font-semibold tracking-wider text-white/60 uppercase font-mono">Pillar 01</span>
+                <h3 className="text-2xl font-heading font-medium text-[#FDFBF7] mt-0.5">OCR Analysis</h3>
+              </div>
+              <span className="px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/20 text-[10px] font-mono text-[#D4AF37] flex items-center gap-1.5 shadow-sm group-hover/card:bg-[#D4AF37] group-hover/card:text-black transition-all">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e] animate-pulse" />
+                <span>Tap to Open ↗</span>
+              </span>
             </div>
 
             {/* Translucent Bar Chart Overlay */}
-            <div className="z-10 w-full mb-2">
-              <div className="glass-card-dark-overlay rounded-3xl p-5 border border-white/10 shadow-xl space-y-4">
+            <div className="z-10 w-full mb-1">
+              <div className="glass-card-dark-overlay rounded-3xl p-5 border border-white/15 shadow-xl space-y-3.5 backdrop-blur-xl bg-black/65">
                 <div className="flex justify-between items-center">
-                  <span className="text-xs font-semibold text-white/90 font-sans tracking-wide font-medium">Report Parsing</span>
-                  <span className="text-[10px] font-bold text-[#D4AF37] bg-[#D4AF37]/15 border border-[#D4AF37]/20 px-2 py-0.5 rounded-full font-mono">99.8% ACC</span>
+                  <div>
+                    <span className="text-xs font-semibold text-white/95 font-sans tracking-wide">Report Parsing</span>
+                    <span className="ml-2 text-[10px] font-mono text-white/50">Tap a day</span>
+                  </div>
+                  <span className="text-[10px] font-bold text-[#D4AF37] bg-[#D4AF37]/15 border border-[#D4AF37]/30 px-2 py-0.5 rounded-full font-mono">
+                    {ocrDays[activeDayIdx].confidence}% ACC
+                  </span>
                 </div>
                 
-                {/* Bar Chart Graphics */}
-                <div className="flex justify-between items-end h-24 pt-2 px-1">
-                  {[
-                    { label: "S", val: 64 },
-                    { label: "M", val: 74 },
-                    { label: "T", val: 57 },
-                    { label: "W", val: 78 },
-                    { label: "Th", val: 68 },
-                    { label: "F", val: 56 },
-                    { label: "S", val: 65 }
-                  ].map((item, idx) => (
-                    <div key={idx} className="flex flex-col items-center gap-2 flex-1">
-                      <span className="text-[9px] font-mono text-white/70 scale-90">{item.val}%</span>
-                      <div className="w-2.5 h-14 bg-white/5 rounded-full overflow-hidden relative flex items-end">
-                        <div 
-                          className="w-full bg-gradient-to-t from-[#D4AF37]/40 to-[#D4AF37] rounded-full"
-                          style={{ height: `${item.val}%` }}
-                        />
-                      </div>
-                      <span className="text-[10px] font-semibold text-white/40 font-sans">{item.label}</span>
-                    </div>
-                  ))}
+                {/* Bar Chart Graphics - Clickable Bars */}
+                <div className="flex justify-between items-end h-20 pt-1 px-1">
+                  {ocrDays.map((item, idx) => {
+                    const isSelected = activeDayIdx === idx;
+                    return (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveDayIdx(idx);
+                        }}
+                        className={`flex flex-col items-center gap-1.5 flex-1 transition-all group/bar cursor-pointer ${
+                          isSelected ? "scale-105" : "opacity-75 hover:opacity-100"
+                        }`}
+                        title={`Day ${item.label}: ${item.count} biomarkers (${item.confidence}% ACC)`}
+                      >
+                        <span className={`text-[9px] font-mono transition-colors ${
+                          isSelected ? "text-[#D4AF37] font-bold" : "text-white/60"
+                        }`}>
+                          {item.val}%
+                        </span>
+                        <div className={`w-3 h-12 rounded-full overflow-hidden relative flex items-end transition-all ${
+                          isSelected 
+                            ? "bg-white/20 ring-2 ring-[#D4AF37] shadow-[0_0_10px_rgba(212,175,55,0.4)]" 
+                            : "bg-white/5 hover:bg-white/10"
+                        }`}>
+                          <div 
+                            className={`w-full rounded-full transition-all duration-300 ${
+                              isSelected
+                                ? "bg-gradient-to-t from-[#D4AF37] to-[#FFF8E7]"
+                                : "bg-gradient-to-t from-[#D4AF37]/40 to-[#D4AF37]"
+                            }`}
+                            style={{ height: `${item.val}%` }}
+                          />
+                        </div>
+                        <span className={`text-[10px] font-semibold font-sans transition-colors ${
+                          isSelected ? "text-[#D4AF37] font-bold" : "text-white/50"
+                        }`}>
+                          {item.label}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
 
-                <p className="text-[10.5px] text-white/60 leading-relaxed font-light text-center border-t border-white/5 pt-3">
-                  Your biomarker extraction accuracy was within the typical range (95% - 99%)
-                </p>
+                <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-[10.5px] text-white/80 text-center font-light leading-snug">
+                  Day <span className="font-semibold text-[#D4AF37]">{ocrDays[activeDayIdx].label}</span>: Extracted <span className="font-semibold text-white">{ocrDays[activeDayIdx].count} biomarkers</span> with <span className="font-semibold text-[#D4AF37]">{ocrDays[activeDayIdx].confidence}%</span> confidence.
+                </div>
+
+                {/* 1-Click Launch Button */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handlePillarClick("upload");
+                  }}
+                  className="w-full py-2 px-3 rounded-xl bg-[#D4AF37] hover:bg-[#C29D29] text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md transition-all active:scale-[0.98] cursor-pointer"
+                >
+                  <span>⚡ Try 1-Click OCR Scanner</span>
+                  <span className="text-white/80">&rarr;</span>
+                </button>
               </div>
             </div>
           </div>
 
           {/* Card 2: Biomarkers */}
-          <div className="clinical-card group/card relative h-[480px] md:h-[530px] rounded-[2.2rem] overflow-hidden shadow-[0_15px_45px_rgba(0,0,0,0.03)] border border-[#EFECE6] bg-[#FFF] flex flex-col justify-end p-5 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(212,175,55,0.06)]">
+          <div 
+            onClick={() => handlePillarClick("trends")}
+            className="clinical-card group/card relative min-h-[520px] md:min-h-[560px] rounded-[2.2rem] overflow-hidden shadow-[0_15px_45px_rgba(0,0,0,0.03)] border border-[#EFECE6] bg-[#FFF] flex flex-col justify-end p-5 transition-all duration-300 hover:-translate-y-1 hover:border-[#D4AF37]/50 hover:shadow-[0_20px_50px_rgba(212,175,55,0.15)] cursor-pointer"
+          >
             {/* Background Portrait */}
             <div className="absolute inset-0 z-0 overflow-hidden">
               <img 
                 src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=800" 
                 alt="Thoughtful Biomarker Analysis" 
-                className="w-full h-full object-cover object-center transition-transform duration-1000 ease-out scale-100 group-hover/card:scale-103 filter brightness-[0.78] contrast-[1.08] saturate-[0.8]"
+                className="w-full h-full object-cover object-center transition-transform duration-1000 ease-out scale-100 group-hover/card:scale-105 filter brightness-[0.78] contrast-[1.08] saturate-[0.8]"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10" />
             </div>
 
-            {/* Top Label */}
-            <div className="absolute top-7 left-7 z-10">
-              <span className="text-xs font-semibold tracking-wider text-white/50 uppercase font-mono">Pillar 02</span>
-              <h3 className="text-2xl font-heading font-medium text-[#FDFBF7] mt-0.5">Biomarkers</h3>
+            {/* Top Label & Quick Action Badge */}
+            <div className="absolute top-6 left-6 right-6 z-10 flex justify-between items-start">
+              <div>
+                <span className="text-xs font-semibold tracking-wider text-white/60 uppercase font-mono">Pillar 02</span>
+                <h3 className="text-2xl font-heading font-medium text-[#FDFBF7] mt-0.5">Biomarkers</h3>
+              </div>
+              <span className="px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/20 text-[10px] font-mono text-[#D4AF37] flex items-center gap-1.5 shadow-sm group-hover/card:bg-[#D4AF37] group-hover/card:text-black transition-all">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e] animate-pulse" />
+                <span>Tap to Open ↗</span>
+              </span>
             </div>
 
             {/* Translucent Biomarker Widget Overlay */}
-            <div className="z-10 w-full mb-2">
-              <div className="glass-card-dark-overlay rounded-3xl p-6 border border-white/10 shadow-xl">
-                <div className="flex justify-between items-start gap-4">
-                  <div className="space-y-1">
-                    <span className="text-[28px] font-mono font-bold text-white leading-none tracking-tight">10.8 <span className="text-xs font-normal text-white/60 font-sans">g/dl</span></span>
-                    <p className="text-xs font-medium text-white/50 tracking-wide font-sans">Ferritin (Blood Iron)</p>
-                  </div>
-                  
-                  <div className="flex flex-col items-end gap-1.5">
-                    <span className="text-[9px] font-bold tracking-wider uppercase bg-[#DC143C]/20 text-[#FF4D6D] border border-[#DC143C]/30 px-2.5 py-1 rounded-full font-mono">
-                      Borderline Low
-                    </span>
-                    <p className="text-[10px] font-medium text-white/40 font-sans">Reference: 12.0 - 150.0</p>
-                  </div>
+            <div className="z-10 w-full mb-1">
+              <div className="glass-card-dark-overlay rounded-3xl p-5 border border-white/15 shadow-xl space-y-3.5 backdrop-blur-xl bg-black/65">
+                {/* Interactive Biomarker Toggle Pills */}
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+                  {sampleBiomarkers.map((bm, idx) => {
+                    const isSelected = activeBiomarkerIdx === idx;
+                    return (
+                      <button
+                        key={bm.id}
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveBiomarkerIdx(idx);
+                        }}
+                        className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-medium transition-all shrink-0 cursor-pointer ${
+                          isSelected
+                            ? "bg-[#D4AF37] text-white shadow-sm font-bold scale-105"
+                            : "bg-white/10 text-white/60 hover:text-white hover:bg-white/15"
+                        }`}
+                      >
+                        {bm.short}
+                      </button>
+                    );
+                  })}
                 </div>
 
-                <div className="mt-5 space-y-1.5">
-                  <div className="flex justify-between text-[9px] font-mono text-white/40">
-                    <span>Low</span>
-                    <span>Normal</span>
-                    <span>High</span>
-                  </div>
-                  <div className="h-1.5 w-full bg-white/10 rounded-full relative overflow-hidden">
-                    <div className="absolute left-[20%] right-[15%] top-0 bottom-0 bg-white/20 rounded-full" />
-                    <div className="absolute left-[15%] top-0 bottom-0 w-2 bg-red-500 rounded-full shadow-[0_0_8px_rgba(220,20,60,0.8)]" />
-                  </div>
-                </div>
+                {(() => {
+                  const currentBm = sampleBiomarkers[activeBiomarkerIdx];
+                  return (
+                    <>
+                      <div className="flex justify-between items-start gap-3">
+                        <div className="space-y-0.5">
+                          <span className="text-[26px] font-mono font-bold text-white leading-none tracking-tight">
+                            {currentBm.val} <span className="text-xs font-normal text-white/60 font-sans">{currentBm.unit}</span>
+                          </span>
+                          <p className="text-xs font-medium text-white/70 tracking-wide font-sans">{currentBm.name}</p>
+                        </div>
+                        
+                        <div className="flex flex-col items-end gap-1">
+                          <span 
+                            className="text-[9px] font-bold tracking-wider uppercase px-2.5 py-0.5 rounded-full font-mono transition-all"
+                            style={{
+                              backgroundColor: currentBm.badgeBg,
+                              border: `1px solid ${currentBm.badgeBorder}`,
+                              color: currentBm.color
+                            }}
+                          >
+                            {currentBm.status}
+                          </span>
+                          <p className="text-[9.5px] font-medium text-white/40 font-sans">Ref: {currentBm.ref}</p>
+                        </div>
+                      </div>
+
+                      {/* Slider with dynamic pointer */}
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-[9px] font-mono text-white/40">
+                          <span>Low</span>
+                          <span>Normal</span>
+                          <span>High</span>
+                        </div>
+                        <div className="h-1.5 w-full bg-white/10 rounded-full relative overflow-hidden">
+                          <div className="absolute left-[20%] right-[20%] top-0 bottom-0 bg-white/20 rounded-full" />
+                          <div 
+                            className="absolute top-0 bottom-0 w-2.5 rounded-full transition-all duration-500 shadow-md"
+                            style={{ 
+                              left: currentBm.markerPos, 
+                              backgroundColor: currentBm.markerColor,
+                              boxShadow: `0 0 10px ${currentBm.markerColor}`
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-[10.5px] text-white/80 text-center font-light leading-snug">
+                        {currentBm.desc}
+                      </div>
+
+                      {/* 1-Click Launch Button */}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlePillarClick("trends");
+                        }}
+                        className="w-full py-2 px-3 rounded-xl bg-[#D4AF37] hover:bg-[#C29D29] text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md transition-all active:scale-[0.98] cursor-pointer"
+                      >
+                        <span>📊 Explore Biomarker Trends</span>
+                        <span className="text-white/80">&rarr;</span>
+                      </button>
+                    </>
+                  );
+                })()}
               </div>
             </div>
           </div>
 
           {/* Card 3: AI Chatbot */}
-          <div className="clinical-card group/card relative h-[480px] md:h-[530px] rounded-[2.2rem] overflow-hidden shadow-[0_15px_45px_rgba(0,0,0,0.03)] border border-[#EFECE6] bg-[#FFF] flex flex-col justify-end p-5 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(212,175,55,0.06)]">
+          <div 
+            onClick={() => handlePillarClick("chat")}
+            className="clinical-card group/card relative min-h-[520px] md:min-h-[560px] rounded-[2.2rem] overflow-hidden shadow-[0_15px_45px_rgba(0,0,0,0.03)] border border-[#EFECE6] bg-[#FFF] flex flex-col justify-end p-5 transition-all duration-300 hover:-translate-y-1 hover:border-[#D4AF37]/50 hover:shadow-[0_20px_50px_rgba(212,175,55,0.15)] cursor-pointer"
+          >
             {/* Background Portrait */}
             <div className="absolute inset-0 z-0 overflow-hidden">
               <img 
                 src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&q=80&w=800" 
                 alt="Serene AI Health Assistant" 
-                className="w-full h-full object-cover object-center transition-transform duration-1000 ease-out scale-100 group-hover/card:scale-103 filter brightness-[0.8] contrast-[1.04] saturate-[0.9]"
+                className="w-full h-full object-cover object-center transition-transform duration-1000 ease-out scale-100 group-hover/card:scale-105 filter brightness-[0.8] contrast-[1.04] saturate-[0.9]"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10" />
             </div>
 
-            {/* Top Label */}
-            <div className="absolute top-7 left-7 z-10">
-              <span className="text-xs font-semibold tracking-wider text-white/50 uppercase font-mono">Pillar 03</span>
-              <h3 className="text-2xl font-heading font-medium text-[#FDFBF7] mt-0.5">AI Chatbot</h3>
+            {/* Top Label & Quick Action Badge */}
+            <div className="absolute top-6 left-6 right-6 z-10 flex justify-between items-start">
+              <div>
+                <span className="text-xs font-semibold tracking-wider text-white/60 uppercase font-mono">Pillar 03</span>
+                <h3 className="text-2xl font-heading font-medium text-[#FDFBF7] mt-0.5">AI Chatbot</h3>
+              </div>
+              <span className="px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/20 text-[10px] font-mono text-[#D4AF37] flex items-center gap-1.5 shadow-sm group-hover/card:bg-[#D4AF37] group-hover/card:text-black transition-all">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e] animate-pulse" />
+                <span>Tap to Open ↗</span>
+              </span>
             </div>
 
-            {/* Translucent Line Chart Overlay */}
-            <div className="z-10 w-full mb-2">
-              <div className="glass-card-dark-overlay rounded-3xl p-5 border border-white/10 shadow-xl space-y-4">
+            {/* Translucent Chat & Trend Widget Overlay */}
+            <div className="z-10 w-full mb-1">
+              <div className="glass-card-dark-overlay rounded-3xl p-5 border border-white/15 shadow-xl space-y-3.5 backdrop-blur-xl bg-black/65">
                 <div className="flex justify-between items-center">
-                  <span className="text-xs font-semibold text-white/90 font-sans tracking-wide font-medium">Health Index Trends</span>
-                  <span className="text-[10px] font-bold text-[#4DFFC9] bg-[#4DFFC9]/15 border border-[#4DFFC9]/20 px-2 py-0.5 rounded-full font-mono">OPTIMAL</span>
+                  <span className="text-xs font-semibold text-white/95 font-sans tracking-wide">AI Health Coach</span>
+                  <span className="text-[10px] font-bold text-[#4DFFC9] bg-[#4DFFC9]/15 border border-[#4DFFC9]/30 px-2 py-0.5 rounded-full font-mono">
+                    OPTIMAL 86/100
+                  </span>
                 </div>
 
-                {/* SVG Line Chart */}
-                <div className="h-24 pt-2 relative">
-                  <svg className="w-full h-full overflow-visible" viewBox="0 0 100 40" preserveAspectRatio="none">
-                    <defs>
-                      <linearGradient id="chart-grad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="rgba(255, 255, 255, 0.25)" />
-                        <stop offset="100%" stopColor="rgba(255, 255, 255, 0.0)" />
-                      </linearGradient>
-                    </defs>
-                    <path 
-                      d="M 0,22 L 16.6,21.5 L 33.2,27 L 49.8,23 L 66.4,28.5 L 83,14 L 100,18 L 100,40 L 0,40 Z" 
-                      fill="url(#chart-grad)" 
-                    />
-                    <path 
-                      d="M 0,22 L 16.6,21.5 L 33.2,27 L 49.8,23 L 66.4,28.5 L 83,14 L 100,18" 
-                      fill="none" 
-                      stroke="#FFFFFF" 
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                    />
-                    {[
-                      {x: 0, y: 22},
-                      {x: 16.6, y: 21.5},
-                      {x: 33.2, y: 27},
-                      {x: 49.8, y: 23},
-                      {x: 66.4, y: 28.5},
-                      {x: 83, y: 14},
-                      {x: 100, y: 18}
-                    ].map((dot, dIdx) => (
-                      <circle 
-                        key={dIdx} 
-                        cx={dot.x} 
-                        cy={dot.y} 
-                        r="1.8" 
-                        fill="#D4AF37" 
-                        stroke="#FFFFFF" 
-                        strokeWidth="0.8"
-                      />
-                    ))}
-                  </svg>
+                {/* Question Suggestion Pills */}
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 scrollbar-none">
+                  {aiChatPrompts.map((item, idx) => {
+                    const isSelected = activeChatPromptIdx === idx;
+                    return (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveChatPromptIdx(idx);
+                        }}
+                        className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-medium transition-all shrink-0 cursor-pointer ${
+                          isSelected
+                            ? "bg-[#D4AF37] text-white shadow-sm font-bold scale-105"
+                            : "bg-white/10 text-white/60 hover:text-white hover:bg-white/15"
+                        }`}
+                      >
+                        {item.label}
+                      </button>
+                    );
+                  })}
+                </div>
 
-                  <div className="flex justify-between text-[9px] text-white/40 font-semibold font-sans mt-1.5 px-0.5">
-                    <span>S</span>
-                    <span>M</span>
-                    <span>T</span>
-                    <span>W</span>
-                    <span>Th</span>
-                    <span>F</span>
-                    <span>S</span>
+                {/* AI Dialogue Box */}
+                <div className="p-3 rounded-2xl bg-white/5 border border-white/10 space-y-1 text-left">
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#D4AF37] font-mono">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] animate-ping" />
+                    <span>AI Consultation Insight</span>
                   </div>
+                  <p className="text-[10.5px] text-white/90 leading-snug font-light">
+                    "{aiChatPrompts[activeChatPromptIdx].a}"
+                  </p>
                 </div>
 
-                <p className="text-[10.5px] text-white/60 leading-relaxed font-light text-center border-t border-white/5 pt-3">
-                  Your overall health index is within the optimal range (80 - 90)
-                </p>
+                {/* 1-Click Launch Button */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handlePillarClick("chat");
+                  }}
+                  className="w-full py-2 px-3 rounded-xl bg-[#D4AF37] hover:bg-[#C29D29] text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md transition-all active:scale-[0.98] cursor-pointer"
+                >
+                  <span>💬 Ask AI Coach a Question</span>
+                  <span className="text-white/80">&rarr;</span>
+                </button>
               </div>
             </div>
           </div>

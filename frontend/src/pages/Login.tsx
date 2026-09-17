@@ -1,11 +1,14 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "../services/supabase";
 import { useAuth } from "../hooks/useAuth";
 import { HeartPulse, Loader2 } from "lucide-react";
 
 export const Login: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const targetTab = searchParams.get("tab");
+  const redirectTarget = targetTab ? `/dashboard?tab=${targetTab}` : "/dashboard";
   const [isSignUp, setIsSignUp] = useState(false);
   
   // Credentials
@@ -23,6 +26,27 @@ export const Login: React.FC = () => {
   const { isMockMode, mockLogin } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (searchParams.get("auto") === "1") {
+      setEmail("demo@healthlens.ai");
+      setPassword("Demo@12345");
+      const autoLog = async () => {
+        setLoading(true);
+        try {
+          const { error: signInErr } = await supabase.auth.signInWithPassword({
+            email: "demo@healthlens.ai",
+            password: "Demo@12345",
+          });
+          if (signInErr) throw signInErr;
+          navigate(redirectTarget);
+        } catch {
+          setLoading(false);
+        }
+      };
+      autoLog();
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,7 +70,7 @@ export const Login: React.FC = () => {
             mockLogin(email);
           }
           setLoading(false);
-          navigate("/");
+          navigate(redirectTarget);
         } catch (err: any) {
           setError(err.message || "Mock login failed.");
           setLoading(false);
@@ -97,7 +121,7 @@ export const Login: React.FC = () => {
         });
 
         if (signInError) throw signInError;
-        navigate("/");
+        navigate(redirectTarget);
       }
     } catch (err: any) {
       setError(err.message || "An error occurred. Please try again.");
