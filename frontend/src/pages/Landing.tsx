@@ -433,31 +433,19 @@ export const Landing: React.FC = () => {
 
         {/* Right CTA */}
         <div className="nav-item flex items-center gap-3">
-          {user ? (
-            <button
-              onClick={() => navigate("/dashboard")}
-              className="px-5 py-2.5 bg-[#1A1A1A] hover:bg-black text-[#FDFBF7] rounded-full text-xs font-bold tracking-wide flex items-center gap-1.5 transition-all duration-300 active:scale-[0.97] shadow-md hover:shadow-lg cursor-pointer"
-            >
-              <span>Go to Dashboard</span>
-              <SolidArrowUpRight className="h-3 w-3 text-[#FDFBF7]" />
-            </button>
-          ) : (
-            <>
-              <button
-                onClick={() => navigate("/login")}
-                className="hidden md:flex px-4 py-2 text-xs font-semibold text-[#71797E] hover:text-[#1A1A1A] transition-colors cursor-pointer"
-              >
-                Sign In
-              </button>
-              <button 
-                onClick={() => navigate("/login")}
-                className="px-5 py-2.5 bg-[#D4AF37] hover:bg-[#B8962D] text-white rounded-full text-xs font-bold tracking-wide flex items-center gap-1.5 transition-all duration-300 active:scale-[0.97] shadow-md hover:shadow-lg cursor-pointer"
-              >
-                <span>Try Demo Free</span>
-                <SolidArrowUpRight className="h-3 w-3" />
-              </button>
-            </>
-          )}
+          <button
+            onClick={() => navigate("/login")}
+            className="hidden md:flex px-4 py-2 text-xs font-semibold text-[#71797E] hover:text-[#1A1A1A] transition-colors cursor-pointer"
+          >
+            Sign In
+          </button>
+          <button 
+            onClick={() => navigate("/login")}
+            className="px-5 py-2.5 bg-[#D4AF37] hover:bg-[#B8962D] text-white rounded-full text-xs font-bold tracking-wide flex items-center gap-1.5 transition-all duration-300 active:scale-[0.97] shadow-md hover:shadow-lg cursor-pointer"
+          >
+            <span>Try Demo Free</span>
+            <SolidArrowUpRight className="h-3 w-3" />
+          </button>
         </div>
       </header>
 
@@ -480,7 +468,7 @@ export const Landing: React.FC = () => {
               onClick={handleCTAClick}
               className="px-8 py-4 bg-[#1A1A1A] hover:bg-black text-[#FDFBF7] rounded-full text-sm font-bold tracking-wide flex items-center gap-2 transition-all duration-300 active:scale-[0.97] shadow-lg hover:shadow-xl cursor-pointer group"
             >
-              <span>{user ? "Open Clinical Dashboard" : "Start Analyzing Free"}</span>
+              <span>Start Analyzing Free</span>
               <SolidArrowUpRight className="h-3.5 w-3.5 text-[#FDFBF7]" />
             </button>
             <span className="text-xs text-[#71797E] font-light">No credit card needed · 100% free</span>

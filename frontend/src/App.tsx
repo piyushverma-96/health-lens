@@ -59,20 +59,6 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   return <>{children}</>;
 };
 
-// Guard component to prevent authenticated users from viewing login screen
-const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return <AppLoadingFallback />;
-  }
-
-  if (user) {
-    return <Navigate to="/" replace />;
-  }
-
-  return <>{children}</>;
-};
 
 function App() {
   return (
@@ -86,11 +72,7 @@ function App() {
             />
             <Route
               path="/login"
-              element={
-                <PublicRoute>
-                  <Login />
-                </PublicRoute>
-              }
+              element={<Login />}
             />
             <Route
               path="/dashboard"
