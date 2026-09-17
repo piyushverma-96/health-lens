@@ -284,13 +284,19 @@ export const Landing: React.FC = () => {
         </nav>
 
         {/* Right CTA */}
-        <div className="nav-item">
+        <div className="nav-item flex items-center gap-3">
+          <button
+            onClick={() => navigate("/login")}
+            className="hidden md:flex px-4 py-2 text-xs font-semibold text-[#71797E] hover:text-[#1A1A1A] transition-colors cursor-pointer"
+          >
+            Sign In
+          </button>
           <button 
             onClick={() => navigate("/login")}
-            className="px-5 py-2.5 bg-[#1A1A1A] hover:bg-black text-[#FDFBF7] rounded-full text-xs font-semibold tracking-wide flex items-center gap-1.5 transition-all duration-300 active:scale-[0.97] shadow-sm hover:shadow-md cursor-pointer"
+            className="px-5 py-2.5 bg-[#D4AF37] hover:bg-[#B8962D] text-white rounded-full text-xs font-bold tracking-wide flex items-center gap-1.5 transition-all duration-300 active:scale-[0.97] shadow-md hover:shadow-lg cursor-pointer"
           >
-            <span>Contact Us</span>
-            <SolidArrowUpRight className="h-3 w-3 text-[#FDFBF7]" />
+            <span>Try Demo Free</span>
+            <SolidArrowUpRight className="h-3 w-3" />
           </button>
         </div>
       </header>
@@ -300,8 +306,19 @@ export const Landing: React.FC = () => {
         
         {/* Hero Section */}
         <section id="home" className="text-center space-y-6 max-w-3xl mx-auto px-6 py-12 md:py-20">
+          {/* Demo Credentials Banner */}
           <div className="overflow-hidden flex justify-center">
-            
+            <div className="hero-title-line inline-flex items-center gap-3 bg-[#FFFDF9] border border-[#D4AF37]/30 rounded-full px-5 py-2.5 shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-[#22c55e] animate-pulse shrink-0" />
+              <span className="text-xs font-semibold text-[#1A1A1A] tracking-wide">🎯 Live Demo</span>
+              <span className="text-[11px] text-[#71797E] font-mono hidden sm:block">demo@healthlens.ai / Demo@12345</span>
+              <button
+                onClick={handleCTAClick}
+                className="text-[10px] font-bold text-[#D4AF37] hover:text-[#B8962D] transition-colors cursor-pointer"
+              >
+                Try Now →
+              </button>
+            </div>
           </div>
           
           <h1 className="text-5xl sm:text-6xl md:text-7xl font-heading font-light text-[#1A1A1A] leading-[1.12] tracking-tight">
@@ -310,17 +327,34 @@ export const Landing: React.FC = () => {
           </h1>
           
           <p className="hero-subtitle text-sm md:text-base text-[#71797E] max-w-xl mx-auto leading-relaxed font-light">
-            Analyze your health reports, track key biomarkers chronologically, and receive personalized AI health insights instantly.
+            Upload your lab report — our AI instantly decodes every biomarker, tracks your health trends, and answers your questions in plain English.
           </p>
           
-          <div className="hero-cta pt-4 flex justify-center">
+          <div className="hero-cta pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
             <button 
               onClick={handleCTAClick}
-              className="px-7 py-3.5 bg-[#1A1A1A] hover:bg-black text-[#FDFBF7] rounded-full text-sm font-medium tracking-wide flex items-center gap-2 transition-all duration-300 active:scale-[0.97] shadow-md hover:shadow-lg cursor-pointer group"
+              className="px-8 py-4 bg-[#1A1A1A] hover:bg-black text-[#FDFBF7] rounded-full text-sm font-bold tracking-wide flex items-center gap-2 transition-all duration-300 active:scale-[0.97] shadow-lg hover:shadow-xl cursor-pointer group"
             >
-              <span>Get Started Today</span>
+              <span>Start Analyzing Free</span>
               <SolidArrowUpRight className="h-3.5 w-3.5 text-[#FDFBF7]" />
             </button>
+            <span className="text-xs text-[#71797E] font-light">No credit card needed · 100% free</span>
+          </div>
+
+          {/* Stats Row */}
+          <div className="hero-cta pt-6 grid grid-cols-3 gap-4 max-w-lg mx-auto border-t border-[#EFECE6] mt-4">
+            <div className="text-center">
+              <div className="text-2xl font-heading font-semibold text-[#1A1A1A]">20+</div>
+              <div className="text-[11px] text-[#71797E] font-light mt-0.5">Biomarkers Tracked</div>
+            </div>
+            <div className="text-center border-x border-[#EFECE6]">
+              <div className="text-2xl font-heading font-semibold text-[#1A1A1A]">AI</div>
+              <div className="text-[11px] text-[#71797E] font-light mt-0.5">Powered Analysis</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-heading font-semibold text-[#1A1A1A]">Free</div>
+              <div className="text-[11px] text-[#71797E] font-light mt-0.5">Always & Forever</div>
+            </div>
           </div>
         </section>
 
