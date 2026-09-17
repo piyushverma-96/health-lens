@@ -6,6 +6,80 @@ import { useAuth } from "../hooks/useAuth";
 
 gsap.registerPlugin(ScrollTrigger);
 
+// ================= SOLID AESTHETIC SVG ICONS =================
+
+const SolidHeartPulse: React.FC<{ className?: string }> = ({ className = "h-4 w-4" }) => (
+  <svg className={`${className} fill-current`} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+  </svg>
+);
+
+const SolidSparkle: React.FC<{ className?: string }> = ({ className = "h-3 w-3" }) => (
+  <svg className={`${className} fill-current`} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 2L14.8 9.2L22 12L14.8 14.8L12 22L9.2 14.8L2 12L9.2 9.2L12 2Z" />
+  </svg>
+);
+
+const SolidArrowUpRight: React.FC<{ className?: string }> = ({ className = "h-3.5 w-3.5" }) => (
+  <svg className={`${className} fill-current`} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M5 17.59L15.59 7H9V5h10v10h-2V8.41L6.41 19L5 17.59z" />
+  </svg>
+);
+
+const SolidUpload: React.FC<{ className?: string }> = ({ className = "h-5 w-5" }) => (
+  <svg className={`${className} fill-current`} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M4 19h16v2H4zm8-16L7.5 7.5l1.42 1.42L11 6.83V16h2V6.83l2.08 2.09 1.42-1.42L12 3z" />
+  </svg>
+);
+
+const SolidCpu: React.FC<{ className?: string }> = ({ className = "h-5 w-5" }) => (
+  <svg className={`${className} fill-current`} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M19 9h2v2h-2zm0 4h2v2h-2zm-16-4h2v2H3zm0 4h2v2H3zm6-8h2v2H9zm4 0h2v2h-2zM9 19h2v2H9zm4 0h2v2h-2zm-7-4h12V7H6v12zm2-10h8v8H8V5z" />
+  </svg>
+);
+
+const SolidTrend: React.FC<{ className?: string }> = ({ className = "h-5 w-5" }) => (
+  <svg className={`${className} fill-current`} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M4 11h3v8H4zm5.5-4h3v12h-3zm5.5 8h3v4h-3zm5.5-12h3v16h-3z" />
+  </svg>
+);
+
+const SolidShield: React.FC<{ className?: string }> = ({ className = "h-5 w-5" }) => (
+  <svg className={`${className} fill-current`} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" />
+  </svg>
+);
+
+const SolidLayers: React.FC<{ className?: string }> = ({ className = "h-5 w-5" }) => (
+  <svg className={`${className} fill-current`} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M11.99 18.54l-7.37-5.73L3 14.07l9 7 9-7-1.63-1.27-7.38 5.74zM12 16l7.36-5.73L21 11.53l-9 7-9-7 1.63-1.26L12 16zm0-11L3 12l9 7 9-7-9-7z" />
+  </svg>
+);
+
+const SolidScale: React.FC<{ className?: string }> = ({ className = "h-5 w-5" }) => (
+  <svg className={`${className} fill-current`} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 2a10 10 0 1010 10A10 10 0 0012 2zm1 14.93V19h-2v-2.07a6 6 0 01-5-5.93h2a4 4 0 008 0h2a6 6 0 01-5 5.93z" />
+  </svg>
+);
+
+const SolidActivity: React.FC<{ className?: string }> = ({ className = "h-5 w-5" }) => (
+  <svg className={`${className} fill-current`} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-4.5 11l-3-3-3 3-1.5-1.5L11.5 8l3 3 3.5-3.5L19.5 9l-5 5z" />
+  </svg>
+);
+
+const SolidPlus: React.FC<{ className?: string }> = ({ className = "h-4 w-4" }) => (
+  <svg className={`${className} fill-current`} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+  </svg>
+);
+
+const SolidMinus: React.FC<{ className?: string }> = ({ className = "h-4 w-4" }) => (
+  <svg className={`${className} fill-current`} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M19 13H5v-2h14v2z" />
+  </svg>
+);
+
 interface FAQItem {
   question: string;
   answer: string;
@@ -18,6 +92,8 @@ export const Landing: React.FC = () => {
   const cardsRef = useRef<HTMLDivElement>(null);
   const workflowRef = useRef<HTMLDivElement>(null);
   const featuresRef = useRef<HTMLDivElement>(null);
+  const faqRef = useRef<HTMLDivElement>(null);
+
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
 
   const faqData: FAQItem[] = [
@@ -41,305 +117,627 @@ export const Landing: React.FC = () => {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
+      // 1. Initial Hero Entrance Animations
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-      tl.fromTo(".nav-item", { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.6, stagger: 0.05 });
-      tl.fromTo(".hero-title-line", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.9, stagger: 0.12 }, "-=0.4");
-      tl.fromTo(".hero-subtitle", { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.7 }, "-=0.5");
-      tl.fromTo(".hero-cta", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.6 }, "-=0.5");
+      
+      tl.fromTo(
+        ".nav-item",
+        { opacity: 0, y: -8 },
+        { opacity: 1, y: 0, duration: 0.6, stagger: 0.05 }
+      );
+      
+      tl.fromTo(
+        ".hero-title-line",
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.8, stagger: 0.1 },
+        "-=0.4"
+      );
+      
+      tl.fromTo(
+        ".hero-subtitle",
+        { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: 0.6 },
+        "-=0.5"
+      );
+      
+      tl.fromTo(
+        ".hero-cta",
+        { opacity: 0, y: 8 },
+        { opacity: 1, y: 0, duration: 0.6 },
+        "-=0.5"
+      );
 
-      gsap.fromTo(".clinical-card", { opacity: 0, y: 40 }, {
-        opacity: 1, y: 0, duration: 0.8, stagger: 0.15, ease: "power2.out",
-        scrollTrigger: { trigger: cardsRef.current, start: "top 88%", toggleActions: "play none none none" }
+      // 2. Ultra-Light Card Scroll Animation
+      gsap.fromTo(
+        ".clinical-card",
+        { opacity: 0, y: 15 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.7,
+          stagger: 0.1,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: cardsRef.current,
+            start: "top 88%",
+            toggleActions: "play none none none"
+          }
+        }
+      );
+
+      // 3. Workflow Step Entrance Animation
+      gsap.fromTo(
+        ".workflow-step",
+        { opacity: 0, y: 15 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.7,
+          stagger: 0.1,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: workflowRef.current,
+            start: "top 85%",
+            toggleActions: "play none none none"
+          }
+        }
+      );
+
+      // 4. Features Grid Scroll Animation
+      gsap.fromTo(
+        ".feature-item",
+        { opacity: 0, y: 15 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.7,
+          stagger: 0.08,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: featuresRef.current,
+            start: "top 85%",
+            toggleActions: "play none none none"
+          }
+        }
+      );
+
+      // 5. Floating background blobs
+      gsap.to(".blob-1", {
+        x: "random(-30, 30)",
+        y: "random(-30, 30)",
+        duration: 12,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut"
       });
 
-      gsap.fromTo(".workflow-step", { opacity: 0, y: 30 }, {
-        opacity: 1, y: 0, duration: 0.7, stagger: 0.12, ease: "power2.out",
-        scrollTrigger: { trigger: workflowRef.current, start: "top 85%", toggleActions: "play none none none" }
+      gsap.to(".blob-2", {
+        x: "random(-20, 20)",
+        y: "random(-20, 20)",
+        duration: 14,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut"
       });
 
-      gsap.fromTo(".feature-item", { opacity: 0, y: 25 }, {
-        opacity: 1, y: 0, duration: 0.7, stagger: 0.08, ease: "power2.out",
-        scrollTrigger: { trigger: featuresRef.current, start: "top 85%", toggleActions: "play none none none" }
-      });
-
-      gsap.to(".blob-1", { x: "random(-40, 40)", y: "random(-40, 40)", duration: 14, repeat: -1, yoyo: true, ease: "sine.inOut" });
-      gsap.to(".blob-2", { x: "random(-30, 30)", y: "random(-30, 30)", duration: 18, repeat: -1, yoyo: true, ease: "sine.inOut" });
-      gsap.to(".blob-3", { x: "random(-20, 20)", y: "random(-20, 20)", duration: 20, repeat: -1, yoyo: true, ease: "sine.inOut" });
     }, containerRef);
 
     return () => ctx.revert();
   }, []);
 
   const handleCTAClick = () => {
-    if (user) navigate("/dashboard");
-    else navigate("/login");
+    if (user) {
+      navigate("/dashboard");
+    } else {
+      navigate("/login");
+    }
+  };
+
+  const toggleFaq = (index: number) => {
+    setActiveFaq(activeFaq === index ? null : index);
   };
 
   return (
-    <div
-      ref={containerRef}
-      className="min-h-screen text-white relative overflow-hidden font-sans flex flex-col"
-      style={{ background: "linear-gradient(135deg, #07070F 0%, #0D0B1E 50%, #070F18 100%)" }}
+    <div 
+      ref={containerRef} 
+      className="min-h-screen bg-[#FDFBF7] text-[#1A1A1A] relative overflow-hidden font-sans flex flex-col justify-between"
+      style={{
+        backgroundImage: `
+          radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
+          radial-gradient(circle at 0% 100%, rgba(212, 175, 55, 0.03) 0%, transparent 30%),
+          radial-gradient(circle at 100% 100%, rgba(212, 175, 55, 0.03) 0%, transparent 30%),
+          radial-gradient(rgba(26, 26, 26, 0.025) 1px, transparent 0)
+        `,
+        backgroundSize: "100% 100%, 100% 100%, 100% 100%, 24px 24px"
+      }}
     >
-      {/* Animated background blobs */}
-      <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="blob-1 absolute top-[-10%] left-[-5%] w-[600px] h-[600px] rounded-full opacity-30"
-          style={{ background: "radial-gradient(circle, rgba(124,58,237,0.4) 0%, transparent 70%)", filter: "blur(80px)" }} />
-        <div className="blob-2 absolute bottom-[10%] right-[-10%] w-[500px] h-[500px] rounded-full opacity-20"
-          style={{ background: "radial-gradient(circle, rgba(6,182,212,0.5) 0%, transparent 70%)", filter: "blur(80px)" }} />
-        <div className="blob-3 absolute top-[40%] left-[40%] w-[400px] h-[400px] rounded-full opacity-15"
-          style={{ background: "radial-gradient(circle, rgba(16,185,129,0.4) 0%, transparent 70%)", filter: "blur(100px)" }} />
+      {/* Subtle organic noise layer */}
+      <svg className="pointer-events-none fixed inset-0 z-50 h-full w-full opacity-[0.01]" xmlns="http://www.w3.org/2000/svg">
+        <filter id="noiseFilter">
+          <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="4" stitchTiles="stitch" />
+        </filter>
+        <rect width="100%" height="100%" filter="url(#noiseFilter)" />
+      </svg>
+
+      {/* Ambient background glow elements */}
+      <div className="absolute inset-0 pointer-events-none z-0">
+        <div className="absolute top-[10%] left-[5%] w-[45vw] h-[45vw] rounded-full bg-radial from-[#D4AF37]/4 to-transparent blur-[100px] blob-1" />
+        <div className="absolute bottom-[25%] right-[5%] w-[40vw] h-[40vw] rounded-full bg-radial from-[#D4AF37]/3 to-transparent blur-[90px] blob-2" />
       </div>
 
-      {/* Subtle grid */}
-      <div className="absolute inset-0 z-0 opacity-[0.03]"
-        style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
-
-      {/* ========= NAVBAR ========= */}
-      <header className="w-full max-w-[1300px] mx-auto px-6 py-5 flex justify-between items-center z-20 relative">
-        <div className="nav-item flex items-center gap-2.5 cursor-pointer" onClick={() => navigate("/")}>
-          <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-            style={{ background: "linear-gradient(135deg, #7C3AED, #06B6D4)" }}>
-            <svg viewBox="0 0 24 24" className="h-4 w-4 fill-white">
-              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-            </svg>
+      {/* Header / Navigation */}
+      <header className="w-full max-w-[1300px] mx-auto px-6 py-6 md:py-8 flex justify-between items-center z-10 relative">
+        {/* Logo */}
+        <div className="flex items-center gap-2.5 text-[#1A1A1A] font-heading font-semibold text-xl tracking-tight cursor-pointer nav-item" onClick={() => navigate("/")}>
+          <div className="bg-[#1A1A1A] text-[#FDFBF7] p-1.5 rounded-xl flex items-center justify-center">
+            <SolidHeartPulse className="h-3.5 w-3.5 text-[#FDFBF7]" />
           </div>
-          <span className="font-bold text-lg text-white tracking-tight">HealthLens <span className="text-purple-400 font-light">AI</span></span>
+          <span className="font-heading font-bold text-lg tracking-tight">HealthLens</span>
         </div>
 
-        <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-white/50">
-          {["#home", "#workflow", "#features", "#faq"].map((href, i) => (
-            <a key={i} href={href}
-              className="nav-item hover:text-white transition-colors duration-200"
-            >{["Home", "How It Works", "Capabilities", "FAQ"][i]}</a>
-          ))}
+        {/* Center Links */}
+        <nav className="hidden md:flex items-center gap-8 text-[13px] font-medium text-[#71797E]">
+          <a href="#home" className="nav-item text-[#1A1A1A] hover:text-black transition-colors relative after:absolute after:bottom-[-4px] after:left-0 after:w-full after:h-[1px] after:bg-[#1a1a1a] after:scale-x-100">Home</a>
+          <a href="#workflow" className="nav-item hover:text-black transition-colors relative after:absolute after:bottom-[-4px] after:left-0 after:w-full after:h-[1px] after:bg-[#1a1a1a] after:scale-x-0 hover:after:scale-x-100 after:origin-left after:transition-transform after:duration-300">How It Works</a>
+          <a href="#features" className="nav-item hover:text-black transition-colors relative after:absolute after:bottom-[-4px] after:left-0 after:w-full after:h-[1px] after:bg-[#1a1a1a] after:scale-x-0 hover:after:scale-x-100 after:origin-left after:transition-transform after:duration-300">Capabilities</a>
+          <a href="#faq" className="nav-item hover:text-black transition-colors relative after:absolute after:bottom-[-4px] after:left-0 after:w-full after:h-[1px] after:bg-[#1a1a1a] after:scale-x-0 hover:after:scale-x-100 after:origin-left after:transition-transform after:duration-300">FAQ</a>
         </nav>
 
+        {/* Right CTA */}
         <div className="nav-item flex items-center gap-3">
-          <button onClick={() => navigate("/login")}
-            className="hidden md:block text-sm font-medium text-white/50 hover:text-white transition-colors cursor-pointer">
+          <button
+            onClick={() => navigate("/login")}
+            className="hidden md:flex px-4 py-2 text-xs font-semibold text-[#71797E] hover:text-[#1A1A1A] transition-colors cursor-pointer"
+          >
             Sign In
           </button>
-          <button onClick={() => navigate("/login")}
-            className="px-5 py-2.5 rounded-full text-sm font-bold text-white transition-all duration-300 active:scale-95 cursor-pointer shadow-lg"
-            style={{ background: "linear-gradient(135deg, #7C3AED, #06B6D4)", boxShadow: "0 0 20px rgba(124,58,237,0.4)" }}>
-            Try Demo Free →
+          <button 
+            onClick={() => navigate("/login")}
+            className="px-5 py-2.5 bg-[#D4AF37] hover:bg-[#B8962D] text-white rounded-full text-xs font-bold tracking-wide flex items-center gap-1.5 transition-all duration-300 active:scale-[0.97] shadow-md hover:shadow-lg cursor-pointer"
+          >
+            <span>Try Demo Free</span>
+            <SolidArrowUpRight className="h-3 w-3" />
           </button>
         </div>
       </header>
 
-      {/* ========= HERO ========= */}
-      <main className="flex-1 flex flex-col items-center z-10 relative w-full">
-        <section id="home" className="text-center w-full max-w-4xl mx-auto px-6 pt-16 pb-20">
-
-          {/* Live badge */}
-          <div className="hero-title-line flex justify-center mb-8">
-            <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full border text-sm font-semibold"
-              style={{ background: "rgba(124,58,237,0.12)", borderColor: "rgba(124,58,237,0.3)", color: "#A78BFA" }}>
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              🎯 Live Demo — demo@healthlens.ai / Demo@12345
-              <button onClick={handleCTAClick} className="text-cyan-400 hover:text-cyan-300 font-bold cursor-pointer">Try Now →</button>
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col items-center justify-center z-10 relative w-full">
+        
+        {/* Hero Section */}
+        <section id="home" className="text-center space-y-6 max-w-3xl mx-auto px-6 py-12 md:py-20">
+          {/* Demo Credentials Banner */}
+          <div className="overflow-hidden flex justify-center">
+            <div className="hero-title-line inline-flex items-center gap-3 bg-[#FFFDF9] border border-[#D4AF37]/30 rounded-full px-5 py-2.5 shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-[#22c55e] animate-pulse shrink-0" />
+              <span className="text-xs font-semibold text-[#1A1A1A] tracking-wide">🎯 Live Demo</span>
+              <span className="text-[11px] text-[#71797E] font-mono hidden sm:block">demo@healthlens.ai / Demo@12345</span>
+              <button
+                onClick={handleCTAClick}
+                className="text-[10px] font-bold text-[#D4AF37] hover:text-[#B8962D] transition-colors cursor-pointer"
+              >
+                Try Now →
+              </button>
             </div>
           </div>
-
-          {/* Hero title */}
-          <h1 className="font-heading font-bold leading-[1.08] tracking-tight mb-6">
-            <span className="block hero-title-line text-5xl sm:text-6xl md:text-7xl text-white">Your Lab Reports,</span>
-            <span className="block hero-title-line text-5xl sm:text-6xl md:text-7xl"
-              style={{ background: "linear-gradient(135deg, #A78BFA 0%, #06B6D4 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-              Decoded by AI
-            </span>
+          
+          <h1 className="text-5xl sm:text-6xl md:text-7xl font-heading font-light text-[#1A1A1A] leading-[1.12] tracking-tight">
+            <span className="block hero-title-line">Smarter Health Insights,</span>
+            <span className="block hero-title-line italic font-normal text-[#1a1a1a]/90">Powered by AI</span>
           </h1>
-
-          <p className="hero-subtitle text-lg text-white/50 max-w-2xl mx-auto leading-relaxed mb-10">
-            Upload any blood report — our AI instantly explains every biomarker in plain English,
-            tracks your health trends, and answers your questions 24/7.
+          
+          <p className="hero-subtitle text-sm md:text-base text-[#71797E] max-w-xl mx-auto leading-relaxed font-light">
+            Upload your lab report — our AI instantly decodes every biomarker, tracks your health trends, and answers your questions in plain English.
           </p>
-
-          <div className="hero-cta flex flex-col sm:flex-row items-center justify-center gap-4 mb-14">
-            <button onClick={handleCTAClick}
-              className="px-8 py-4 rounded-full text-base font-bold text-white transition-all duration-300 active:scale-95 cursor-pointer shadow-2xl"
-              style={{ background: "linear-gradient(135deg, #7C3AED, #06B6D4)", boxShadow: "0 0 40px rgba(124,58,237,0.5)" }}>
-              ✨ Start Analyzing Free
+          
+          <div className="hero-cta pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <button 
+              onClick={handleCTAClick}
+              className="px-8 py-4 bg-[#1A1A1A] hover:bg-black text-[#FDFBF7] rounded-full text-sm font-bold tracking-wide flex items-center gap-2 transition-all duration-300 active:scale-[0.97] shadow-lg hover:shadow-xl cursor-pointer group"
+            >
+              <span>Start Analyzing Free</span>
+              <SolidArrowUpRight className="h-3.5 w-3.5 text-[#FDFBF7]" />
             </button>
-            <span className="text-sm text-white/30 font-light">No signup required for demo · 100% Free</span>
+            <span className="text-xs text-[#71797E] font-light">No credit card needed · 100% free</span>
           </div>
 
-          {/* Stats */}
-          <div className="hero-cta grid grid-cols-3 gap-px max-w-md mx-auto rounded-2xl overflow-hidden"
-            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}>
-            {[
-              { num: "20+", label: "Biomarkers" },
-              { num: "AI", label: "Powered" },
-              { num: "Free", label: "Forever" }
-            ].map((s, i) => (
-              <div key={i} className="py-5 text-center" style={{ background: "rgba(255,255,255,0.02)" }}>
-                <div className="text-2xl font-heading font-bold"
-                  style={{ background: "linear-gradient(135deg, #A78BFA, #06B6D4)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-                  {s.num}
-                </div>
-                <div className="text-[11px] text-white/40 mt-1 font-medium uppercase tracking-wider">{s.label}</div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ========= 3 PILLARS ========= */}
-        <section ref={cardsRef} className="grid grid-cols-1 md:grid-cols-3 gap-5 w-full max-w-[1300px] mx-auto px-6 mb-24">
-          {[
-            {
-              label: "Pillar 01", title: "Smart OCR", badge: "99.8% ACC",
-              img: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?auto=format&fit=crop&q=80&w=800",
-              desc: "AI-powered OCR extracts every biomarker from your PDF or image lab report with 99.8% accuracy.",
-              color: "#7C3AED"
-            },
-            {
-              label: "Pillar 02", title: "Biomarker Analysis", badge: "REAL-TIME",
-              img: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=800",
-              desc: "Each value is compared against age & gender-adjusted ranges. Color-coded risk indicators make it instant.",
-              color: "#06B6D4"
-            },
-            {
-              label: "Pillar 03", title: "AI Health Chat", badge: "OPTIMAL",
-              img: "https://images.unsplash.com/photo-1584982751601-97dcc096659c?auto=format&fit=crop&q=80&w=800",
-              desc: "Ask anything about your results. Our RAG-powered AI gives grounded answers from medical literature.",
-              color: "#10B981"
-            }
-          ].map((card, i) => (
-            <div key={i}
-              className="clinical-card group relative h-[420px] md:h-[480px] rounded-[2rem] overflow-hidden cursor-pointer transition-all duration-500 hover:-translate-y-2"
-              style={{ border: "1px solid rgba(255,255,255,0.08)", boxShadow: `0 0 40px ${card.color}15` }}>
-              {/* Background image */}
-              <div className="absolute inset-0">
-                <img src={card.img} alt={card.title}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  style={{ filter: "brightness(0.4) saturate(0.7)" }} />
-                <div className="absolute inset-0" style={{ background: `linear-gradient(to top, rgba(7,7,15,0.98) 0%, rgba(7,7,15,0.5) 50%, transparent 100%)` }} />
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                  style={{ background: `linear-gradient(to top, ${card.color}22 0%, transparent 60%)` }} />
-              </div>
-
-              {/* Content */}
-              <div className="absolute inset-0 p-6 flex flex-col justify-between z-10">
-                <div>
-                  <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-white/30">{card.label}</span>
-                  <h3 className="text-2xl font-heading font-bold text-white mt-1">{card.title}</h3>
-                </div>
-
-                {/* Glass bottom card */}
-                <div className="rounded-2xl p-4 space-y-3" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", backdropFilter: "blur(20px)" }}>
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs font-semibold text-white/80">Live Indicator</span>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full font-mono"
-                      style={{ background: `${card.color}25`, color: card.color, border: `1px solid ${card.color}40` }}>
-                      {card.badge}
-                    </span>
-                  </div>
-                  <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.1)" }}>
-                    <div className="h-full rounded-full transition-all duration-1000 group-hover:w-full"
-                      style={{ width: "75%", background: `linear-gradient(90deg, ${card.color}, ${card.color}88)`, boxShadow: `0 0 10px ${card.color}80` }} />
-                  </div>
-                  <p className="text-[11px] text-white/50 leading-relaxed">{card.desc}</p>
-                </div>
-              </div>
+          {/* Stats Row */}
+          <div className="hero-cta pt-6 grid grid-cols-3 gap-4 max-w-lg mx-auto border-t border-[#EFECE6] mt-4">
+            <div className="text-center">
+              <div className="text-2xl font-heading font-semibold text-[#1A1A1A]">20+</div>
+              <div className="text-[11px] text-[#71797E] font-light mt-0.5">Biomarkers Tracked</div>
             </div>
-          ))}
+            <div className="text-center border-x border-[#EFECE6]">
+              <div className="text-2xl font-heading font-semibold text-[#1A1A1A]">AI</div>
+              <div className="text-[11px] text-[#71797E] font-light mt-0.5">Powered Analysis</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-heading font-semibold text-[#1A1A1A]">Free</div>
+              <div className="text-[11px] text-[#71797E] font-light mt-0.5">Always & Forever</div>
+            </div>
+          </div>
         </section>
 
-        {/* ========= HOW IT WORKS ========= */}
-        <section id="workflow" ref={workflowRef}
-          className="w-full py-20 mb-8"
-          style={{ background: "rgba(255,255,255,0.02)", borderTop: "1px solid rgba(255,255,255,0.06)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-          <div className="max-w-[1100px] mx-auto px-6 text-center">
-            <span className="text-[11px] font-bold uppercase tracking-[0.3em] font-mono mb-3 block"
-              style={{ background: "linear-gradient(135deg, #A78BFA, #06B6D4)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-              Workflow
-            </span>
-            <h2 className="text-3xl md:text-4xl font-heading font-bold text-white mb-4">How HealthLens Works</h2>
-            <p className="text-white/40 text-sm max-w-lg mx-auto mb-16">Three simple steps to transform confusing lab numbers into clear health insights.</p>
+        {/* 3 Pillars Cards Section */}
+        <section 
+          ref={cardsRef}
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-[1300px] mx-auto px-6 mb-24 md:mb-32"
+        >
+          
+          {/* Card 1: OCR Analysis */}
+          <div className="clinical-card group/card relative h-[480px] md:h-[530px] rounded-[2.2rem] overflow-hidden shadow-[0_15px_45px_rgba(0,0,0,0.03)] border border-[#EFECE6] bg-[#FFF] flex flex-col justify-end p-5 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(212,175,55,0.06)]">
+            {/* Background Portrait */}
+            <div className="absolute inset-0 z-0 overflow-hidden">
+              <img 
+                src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=800" 
+                alt="Serene Health Analysis" 
+                className="w-full h-full object-cover object-center transition-transform duration-1000 ease-out scale-100 group-hover/card:scale-103 filter brightness-[0.82] contrast-[1.05] saturate-[0.85]"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10" />
+            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
-              {[
-                { icon: "📄", step: "01", title: "Upload Your Report", desc: "Drop any PDF or image lab report. Supports CBC, lipid panels, metabolic panels, thyroid, and more.", color: "#7C3AED" },
-                { icon: "🤖", step: "02", title: "AI Extraction & Analysis", desc: "Tesseract OCR reads every value. Groq AI interprets each biomarker against medical reference ranges.", color: "#06B6D4" },
-                { icon: "📊", step: "03", title: "Insights & Chat", desc: "Get visual trend charts and ask your personal AI health assistant anything about your results.", color: "#10B981" }
-              ].map((s, i) => (
-                <div key={i} className="workflow-step p-6 rounded-2xl transition-all duration-300 hover:-translate-y-1"
-                  style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
-                  <div className="flex items-center justify-between mb-5">
-                    <div className="w-12 h-12 rounded-xl flex items-center justify-center text-xl"
-                      style={{ background: `${s.color}20`, border: `1px solid ${s.color}40` }}>
-                      {s.icon}
+            {/* Top Label */}
+            <div className="absolute top-7 left-7 z-10">
+              <span className="text-xs font-semibold tracking-wider text-white/50 uppercase font-mono">Pillar 01</span>
+              <h3 className="text-2xl font-heading font-medium text-[#FDFBF7] mt-0.5">OCR Analysis</h3>
+            </div>
+
+            {/* Translucent Bar Chart Overlay */}
+            <div className="z-10 w-full mb-2">
+              <div className="glass-card-dark-overlay rounded-3xl p-5 border border-white/10 shadow-xl space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-semibold text-white/90 font-sans tracking-wide font-medium">Report Parsing</span>
+                  <span className="text-[10px] font-bold text-[#D4AF37] bg-[#D4AF37]/15 border border-[#D4AF37]/20 px-2 py-0.5 rounded-full font-mono">99.8% ACC</span>
+                </div>
+                
+                {/* Bar Chart Graphics */}
+                <div className="flex justify-between items-end h-24 pt-2 px-1">
+                  {[
+                    { label: "S", val: 64 },
+                    { label: "M", val: 74 },
+                    { label: "T", val: 57 },
+                    { label: "W", val: 78 },
+                    { label: "Th", val: 68 },
+                    { label: "F", val: 56 },
+                    { label: "S", val: 65 }
+                  ].map((item, idx) => (
+                    <div key={idx} className="flex flex-col items-center gap-2 flex-1">
+                      <span className="text-[9px] font-mono text-white/70 scale-90">{item.val}%</span>
+                      <div className="w-2.5 h-14 bg-white/5 rounded-full overflow-hidden relative flex items-end">
+                        <div 
+                          className="w-full bg-gradient-to-t from-[#D4AF37]/40 to-[#D4AF37] rounded-full"
+                          style={{ height: `${item.val}%` }}
+                        />
+                      </div>
+                      <span className="text-[10px] font-semibold text-white/40 font-sans">{item.label}</span>
                     </div>
-                    <span className="text-5xl font-heading font-bold" style={{ color: `${s.color}20` }}>{s.step}</span>
-                  </div>
-                  <h4 className="text-lg font-bold text-white mb-2">{s.title}</h4>
-                  <p className="text-sm text-white/40 leading-relaxed">{s.desc}</p>
+                  ))}
                 </div>
-              ))}
+
+                <p className="text-[10.5px] text-white/60 leading-relaxed font-light text-center border-t border-white/5 pt-3">
+                  Your biomarker extraction accuracy was within the typical range (95% - 99%)
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 2: Biomarkers */}
+          <div className="clinical-card group/card relative h-[480px] md:h-[530px] rounded-[2.2rem] overflow-hidden shadow-[0_15px_45px_rgba(0,0,0,0.03)] border border-[#EFECE6] bg-[#FFF] flex flex-col justify-end p-5 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(212,175,55,0.06)]">
+            {/* Background Portrait */}
+            <div className="absolute inset-0 z-0 overflow-hidden">
+              <img 
+                src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=800" 
+                alt="Thoughtful Biomarker Analysis" 
+                className="w-full h-full object-cover object-center transition-transform duration-1000 ease-out scale-100 group-hover/card:scale-103 filter brightness-[0.78] contrast-[1.08] saturate-[0.8]"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10" />
+            </div>
+
+            {/* Top Label */}
+            <div className="absolute top-7 left-7 z-10">
+              <span className="text-xs font-semibold tracking-wider text-white/50 uppercase font-mono">Pillar 02</span>
+              <h3 className="text-2xl font-heading font-medium text-[#FDFBF7] mt-0.5">Biomarkers</h3>
+            </div>
+
+            {/* Translucent Biomarker Widget Overlay */}
+            <div className="z-10 w-full mb-2">
+              <div className="glass-card-dark-overlay rounded-3xl p-6 border border-white/10 shadow-xl">
+                <div className="flex justify-between items-start gap-4">
+                  <div className="space-y-1">
+                    <span className="text-[28px] font-mono font-bold text-white leading-none tracking-tight">10.8 <span className="text-xs font-normal text-white/60 font-sans">g/dl</span></span>
+                    <p className="text-xs font-medium text-white/50 tracking-wide font-sans">Ferritin (Blood Iron)</p>
+                  </div>
+                  
+                  <div className="flex flex-col items-end gap-1.5">
+                    <span className="text-[9px] font-bold tracking-wider uppercase bg-[#DC143C]/20 text-[#FF4D6D] border border-[#DC143C]/30 px-2.5 py-1 rounded-full font-mono">
+                      Borderline Low
+                    </span>
+                    <p className="text-[10px] font-medium text-white/40 font-sans">Reference: 12.0 - 150.0</p>
+                  </div>
+                </div>
+
+                <div className="mt-5 space-y-1.5">
+                  <div className="flex justify-between text-[9px] font-mono text-white/40">
+                    <span>Low</span>
+                    <span>Normal</span>
+                    <span>High</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-white/10 rounded-full relative overflow-hidden">
+                    <div className="absolute left-[20%] right-[15%] top-0 bottom-0 bg-white/20 rounded-full" />
+                    <div className="absolute left-[15%] top-0 bottom-0 w-2 bg-red-500 rounded-full shadow-[0_0_8px_rgba(220,20,60,0.8)]" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 3: AI Chatbot */}
+          <div className="clinical-card group/card relative h-[480px] md:h-[530px] rounded-[2.2rem] overflow-hidden shadow-[0_15px_45px_rgba(0,0,0,0.03)] border border-[#EFECE6] bg-[#FFF] flex flex-col justify-end p-5 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(212,175,55,0.06)]">
+            {/* Background Portrait */}
+            <div className="absolute inset-0 z-0 overflow-hidden">
+              <img 
+                src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&q=80&w=800" 
+                alt="Serene AI Health Assistant" 
+                className="w-full h-full object-cover object-center transition-transform duration-1000 ease-out scale-100 group-hover/card:scale-103 filter brightness-[0.8] contrast-[1.04] saturate-[0.9]"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10" />
+            </div>
+
+            {/* Top Label */}
+            <div className="absolute top-7 left-7 z-10">
+              <span className="text-xs font-semibold tracking-wider text-white/50 uppercase font-mono">Pillar 03</span>
+              <h3 className="text-2xl font-heading font-medium text-[#FDFBF7] mt-0.5">AI Chatbot</h3>
+            </div>
+
+            {/* Translucent Line Chart Overlay */}
+            <div className="z-10 w-full mb-2">
+              <div className="glass-card-dark-overlay rounded-3xl p-5 border border-white/10 shadow-xl space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-semibold text-white/90 font-sans tracking-wide font-medium">Health Index Trends</span>
+                  <span className="text-[10px] font-bold text-[#4DFFC9] bg-[#4DFFC9]/15 border border-[#4DFFC9]/20 px-2 py-0.5 rounded-full font-mono">OPTIMAL</span>
+                </div>
+
+                {/* SVG Line Chart */}
+                <div className="h-24 pt-2 relative">
+                  <svg className="w-full h-full overflow-visible" viewBox="0 0 100 40" preserveAspectRatio="none">
+                    <defs>
+                      <linearGradient id="chart-grad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="rgba(255, 255, 255, 0.25)" />
+                        <stop offset="100%" stopColor="rgba(255, 255, 255, 0.0)" />
+                      </linearGradient>
+                    </defs>
+                    <path 
+                      d="M 0,22 L 16.6,21.5 L 33.2,27 L 49.8,23 L 66.4,28.5 L 83,14 L 100,18 L 100,40 L 0,40 Z" 
+                      fill="url(#chart-grad)" 
+                    />
+                    <path 
+                      d="M 0,22 L 16.6,21.5 L 33.2,27 L 49.8,23 L 66.4,28.5 L 83,14 L 100,18" 
+                      fill="none" 
+                      stroke="#FFFFFF" 
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                    />
+                    {[
+                      {x: 0, y: 22},
+                      {x: 16.6, y: 21.5},
+                      {x: 33.2, y: 27},
+                      {x: 49.8, y: 23},
+                      {x: 66.4, y: 28.5},
+                      {x: 83, y: 14},
+                      {x: 100, y: 18}
+                    ].map((dot, dIdx) => (
+                      <circle 
+                        key={dIdx} 
+                        cx={dot.x} 
+                        cy={dot.y} 
+                        r="1.8" 
+                        fill="#D4AF37" 
+                        stroke="#FFFFFF" 
+                        strokeWidth="0.8"
+                      />
+                    ))}
+                  </svg>
+
+                  <div className="flex justify-between text-[9px] text-white/40 font-semibold font-sans mt-1.5 px-0.5">
+                    <span>S</span>
+                    <span>M</span>
+                    <span>T</span>
+                    <span>W</span>
+                    <span>Th</span>
+                    <span>F</span>
+                    <span>S</span>
+                  </div>
+                </div>
+
+                <p className="text-[10.5px] text-white/60 leading-relaxed font-light text-center border-t border-white/5 pt-3">
+                  Your overall health index is within the optimal range (80 - 90)
+                </p>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        {/* Workflow / How It Works Section */}
+        <section 
+          id="workflow" 
+          ref={workflowRef}
+          className="w-full max-w-[1100px] mx-auto px-6 py-16 md:py-24 border-t border-[#EFECE6] text-center"
+        >
+          <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-[#D4AF37] font-mono block mb-3">Workflow</span>
+          <h2 className="text-3xl md:text-4xl font-heading font-light text-[#1A1A1A] mb-12">
+            How HealthLens Works
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8 text-left">
+            {/* Step 1 */}
+            <div className="workflow-step space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="p-3 bg-[#1A1A1A] text-[#FDFBF7] rounded-xl flex items-center justify-center">
+                  <SolidUpload className="h-5 w-5 text-[#FDFBF7]" />
+                </div>
+                <span className="text-4xl font-heading text-[#EFECE6] font-semibold">01</span>
+              </div>
+              <h4 className="text-lg font-semibold text-[#1A1A1A] pt-2">Upload Reports</h4>
+              <p className="text-sm text-[#71797E] font-light leading-relaxed">
+                Securely drop your PDF scans or image-based laboratory reports. Files are handled with bank-grade encryption.
+              </p>
+            </div>
+
+            {/* Step 2 */}
+            <div className="workflow-step space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="p-3 bg-[#1A1A1A] text-[#FDFBF7] rounded-xl flex items-center justify-center">
+                  <SolidCpu className="h-5 w-5 text-[#FDFBF7]" />
+                </div>
+                <span className="text-4xl font-heading text-[#EFECE6] font-semibold">02</span>
+              </div>
+              <h4 className="text-lg font-semibold text-[#1A1A1A] pt-2">AI Extraction</h4>
+              <p className="text-sm text-[#71797E] font-light leading-relaxed">
+                Our OCR engine parses the document, normalizes varying units, and maps metrics directly to standard reference ranges.
+              </p>
+            </div>
+
+            {/* Step 3 */}
+            <div className="workflow-step space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="p-3 bg-[#1A1A1A] text-[#FDFBF7] rounded-xl flex items-center justify-center">
+                  <SolidTrend className="h-5 w-5 text-[#FDFBF7]" />
+                </div>
+                <span className="text-4xl font-heading text-[#EFECE6] font-semibold">03</span>
+              </div>
+              <h4 className="text-lg font-semibold text-[#1A1A1A] pt-2">Analyze & Consult</h4>
+              <p className="text-sm text-[#71797E] font-light leading-relaxed">
+                Visualize historical biomarker graphs and discuss findings securely with an empathetic RAG AI assistant.
+              </p>
             </div>
           </div>
         </section>
 
-        {/* ========= FEATURES ========= */}
-        <section id="features" ref={featuresRef} className="w-full max-w-[1100px] mx-auto px-6 py-20">
-          <div className="text-center mb-14">
-            <span className="text-[11px] font-bold uppercase tracking-[0.3em] font-mono mb-3 block"
-              style={{ background: "linear-gradient(135deg, #A78BFA, #06B6D4)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-              Core Capabilities
-            </span>
-            <h2 className="text-3xl md:text-4xl font-heading font-bold text-white mb-4">Everything You Need</h2>
-            <p className="text-white/40 text-sm max-w-lg mx-auto">A complete health intelligence platform built for everyone.</p>
-          </div>
+        {/* Detailed Features Grid Section */}
+        <section 
+          id="features" 
+          ref={featuresRef}
+          className="w-full bg-[#FAF7F1] border-t border-b border-[#EFECE6] py-16 md:py-24"
+        >
+          <div className="max-w-[1100px] mx-auto px-6">
+            <div className="text-center max-w-2xl mx-auto mb-16">
+              <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-[#D4AF37] font-mono block mb-3">Core Capabilities</span>
+              <h2 className="text-3xl md:text-4xl font-heading font-light text-[#1A1A1A]">
+                Intelligent Medical Translation
+              </h2>
+              <p className="text-sm text-[#71797E] font-light mt-4 leading-relaxed">
+                We bridge the gap between complex laboratory statistics and actionable personal wellness metrics.
+              </p>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[
-              { icon: "🔒", title: "Privacy-First", desc: "Your data stays in your private container. We never share your medical records.", color: "#7C3AED" },
-              { icon: "📈", title: "Trend Tracking", desc: "Track biomarkers across months and years. Spot patterns before they become problems.", color: "#06B6D4" },
-              { icon: "⚖️", title: "Unit Normalization", desc: "Different labs, different units — our AI normalizes everything automatically.", color: "#10B981" },
-              { icon: "🎯", title: "Reference Ranges", desc: "Age & gender-adjusted healthy intervals from medical databases.", color: "#F59E0B" },
-              { icon: "🧠", title: "RAG-Powered AI", desc: "Answers grounded in peer-reviewed medical publications and your lab history.", color: "#EC4899" },
-              { icon: "💊", title: "Health Scoring", desc: "Consolidated health index rating based on all your key biomarkers.", color: "#8B5CF6" }
-            ].map((f, i) => (
-              <div key={i}
-                className="feature-item p-6 rounded-2xl transition-all duration-300 hover:-translate-y-1 group cursor-default"
-                style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
-                onMouseEnter={e => (e.currentTarget.style.borderColor = `${f.color}40`)}
-                onMouseLeave={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.07)")}>
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl mb-4"
-                  style={{ background: `${f.color}15`, border: `1px solid ${f.color}30` }}>
-                  {f.icon}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Feature 1 */}
+              <div className="feature-item p-6 bg-[#FFFDF9] border border-[#EFECE6] rounded-[1.8rem] space-y-3 shadow-xs hover:border-[#D4AF37]/40 transition-colors duration-300">
+                <div className="w-8 h-8 rounded-lg bg-[#1A1A1A] flex items-center justify-center">
+                  <SolidShield className="h-4 w-4 text-[#FDFBF7]" />
                 </div>
-                <h5 className="font-bold text-white text-sm mb-2">{f.title}</h5>
-                <p className="text-xs text-white/40 leading-relaxed">{f.desc}</p>
+                <h5 className="font-semibold text-[#1A1A1A] text-sm">Privacy-First Data</h5>
+                <p className="text-xs text-[#71797E] font-light leading-relaxed">
+                  Your data stays in your private Supabase container. We never share or sell your sensitive medical records.
+                </p>
               </div>
-            ))}
+
+              {/* Feature 2 */}
+              <div className="feature-item p-6 bg-[#FFFDF9] border border-[#EFECE6] rounded-[1.8rem] space-y-3 shadow-xs hover:border-[#D4AF37]/40 transition-colors duration-300">
+                <div className="w-8 h-8 rounded-lg bg-[#1A1A1A] flex items-center justify-center">
+                  <SolidLayers className="h-4 w-4 text-[#FDFBF7]" />
+                </div>
+                <h5 className="font-semibold text-[#1A1A1A] text-sm">Chronological Timelines</h5>
+                <p className="text-xs text-[#71797E] font-light leading-relaxed">
+                  Track how your biomarkers change over weeks, months, or years. Spot health patterns before they become issues.
+                </p>
+              </div>
+
+              {/* Feature 3 */}
+              <div className="feature-item p-6 bg-[#FFFDF9] border border-[#EFECE6] rounded-[1.8rem] space-y-3 shadow-xs hover:border-[#D4AF37]/40 transition-colors duration-300">
+                <div className="w-8 h-8 rounded-lg bg-[#1A1A1A] flex items-center justify-center">
+                  <SolidScale className="h-4 w-4 text-[#FDFBF7]" />
+                </div>
+                <h5 className="font-semibold text-[#1A1A1A] text-sm">Unit Normalization</h5>
+                <p className="text-xs text-[#71797E] font-light leading-relaxed">
+                  Different labs use different units. Our parser automatically normalizes metrics (e.g., pg/mL to ng/dL) for clean comparison.
+                </p>
+              </div>
+
+              {/* Feature 4 */}
+              <div className="feature-item p-6 bg-[#FFFDF9] border border-[#EFECE6] rounded-[1.8rem] space-y-3 shadow-xs hover:border-[#D4AF37]/40 transition-colors duration-300">
+                <div className="w-8 h-8 rounded-lg bg-[#1A1A1A] flex items-center justify-center">
+                  <SolidActivity className="h-4 w-4 text-[#FDFBF7]" />
+                </div>
+                <h5 className="font-semibold text-[#1A1A1A] text-sm">Reference Range Matching</h5>
+                <p className="text-xs text-[#71797E] font-light leading-relaxed">
+                  Compare results against age- and biological sex-adjusted healthy intervals sourced from medical reference databases.
+                </p>
+              </div>
+
+              {/* Feature 5 */}
+              <div className="feature-item p-6 bg-[#FFFDF9] border border-[#EFECE6] rounded-[1.8rem] space-y-3 shadow-xs hover:border-[#D4AF37]/40 transition-colors duration-300">
+                <div className="w-8 h-8 rounded-lg bg-[#1A1A1A] flex items-center justify-center">
+                  <SolidSparkle className="h-4 w-4 text-[#FDFBF7]" />
+                </div>
+                <h5 className="font-semibold text-[#1A1A1A] text-sm">Empathetic AI RAG</h5>
+                <p className="text-xs text-[#71797E] font-light leading-relaxed">
+                  Ask questions and get answers grounded in peer-reviewed medical publications and your historical lab data.
+                </p>
+              </div>
+
+              {/* Feature 6 */}
+              <div className="feature-item p-6 bg-[#FFFDF9] border border-[#EFECE6] rounded-[1.8rem] space-y-3 shadow-xs hover:border-[#D4AF37]/40 transition-colors duration-300">
+                <div className="w-8 h-8 rounded-lg bg-[#1A1A1A] flex items-center justify-center">
+                  <SolidHeartPulse className="h-4 w-4 text-[#FDFBF7]" />
+                </div>
+                <h5 className="font-semibold text-[#1A1A1A] text-sm">Health Index Scoring</h5>
+                <p className="text-xs text-[#71797E] font-light leading-relaxed">
+                  Receive a consolidated, high-level health index rating based on the status of your primary metabolic and blood biomarkers.
+                </p>
+              </div>
+            </div>
           </div>
         </section>
 
-        {/* ========= FAQ ========= */}
-        <section id="faq" className="w-full max-w-[800px] mx-auto px-6 py-16">
-          <div className="text-center mb-10">
-            <span className="text-[11px] font-bold uppercase tracking-[0.3em] font-mono mb-3 block"
-              style={{ background: "linear-gradient(135deg, #A78BFA, #06B6D4)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-              FAQ
-            </span>
-            <h2 className="text-3xl font-heading font-bold text-white">Frequently Asked Questions</h2>
+        {/* FAQ Section */}
+        <section 
+          id="faq" 
+          ref={faqRef}
+          className="w-full max-w-[800px] mx-auto px-6 py-16 md:py-24"
+        >
+          <div className="text-center mb-12">
+            <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-[#D4AF37] font-mono block mb-3">FAQ</span>
+            <h2 className="text-3xl font-heading font-light text-[#1A1A1A]">
+              Frequently Asked Questions
+            </h2>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             {faqData.map((faq, index) => {
               const isOpen = activeFaq === index;
               return (
-                <div key={index} className="rounded-2xl overflow-hidden transition-all duration-300"
-                  style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${isOpen ? "rgba(124,58,237,0.4)" : "rgba(255,255,255,0.07)"}` }}>
-                  <button onClick={() => setActiveFaq(isOpen ? null : index)}
-                    className="w-full px-6 py-5 text-left flex justify-between items-center gap-4 cursor-pointer hover:bg-white/[0.02] transition-colors">
-                    <span className="font-semibold text-sm md:text-base text-white/90">{faq.question}</span>
-                    <span className="text-purple-400 shrink-0 text-xl">{isOpen ? "−" : "+"}</span>
+                <div 
+                  key={index} 
+                  className="border border-[#EFECE6] bg-[#FFFDF9] rounded-2xl overflow-hidden transition-all duration-300"
+                >
+                  <button 
+                    onClick={() => toggleFaq(index)}
+                    className="w-full px-6 py-5 text-left flex justify-between items-center gap-4 hover:bg-[#FAF7F1]/40 transition-colors"
+                  >
+                    <span className="font-medium text-sm md:text-base text-[#1A1A1A]">{faq.question}</span>
+                    <span className="text-[#D4AF37] shrink-0">
+                      {isOpen ? <SolidMinus className="h-3.5 w-3.5" /> : <SolidPlus className="h-3.5 w-3.5" />}
+                    </span>
                   </button>
-                  <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isOpen ? "max-h-48" : "max-h-0"}`}>
-                    <div className="px-6 py-4 text-sm text-white/50 leading-relaxed border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+                  
+                  <div 
+                    className={`transition-all duration-300 ease-in-out overflow-hidden ${
+                      isOpen ? "max-h-40 border-t border-[#EFECE6]" : "max-h-0"
+                    }`}
+                  >
+                    <div className="px-6 py-5 text-xs md:text-sm text-[#71797E] font-light leading-relaxed">
                       {faq.answer}
                     </div>
                   </div>
@@ -349,33 +747,14 @@ export const Landing: React.FC = () => {
           </div>
         </section>
 
-        {/* ========= CTA BANNER ========= */}
-        <section className="w-full max-w-[1100px] mx-auto px-6 pb-20">
-          <div className="relative rounded-[2rem] overflow-hidden p-10 text-center"
-            style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.2) 0%, rgba(6,182,212,0.15) 100%)", border: "1px solid rgba(124,58,237,0.3)" }}>
-            <div className="absolute inset-0 opacity-30"
-              style={{ background: "radial-gradient(circle at 30% 50%, rgba(124,58,237,0.4), transparent 60%), radial-gradient(circle at 70% 50%, rgba(6,182,212,0.3), transparent 60%)" }} />
-            <div className="relative z-10">
-              <h2 className="text-3xl md:text-4xl font-heading font-bold text-white mb-4">Ready to understand your health?</h2>
-              <p className="text-white/50 text-sm mb-8 max-w-md mx-auto">Join thousands of people taking control of their health with AI-powered insights.</p>
-              <button onClick={handleCTAClick}
-                className="px-10 py-4 rounded-full text-base font-bold text-white transition-all duration-300 active:scale-95 cursor-pointer"
-                style={{ background: "linear-gradient(135deg, #7C3AED, #06B6D4)", boxShadow: "0 0 40px rgba(124,58,237,0.5)" }}>
-                Get Started — It's Free ✨
-              </button>
-            </div>
-          </div>
-        </section>
       </main>
 
-      {/* ========= FOOTER ========= */}
-      <footer className="w-full max-w-[1300px] mx-auto px-6 py-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs z-10 relative"
-        style={{ borderTop: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.25)" }}>
-        <div className="flex items-center gap-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span>© 2026 HealthLens AI — All rights reserved</span>
-        </div>
-        <span className="italic text-center">Educational platform only. Not intended for medical diagnosis.</span>
+      {/* Footer */}
+      <footer className="w-full max-w-[1300px] mx-auto px-6 py-8 mt-4 border-t border-[#EFECE6] flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-[#71797E] z-10 relative">
+        <span>© 2026 HealthLens. All rights reserved.</span>
+        <span className="italic font-light text-center sm:text-right">
+          Educational platform only. Not intended for professional medical diagnosis or clinical treatment.
+        </span>
       </footer>
     </div>
   );

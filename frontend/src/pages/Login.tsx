@@ -107,74 +107,44 @@ export const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans relative overflow-hidden"
-      style={{ background: "linear-gradient(135deg, #07070F 0%, #0D0B1E 50%, #070F18 100%)" }}>
-
-      {/* Blobs */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full opacity-20"
-          style={{ background: "radial-gradient(circle, rgba(124,58,237,0.6) 0%, transparent 70%)", filter: "blur(80px)" }} />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[400px] h-[400px] rounded-full opacity-15"
-          style={{ background: "radial-gradient(circle, rgba(6,182,212,0.5) 0%, transparent 70%)", filter: "blur(80px)" }} />
-      </div>
-
-      {/* Back to home */}
-      <div className="absolute top-6 left-6 z-10">
-        <button onClick={() => navigate("/")}
-          className="flex items-center gap-2 text-sm font-medium cursor-pointer transition-colors"
-          style={{ color: "rgba(255,255,255,0.4)" }}
-          onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.9)")}
-          onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.4)")}>
-          ← Back to Home
-        </button>
-      </div>
-
-      {/* Logo + heading */}
-      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center relative z-10">
-        <div className="flex justify-center items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-            style={{ background: "linear-gradient(135deg, #7C3AED, #06B6D4)" }}>
-            <HeartPulse className="h-5 w-5 text-white" />
-          </div>
-          <span className="text-2xl font-bold text-white tracking-tight">
-            HealthLens <span className="font-light" style={{ color: "#A78BFA" }}>AI</span>
-          </span>
+    <div className="min-h-screen bg-clinical-alabaster flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
+        <div className="flex justify-center items-center gap-2 text-clinical-blue text-4xl font-extrabold tracking-tight font-heading">
+          <HeartPulse className="h-10 w-10 text-clinical-blue animate-pulse" />
+          <span>HealthLens <span className="text-clinical-slate font-light">AI</span></span>
         </div>
-        <h2 className="text-2xl font-heading font-bold text-white">
+        <h2 className="mt-6 text-center text-3xl font-heading font-semibold text-clinical-slate">
           {isSignUp ? "Create your health profile" : "Access your health timeline"}
         </h2>
-        <p className="mt-2 text-sm italic" style={{ color: "rgba(255,255,255,0.35)" }}>
+        <p className="mt-2 text-center text-sm text-gray-600 font-serif italic">
           "Educational health intelligence at your fingertips"
         </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md relative z-10">
-        <div className="py-8 px-4 sm:px-10 rounded-3xl"
-          style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", backdropFilter: "blur(20px)" }}>
-          <form className="space-y-5" onSubmit={handleSubmit}>
-
-          {/* Demo Credentials Card */}
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-white py-8 px-4 shadow-sm border border-gray-100 rounded-2xl sm:px-10">
+          <form className="space-y-6" onSubmit={handleSubmit}>
+          {/* Demo Credentials Card - For Hackathon Judges */}
           {!isSignUp && (
-            <div className="mb-2 p-4 rounded-2xl" style={{ background: "rgba(124,58,237,0.12)", border: "1px solid rgba(124,58,237,0.3)" }}>
-              <div className="flex items-center gap-2 mb-3">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-xs font-bold text-white tracking-wide">🎯 Hackathon Demo — Try Instantly</span>
+            <div className="mb-2 p-4 rounded-2xl bg-gradient-to-br from-[#FFFDF3] to-[#FFF8E1] border border-[#D4AF37]/30 shadow-sm">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-2 h-2 rounded-full bg-[#22c55e] animate-pulse" />
+                <span className="text-xs font-bold text-[#1A1A1A] tracking-wide">🎯 Demo Account — Try Instantly</span>
               </div>
               <div className="grid grid-cols-2 gap-2 mb-3">
-                <div className="rounded-xl px-3 py-2" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}>
-                  <div className="text-[9px] font-bold uppercase tracking-wider mb-0.5" style={{ color: "rgba(167,139,250,0.8)" }}>Email</div>
-                  <div className="text-xs font-mono font-semibold text-white select-all">demo@healthlens.ai</div>
+                <div className="bg-white/70 rounded-xl px-3 py-2 border border-[#D4AF37]/20">
+                  <div className="text-[9px] font-bold uppercase tracking-wider text-[#71797E] mb-0.5">Email</div>
+                  <div className="text-xs font-mono font-semibold text-[#1A1A1A] select-all">demo@healthlens.ai</div>
                 </div>
-                <div className="rounded-xl px-3 py-2" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}>
-                  <div className="text-[9px] font-bold uppercase tracking-wider mb-0.5" style={{ color: "rgba(167,139,250,0.8)" }}>Password</div>
-                  <div className="text-xs font-mono font-semibold text-white select-all">Demo@12345</div>
+                <div className="bg-white/70 rounded-xl px-3 py-2 border border-[#D4AF37]/20">
+                  <div className="text-[9px] font-bold uppercase tracking-wider text-[#71797E] mb-0.5">Password</div>
+                  <div className="text-xs font-mono font-semibold text-[#1A1A1A] select-all">Demo@12345</div>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => { setEmail("demo@healthlens.ai"); setPassword("Demo@12345"); }}
-                className="w-full py-2.5 rounded-xl text-xs font-bold text-white transition-all active:scale-[0.98] cursor-pointer"
-                style={{ background: "linear-gradient(135deg, #7C3AED, #06B6D4)" }}
+                className="w-full py-2 rounded-xl text-xs font-bold text-white bg-[#D4AF37] hover:bg-[#B8962D] transition-all active:scale-[0.98] cursor-pointer"
               >
                 ✨ Auto-fill Demo Credentials
               </button>
@@ -190,98 +160,217 @@ export const Login: React.FC = () => {
 
 
             {error && (
-              <div className={`p-3 rounded-xl text-sm font-medium ${error.includes("created") ? "text-emerald-400" : "text-red-400"}`}
-                style={{ background: error.includes("created") ? "rgba(16,185,129,0.1)" : "rgba(239,68,68,0.1)", border: `1px solid ${error.includes("created") ? "rgba(16,185,129,0.2)" : "rgba(239,68,68,0.2)"}` }}>
+              <div className={`p-3 rounded-lg text-sm ${error.includes("created") ? "bg-clinical-green-light text-clinical-green-dark" : "bg-red-50 text-red-700"}`}>
                 {error}
               </div>
             )}
 
             {isSignUp && (
-              <div className="grid grid-cols-2 gap-3">
-                {[{id:"first_name",label:"First Name",val:firstName,set:setFirstName},{id:"last_name",label:"Last Name",val:lastName,set:setLastName}].map(f=>(
-                  <div key={f.id}>
-                    <label htmlFor={f.id} className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{color:"rgba(167,139,250,0.7)"}}>{f.label}</label>
-                    <input id={f.id} type="text" required value={f.val} onChange={e=>f.set(e.target.value)}
-                      className="block w-full px-3 py-2.5 rounded-xl text-sm text-white focus:outline-none"
-                      style={{background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.1)"}} />
-                  </div>
-                ))}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="first_name" className="block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                    First Name
+                  </label>
+                  <input
+                    id="first_name"
+                    type="text"
+                    required
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-clinical-blue focus:border-clinical-blue text-sm"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="last_name" className="block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                    Last Name
+                  </label>
+                  <input
+                    id="last_name"
+                    type="text"
+                    required
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-clinical-blue focus:border-clinical-blue text-sm"
+                  />
+                </div>
               </div>
             )}
 
             <div>
-              <label htmlFor="email" className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{color:"rgba(167,139,250,0.7)"}}>
-                Email Address
+              <label htmlFor="email" className="block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                Email address
               </label>
-              <input id="email" name="email" type="email" autoComplete="email" required value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="block w-full px-4 py-3 rounded-xl text-sm text-white focus:outline-none transition-all"
-                style={{background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.1)"}} />
+              <div className="mt-1">
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="block w-full px-3 py-2 border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-clinical-blue focus:border-clinical-blue text-sm"
+                />
+              </div>
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{color:"rgba(167,139,250,0.7)"}}>
+              <label htmlFor="password" className="block text-xs font-semibold uppercase tracking-wider text-gray-500">
                 Password
               </label>
-              <input id="password" name="password" type="password" autoComplete="current-password" required value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="block w-full px-4 py-3 rounded-xl text-sm text-white focus:outline-none transition-all"
-                style={{background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.1)"}} />
+              <div className="mt-1">
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="block w-full px-3 py-2 border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-clinical-blue focus:border-clinical-blue text-sm"
+                />
+              </div>
             </div>
 
             {isSignUp && (
               <>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="dob" className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{color:"rgba(167,139,250,0.7)"}}>Date of Birth</label>
-                    <input id="dob" type="date" required value={dob} onChange={(e) => setDob(e.target.value)}
-                      className="block w-full px-3 py-2.5 rounded-xl text-sm text-white focus:outline-none"
-                      style={{background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.1)"}} />
+                    <label htmlFor="dob" className="block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                      Date of Birth
+                    </label>
+                    <input
+                      id="dob"
+                      type="date"
+                      required
+                      value={dob}
+                      onChange={(e) => setDob(e.target.value)}
+                      className="mt-1 block w-full px-3 py-2 border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-clinical-blue focus:border-clinical-blue text-sm text-gray-700"
+                    />
                   </div>
                   <div>
-                    <label htmlFor="gender" className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{color:"rgba(167,139,250,0.7)"}}>Gender</label>
-                    <select id="gender" value={gender} onChange={(e) => setGender(e.target.value)}
-                      className="block w-full px-3 py-2.5 rounded-xl text-sm text-white focus:outline-none"
-                      style={{background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.1)"}}>
+                    <label htmlFor="gender" className="block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                      Biological Gender
+                    </label>
+                    <select
+                      id="gender"
+                      value={gender}
+                      onChange={(e) => setGender(e.target.value)}
+                      className="mt-1 block w-full px-3 py-2 border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-clinical-blue focus:border-clinical-blue text-sm bg-white text-gray-700"
+                    >
                       <option value="male">Male</option>
                       <option value="female">Female</option>
-                      <option value="other">Other</option>
+                      <option value="other">Other / Prefer not to say</option>
                     </select>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+
+                <div className="grid grid-cols-2 gap-4 mt-4">
                   <div>
-                    <label htmlFor="height" className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{color:"rgba(167,139,250,0.7)"}}>Height (cm)</label>
-                    <input id="height" type="text" placeholder="e.g. 175" value={height} onChange={(e) => setHeight(e.target.value)}
-                      className="block w-full px-3 py-2.5 rounded-xl text-sm text-white focus:outline-none"
-                      style={{background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.1)"}} />
+                    <label htmlFor="height" className="block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                      Height (cm)
+                    </label>
+                    <input
+                      id="height"
+                      type="text"
+                      placeholder="e.g. 175"
+                      value={height}
+                      onChange={(e) => setHeight(e.target.value)}
+                      className="mt-1 block w-full px-3 py-2 border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-clinical-blue focus:border-clinical-blue text-sm text-gray-700"
+                    />
                   </div>
                   <div>
-                    <label htmlFor="blood_group" className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{color:"rgba(167,139,250,0.7)"}}>Blood Group</label>
-                    <select id="blood_group" value={bloodGroup} onChange={(e) => setBloodGroup(e.target.value)}
-                      className="block w-full px-3 py-2.5 rounded-xl text-sm text-white focus:outline-none"
-                      style={{background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.1)"}}>
-                      {["unknown","A+","A-","B+","B-","AB+","AB-","O+","O-"].map(v=><option key={v} value={v}>{v=="unknown"?"Unknown":v}</option>)}
+                    <label htmlFor="blood_group" className="block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                      Blood Group
+                    </label>
+                    <select
+                      id="blood_group"
+                      value={bloodGroup}
+                      onChange={(e) => setBloodGroup(e.target.value)}
+                      className="mt-1 block w-full px-3 py-2 border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-clinical-blue focus:border-clinical-blue text-sm bg-white text-gray-700"
+                    >
+                      <option value="unknown">Unknown</option>
+                      <option value="A+">A+</option>
+                      <option value="A-">A-</option>
+                      <option value="B+">B+</option>
+                      <option value="B-">B-</option>
+                      <option value="AB+">AB+</option>
+                      <option value="AB-">AB-</option>
+                      <option value="O+">O+</option>
+                      <option value="O-">O-</option>
                     </select>
                   </div>
                 </div>
               </>
             )}
 
-            <button type="submit" disabled={loading}
-              className="w-full flex justify-center py-3.5 px-4 rounded-xl text-sm font-bold text-white transition-all active:scale-[0.97] disabled:opacity-50 cursor-pointer mt-2"
-              style={{ background: "linear-gradient(135deg, #7C3AED, #06B6D4)", boxShadow: "0 0 30px rgba(124,58,237,0.4)" }}>
-              {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : isSignUp ? "Create Account ✨" : "Sign In →"}
-            </button>
+            <div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-xl shadow-sm text-sm font-semibold text-white bg-clinical-blue hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-clinical-blue transition-all active:scale-[0.97] disabled:opacity-50"
+              >
+                {loading ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : isSignUp ? (
+                  "Create Account"
+                ) : (
+                  "Sign In"
+                )}
+              </button>
+            </div>
           </form>
 
-          <div className="mt-5 pt-5" style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}>
+          {/* Quick Demo Access Button */}
+          <div className="mt-4 pt-4 border-t border-gray-100">
             <button
-              onClick={() => { setIsSignUp(!isSignUp); setError(null); }}
-              className="w-full flex justify-center py-3 px-4 rounded-xl text-sm font-semibold transition-all cursor-pointer"
-              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.6)" }}>
-              {isSignUp ? "← Sign in to existing account" : "Create new account →"}
+              type="button"
+              onClick={() => {
+                mockLogin("demo@healthlens.ai", {
+                  first_name: "Piyush",
+                  last_name: "Verma",
+                  date_of_birth: "1995-04-12",
+                  gender: "male",
+                  height: "175",
+                  blood_group: "B+",
+                  intake_responses: {
+                    primary_goals: ["Cardiovascular Support", "Metabolic Health", "Energy Optimization"],
+                    diet: "balanced",
+                    activity_level: "moderate",
+                    sleep_hours: "7_8",
+                    family_history: ["Type 2 Diabetes", "Hypertension"]
+                  }
+                });
+                navigate("/dashboard");
+              }}
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold text-clinical-blue bg-blue-50 border border-blue-200 hover:bg-blue-100 transition-all active:scale-[0.98]"
+            >
+              <HeartPulse className="h-4 w-4 text-clinical-blue" />
+              1-Click Demo Patient Access (Instant Dashboard & AI)
             </button>
+          </div>
+
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">New to HealthLens?</span>
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <button
+                onClick={() => {
+                  setIsSignUp(!isSignUp);
+                  setError(null);
+                }}
+                className="w-full flex justify-center py-2.5 px-4 border border-gray-200 rounded-xl shadow-sm text-sm font-semibold text-clinical-slate bg-clinical-alabaster hover:bg-gray-100 transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-clinical-blue"
+              >
+                {isSignUp ? "Sign in to existing account" : "Start Your Health Timeline"}
+              </button>
+            </div>
           </div>
         </div>
       </div>
