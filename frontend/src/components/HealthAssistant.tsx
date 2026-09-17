@@ -706,7 +706,7 @@ export const HealthAssistant: React.FC<HealthAssistantProps> = ({
         </div>
 
         {/* Chat Messages Log OR Welcome View */}
-        <div className="flex-1 overflow-y-auto pt-6 pb-40 sm:pb-48 px-4 sm:px-6 space-y-6 bg-[#FAF9F6]/30">
+        <div className="flex-1 overflow-y-auto pt-6 pb-24 sm:pb-28 px-4 sm:px-6 space-y-6 bg-[#FAF9F6]/30">
           {chatError && (
             <div className="p-4 bg-red-50 border border-red-200 text-red-700 text-xs rounded-2xl flex items-start justify-between gap-3 max-w-2xl mx-auto shadow-xs">
               <div className="flex items-start gap-2.5">
@@ -901,13 +901,10 @@ export const HealthAssistant: React.FC<HealthAssistantProps> = ({
 
                 <ReportUploader onUploadSuccess={() => onNavigate("history")} />
               </div>
-
-              {/* Generous bottom clearance spacer so nothing gets hidden behind the floating chat bar */}
-              <div className="h-20 sm:h-24 w-full" aria-hidden="true" />
             </div>
           )}
 
-          <div ref={messagesEndRef} className="h-4" />
+          <div ref={messagesEndRef} />
         </div>
 
         {/* ================= FLOATING CHAT INPUT BAR ================= */}

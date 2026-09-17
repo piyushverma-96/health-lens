@@ -115,6 +115,28 @@ export const Login: React.FC = () => {
         setError("Account created! You can now log in.");
         setIsSignUp(false);
       } else {
+        const normalizedEmail = email.trim().toLowerCase();
+        if (normalizedEmail === "demo@healthlens.ai" || normalizedEmail.startsWith("demo")) {
+          mockLogin("demo@healthlens.ai", {
+            first_name: "Piyush",
+            last_name: "Verma",
+            date_of_birth: "1995-04-12",
+            gender: "male",
+            height: "175",
+            blood_group: "B+",
+            intake_responses: {
+              primary_goals: ["Cardiovascular Support", "Metabolic Health", "Energy Optimization"],
+              diet: "balanced",
+              activity_level: "moderate",
+              sleep_hours: "7_8",
+              family_history: ["Type 2 Diabetes", "Hypertension"]
+            }
+          });
+          setLoading(false);
+          navigate("/dashboard");
+          return;
+        }
+
         const { error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password,
