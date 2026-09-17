@@ -286,6 +286,10 @@ def send_chat_message(
             "primary health goals, diet type, and activity level. Ground your suggestions in their family risk factors, "
             "and ensure you do not make recommendations that conflict with their lifestyle baselines (e.g., never suggest "
             "animal protein diets to vegans, or intense high-impact sports to sedentary users without appropriate warnings). "
+            "ACCEPTED FILE FORMATS: HealthLens strictly accepts medical reports in PNG, JPG (or JPEG), and PDF formats. "
+            "If the user asks how to upload or send medical reports, what formats are supported, or asks about unsupported formats "
+            "(such as Word/DOC, spreadsheets, or unsupported image formats), advise them that PNG, JPG, or PDF files are accepted "
+            "and can be uploaded using the attachment button (paperclip) in chat or in the 'Upload Report' tab. "
             "CRITICAL: At the very end of your message, you must include a single separate line with the exact text: "
             "\"This is educational information and not a medical diagnosis.\""
         )

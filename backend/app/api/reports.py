@@ -20,6 +20,15 @@ def create_report(
     """
     Registers a new uploaded report in the database and triggers background OCR processing.
     """
+    ALLOWED_EXTENSIONS = {"pdf", "png", "jpg", "jpeg"}
+    file_name = (report_data.file_name or "").strip()
+    ext = file_name.rsplit(".", 1)[-1].lower() if "." in file_name else ""
+    if ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unsupported file format ('.{ext}'). Only PNG, JPG, and PDF files are accepted for medical reports."
+        )
+
     try:
         with get_db_cursor(commit=True) as cur:
             cur.execute(
@@ -48,6 +57,8 @@ def create_report(
         )
         
         return report
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

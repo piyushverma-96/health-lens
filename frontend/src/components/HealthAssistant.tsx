@@ -198,11 +198,29 @@ export const HealthAssistant: React.FC<HealthAssistantProps> = ({
     const file = e.target.files?.[0];
     if (!file) return;
 
+    const ext = file.name.split(".").pop()?.toLowerCase() || "";
+    const allowed = ["png", "jpg", "jpeg", "pdf"];
+    if (!allowed.includes(ext)) {
+      setChatError(`Unsupported file format (.${ext || "unknown"}). Only PNG, JPG, or PDF files are accepted. Please provide your medical report as a valid .png, .jpg, or .pdf document.`);
+      if (chatFileInputRef.current) {
+        chatFileInputRef.current.value = "";
+      }
+      return;
+    }
+
+    if (file.size > 15 * 1024 * 1024) {
+      setChatError(`File is too large (${(file.size / (1024 * 1024)).toFixed(1)} MB). Maximum allowed size is 15 MB.`);
+      if (chatFileInputRef.current) {
+        chatFileInputRef.current.value = "";
+      }
+      return;
+    }
+
     setChatUploadStatus(`Uploading ${file.name}...`);
     setChatError(null);
 
     try {
-      const fileExt = file.name.split(".").pop();
+      const fileExt = ext;
       const uniqueId = crypto.randomUUID();
       const userId = profile?.id || "c5a1d5eb-7b58-407c-a779-9991525c1852";
       const filePath = `${userId}/${uniqueId}.${fileExt}`;
@@ -227,11 +245,11 @@ export const HealthAssistant: React.FC<HealthAssistantProps> = ({
       setChatUploadStatus(null);
 
       // Trigger automatic AI consultation on the uploaded report
-      const prompt = `I have uploaded my laboratory report / medical test image: "${file.name}". Please analyze the extracted biomarkers, note any abnormal values, and provide clinical recommendations.`;
+      const prompt = `I have uploaded my laboratory report / medical test document: "${file.name}". Please analyze the extracted biomarkers, note any abnormal values, and provide clinical recommendations.`;
       handleSuggestionClick(prompt);
     } catch (err: any) {
       console.error("Chat file upload error:", err);
-      setChatError(err.message || "Failed to upload report image.");
+      setChatError(err.message || "Failed to upload report document.");
       setChatUploadStatus(null);
     } finally {
       if (chatFileInputRef.current) {
@@ -930,7 +948,7 @@ export const HealthAssistant: React.FC<HealthAssistantProps> = ({
               onClick={() => chatFileInputRef.current?.click()}
               disabled={!!chatUploadStatus || sendMessageMutation.isPending}
               className="absolute left-2.5 p-2 text-gray-400 hover:text-gold-leaf hover:bg-gold-leaf/5 rounded-xl transition-all cursor-pointer z-10"
-              title="Upload lab report image (.png, .jpg, .jpeg) or PDF"
+              title="Attach medical report (PNG, JPG, or PDF)"
             >
               {chatUploadStatus ? (
                 <Loader2 className="h-4 w-4 animate-spin text-gold-leaf" />

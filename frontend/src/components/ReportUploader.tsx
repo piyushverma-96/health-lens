@@ -75,6 +75,26 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+  const ALLOWED_EXTENSIONS = ["png", "jpg", "jpeg", "pdf"];
+  const MAX_FILE_SIZE_BYTES = 15 * 1024 * 1024; // 15MB
+
+  const validateSelectedFile = (selectedFile: File): { valid: boolean; error?: string } => {
+    const ext = selectedFile.name.split(".").pop()?.toLowerCase() || "";
+    if (!ALLOWED_EXTENSIONS.includes(ext)) {
+      return {
+        valid: false,
+        error: `Unsupported file format (.${ext || "unknown"}). Only PNG, JPG, or PDF files are accepted for medical reports. Please upload a valid .png, .jpg, or .pdf report.`
+      };
+    }
+    if (selectedFile.size > MAX_FILE_SIZE_BYTES) {
+      return {
+        valid: false,
+        error: `File is too large (${(selectedFile.size / (1024 * 1024)).toFixed(1)} MB). Maximum allowed size is 15 MB.`
+      };
+    }
+    return { valid: true };
+  };
+
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
   };
@@ -82,7 +102,15 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      setFile(e.dataTransfer.files[0]);
+      const droppedFile = e.dataTransfer.files[0];
+      const check = validateSelectedFile(droppedFile);
+      if (!check.valid) {
+        setError(check.error || "Only PNG, JPG, or PDF files are accepted.");
+        setSuccess(null);
+        setFile(null);
+        return;
+      }
+      setFile(droppedFile);
       setError(null);
       setSuccess(null);
     }
@@ -90,7 +118,16 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setFile(e.target.files[0]);
+      const selectedFile = e.target.files[0];
+      const check = validateSelectedFile(selectedFile);
+      if (!check.valid) {
+        setError(check.error || "Only PNG, JPG, or PDF files are accepted.");
+        setSuccess(null);
+        setFile(null);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+        return;
+      }
+      setFile(selectedFile);
       setError(null);
       setSuccess(null);
     }
@@ -162,12 +199,18 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
     e.preventDefault();
     if (!file || !user) return;
 
+    const check = validateSelectedFile(file);
+    if (!check.valid) {
+      setError(check.error || "Only PNG, JPG, or PDF files are accepted.");
+      return;
+    }
+
     setUploading(true);
     setError(null);
     setSuccess(null);
 
     try {
-      const fileExt = file.name.split(".").pop();
+      const fileExt = file.name.split(".").pop()?.toLowerCase();
       const uniqueId = crypto.randomUUID();
       const filePath = `${user.id}/${uniqueId}.${fileExt}`;
 
@@ -190,6 +233,7 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
 
       setSuccess("Report uploaded successfully! Processing and OCR analysis started.");
       setFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
       
       // Notify parent component to reload listings
       setTimeout(() => {
@@ -274,17 +318,17 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
                   )}
                 </div>
 
-                <div className="pt-2 border-t border-gray-100 flex items-center gap-2">
+                <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
                   <button
                     type="button"
-                    disabled={uploading}
                     onClick={() => handleAnalyzeDemoReport(demo)}
-                    className="flex-1 flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl bg-gold-leaf hover:bg-gold-muted text-white text-xs font-bold transition-all active:scale-95 disabled:opacity-50 shadow-2xs"
+                    disabled={uploading}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-gold-leaf hover:bg-gold-muted text-white text-xs font-bold transition-all active:scale-[0.97] disabled:opacity-50 shadow-2xs"
                   >
                     {isProcessingThis ? (
                       <>
                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                        <span>Analyzing...</span>
+                        <span>Extracting...</span>
                       </>
                     ) : (
                       <>
@@ -316,7 +360,7 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
             Upload Your Own Medical Report
           </h3>
           <p className="text-xs text-gray-500">
-            Upload personal laboratory results (PDF recommended for digital precision).
+            Upload personal laboratory results (PNG, JPG, or PDF).
           </p>
         </div>
 
@@ -353,23 +397,39 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
               accept=".pdf,.png,.jpg,.jpeg"
               className="hidden"
             />
-            <UploadCloud className={`h-12 w-12 mx-auto mb-4 transition-transform duration-300 ${file ? "text-gold-leaf scale-110" : "text-gray-400 hover:scale-105"}`} />
+            <UploadCloud className={`h-12 w-12 mx-auto mb-3 transition-transform duration-300 ${file ? "text-gold-leaf scale-110" : "text-gray-400 hover:scale-105"}`} />
             {file ? (
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <p className="text-sm font-semibold text-clinical-slate truncate max-w-md mx-auto">
                   {file.name}
                 </p>
                 <p className="text-xs text-gray-400 font-mono">
                   {(file.size / (1024 * 1024)).toFixed(2)} MB • Ready to analyze
                 </p>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setFile(null);
+                    if (fileInputRef.current) fileInputRef.current.value = "";
+                  }}
+                  className="text-xs text-red-500 hover:text-red-700 underline font-medium cursor-pointer"
+                >
+                  Choose a different file
+                </button>
               </div>
             ) : (
-              <div className="space-y-1">
+              <div className="space-y-2.5">
                 <p className="text-sm font-semibold text-clinical-slate">
-                  Select a lab document or drag and drop
+                  Select a medical report or drag and drop
                 </p>
+                <div className="flex items-center justify-center gap-2">
+                  <span className="px-2 py-0.5 rounded-md bg-gold-leaf/10 text-gold-leaf text-[10px] font-bold tracking-wider font-mono">PNG</span>
+                  <span className="px-2 py-0.5 rounded-md bg-gold-leaf/10 text-gold-leaf text-[10px] font-bold tracking-wider font-mono">JPG / JPEG</span>
+                  <span className="px-2 py-0.5 rounded-md bg-gold-leaf/10 text-gold-leaf text-[10px] font-bold tracking-wider font-mono">PDF</span>
+                </div>
                 <p className="text-xs text-gray-400">
-                  Supports native digital PDF (recommended), PNG, or JPG up to 10MB
+                  Only PNG, JPG, or PDF files are accepted (Max 15MB)
                 </p>
               </div>
             )}
