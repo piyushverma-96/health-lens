@@ -13,7 +13,8 @@ import {
   Database,
   PanelLeftClose,
   PanelLeftOpen,
-  UploadCloud
+  UploadCloud,
+  Home
 } from "lucide-react";
 import { ReportUploader } from "../components/ReportUploader";
 import { ReportHistory } from "../components/ReportHistory";
@@ -214,6 +215,19 @@ export const Dashboard: React.FC = () => {
                 </button>
               );
             })}
+
+            <div className="pt-2 mt-2 border-t border-gold-border/40">
+              <button
+                onClick={() => navigate("/")}
+                className={`w-full flex items-center rounded-xl transition-all duration-200 active:scale-[0.98] cursor-pointer text-clinical-slate hover:bg-gold-leaf/10 hover:text-gold-leaf border border-transparent ${
+                  sidebarExpanded ? "px-4 py-2.5 text-left" : "p-3 justify-center"
+                }`}
+                title={!sidebarExpanded ? "Home Page" : undefined}
+              >
+                <Home className={`h-4.5 w-4.5 text-clinical-slate hover:text-gold-leaf ${sidebarExpanded ? "mr-3" : ""}`} />
+                {sidebarExpanded && <span className="text-xs uppercase tracking-wider font-bold text-[10.5px]">Home Page</span>}
+              </button>
+            </div>
           </nav>
         </div>
 

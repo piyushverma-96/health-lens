@@ -70,7 +70,7 @@ export const Login: React.FC = () => {
             mockLogin(email);
           }
           setLoading(false);
-          navigate(redirectTarget);
+          navigate("/");
         } catch (err: any) {
           setError(err.message || "Mock login failed.");
           setLoading(false);
@@ -133,7 +133,7 @@ export const Login: React.FC = () => {
             }
           });
           setLoading(false);
-          navigate("/dashboard");
+          navigate("/");
           return;
         }
 
@@ -143,7 +143,7 @@ export const Login: React.FC = () => {
         });
 
         if (signInError) throw signInError;
-        navigate(redirectTarget);
+        navigate("/");
       }
     } catch (err: any) {
       setError(err.message || "An error occurred. Please try again.");
@@ -361,7 +361,7 @@ export const Login: React.FC = () => {
                     family_history: ["Type 2 Diabetes", "Hypertension"]
                   }
                 });
-                navigate("/dashboard");
+                navigate("/");
               }}
               className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold text-clinical-blue bg-blue-50 border border-blue-200 hover:bg-blue-100 transition-all active:scale-[0.98]"
             >
