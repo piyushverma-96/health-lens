@@ -1,4 +1,4 @@
-"""
+r"""
 HealthLens AI - OCR Service
 ============================
 Extraction pipeline for medical lab reports.

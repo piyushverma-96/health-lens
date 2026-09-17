@@ -33,6 +33,11 @@ def ensure_embedding_model() -> Optional["SentenceTransformer"]:
 
     _model_load_attempted = True
 
+    # Disable heavy local PyTorch on memory-constrained servers (e.g. Render 512MB free tier)
+    if os.environ.get("RENDER") or os.environ.get("DISABLE_LOCAL_EMBEDDINGS", "").lower() in ("true", "1", "yes"):
+        logger.info("Local PyTorch embeddings disabled on Render/constrained server to prevent 512MB OOM crash.")
+        return None
+
     if not _has_sentence_transformers:
         logger.warning("sentence-transformers not installed; RAG vector features will be skipped.")
         return None
@@ -242,22 +247,14 @@ def seed_medical_knowledge_if_empty():
             return
 
         logger.info("Seeding medical knowledge base with baseline biomarker reference insights...")
-        embedding_model = ensure_embedding_model()
-
         with get_db_cursor(commit=True) as cur:
             for seed in _BUILTIN_KNOWLEDGE:
-                embedding = None
-                if embedding_model is not None:
-                    try:
-                        embedding = get_embedding(seed["content"])
-                    except Exception:
-                        embedding = None
                 cur.execute(
                     """
                     INSERT INTO public.medical_knowledge (biomarker_name, topic, content, embedding)
-                    VALUES (%s, %s, %s, %s)
+                    VALUES (%s, %s, %s, NULL)
                     """,
-                    (seed["biomarker_name"], seed["topic"], seed["content"], embedding)
+                    (seed["biomarker_name"], seed["topic"], seed["content"])
                 )
         logger.info("Successfully seeded medical knowledge base with %d entries.", len(_BUILTIN_KNOWLEDGE))
     except Exception as e:

@@ -1,3 +1,4 @@
+import shutil
 import pytesseract
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -63,7 +64,7 @@ def health_check():
     return {
         "status": "healthy" if db_available else "degraded",
         "project": settings.PROJECT_NAME,
-        "ocr_available": settings.TESSERACT_CMD is not None,
+        "ocr_available": bool(settings.TESSERACT_CMD or shutil.which("tesseract")),
         "db_available": db_available,
         "db_error": None if db_available else last_db_error,
         "startup_warning": getattr(app.state, "startup_warning", None),
