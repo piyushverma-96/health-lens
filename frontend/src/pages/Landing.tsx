@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useAuth } from "../hooks/useAuth";
+import { X, Sparkles, Send, CheckCircle2, ArrowRight, FileText, RefreshCw, Zap } from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -100,6 +101,49 @@ export const Landing: React.FC = () => {
   const [activeDayIdx, setActiveDayIdx] = useState<number>(3); // Wednesday
   const [activeBiomarkerIdx, setActiveBiomarkerIdx] = useState<number>(0); // Ferritin
   const [activeChatPromptIdx, setActiveChatPromptIdx] = useState<number>(0); // Chat prompt
+
+  // Pillar Working Live Demo Modals
+  const [activePillarModal, setActivePillarModal] = useState<"ocr" | "biomarkers" | "chat" | null>(null);
+  const [ocrScanStep, setOcrScanStep] = useState<"idle" | "scanning" | "completed">("idle");
+  const [biomarkerCategory, setBiomarkerCategory] = useState<"cmp" | "cbc" | "lipid" | "vitamins">("cmp");
+  const [demoChatMessages, setDemoChatMessages] = useState<Array<{ role: "user" | "assistant"; text: string }>>([
+    { role: "assistant", text: "Hello! I am your HealthLens Clinical AI Assistant. Ask me anything about your lab biomarkers, reference intervals, or health insights." }
+  ]);
+  const [demoChatInput, setDemoChatInput] = useState("");
+  const [demoChatTyping, setDemoChatTyping] = useState(false);
+
+  const runOcrSimulation = () => {
+    setOcrScanStep("scanning");
+    setTimeout(() => {
+      setOcrScanStep("completed");
+    }, 1100);
+  };
+
+  const handleSendDemoChat = (textToSend?: string) => {
+    const q = (textToSend || demoChatInput).trim();
+    if (!q || demoChatTyping) return;
+    
+    const updated = [...demoChatMessages, { role: "user" as const, text: q }];
+    setDemoChatMessages(updated);
+    setDemoChatInput("");
+    setDemoChatTyping(true);
+
+    setTimeout(() => {
+      let answer = "Based on clinical reference intervals, maintaining balanced nutrition with periodic check-ups is recommended.";
+      const lower = q.toLowerCase();
+      if (lower.includes("ferritin") || lower.includes("iron")) {
+        answer = "Ferritin reflects your body's iron stores. A reading of 10.8 g/dL is borderline low, indicating depleted storage before frank anemia develops. Consider iron-rich foods (spinach, lentils) paired with Vitamin C to maximize absorption.";
+      } else if (lower.includes("vitamin d") || lower.includes("vit d")) {
+        answer = "A Vitamin D reading of 19.5 ng/mL indicates deficiency (optimal range: 30-100 ng/mL). 15-20 minutes of sunlight and discussing a 2,000 IU daily D3 supplement with your physician can restore optimal levels.";
+      } else if (lower.includes("glucose") || lower.includes("sugar")) {
+        answer = "Fasting glucose at 92 mg/dL is within the clinically optimal reference range (70-99 mg/dL). This demonstrates healthy insulin sensitivity and metabolic stability.";
+      } else if (lower.includes("cholesterol") || lower.includes("lipid")) {
+        answer = "Total cholesterol of 215 mg/dL is borderline elevated (<200 mg/dL target). Focus on soluble fiber, omega-3s, and regular aerobic exercise for cardiovascular health.";
+      }
+      setDemoChatMessages([...updated, { role: "assistant" as const, text: answer }]);
+      setDemoChatTyping(false);
+    }, 600);
+  };
 
   const ocrDays = [
     { label: "S", val: 64, count: 8, confidence: 99.2 },
@@ -470,7 +514,7 @@ export const Landing: React.FC = () => {
           
           {/* Card 1: OCR Analysis */}
           <div 
-            onClick={() => handlePillarClick("upload")}
+            onClick={() => setActivePillarModal("ocr")}
             className="clinical-card group/card relative min-h-[520px] md:min-h-[560px] rounded-[2.2rem] overflow-hidden shadow-[0_15px_45px_rgba(0,0,0,0.03)] border border-[#EFECE6] bg-[#FFF] flex flex-col justify-end p-5 transition-all duration-300 hover:-translate-y-1 hover:border-[#D4AF37]/50 hover:shadow-[0_20px_50px_rgba(212,175,55,0.15)] cursor-pointer"
           >
             {/* Background Portrait */}
@@ -491,7 +535,7 @@ export const Landing: React.FC = () => {
               </div>
               <span className="px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/20 text-[10px] font-mono text-[#D4AF37] flex items-center gap-1.5 shadow-sm group-hover/card:bg-[#D4AF37] group-hover/card:text-black transition-all">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e] animate-pulse" />
-                <span>Tap to Open ↗</span>
+                <span>Tap to Scan ↗</span>
               </span>
             </div>
 
@@ -563,7 +607,7 @@ export const Landing: React.FC = () => {
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    handlePillarClick("upload");
+                    setActivePillarModal("ocr");
                   }}
                   className="w-full py-2 px-3 rounded-xl bg-[#D4AF37] hover:bg-[#C29D29] text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md transition-all active:scale-[0.98] cursor-pointer"
                 >
@@ -576,7 +620,7 @@ export const Landing: React.FC = () => {
 
           {/* Card 2: Biomarkers */}
           <div 
-            onClick={() => handlePillarClick("trends")}
+            onClick={() => setActivePillarModal("biomarkers")}
             className="clinical-card group/card relative min-h-[520px] md:min-h-[560px] rounded-[2.2rem] overflow-hidden shadow-[0_15px_45px_rgba(0,0,0,0.03)] border border-[#EFECE6] bg-[#FFF] flex flex-col justify-end p-5 transition-all duration-300 hover:-translate-y-1 hover:border-[#D4AF37]/50 hover:shadow-[0_20px_50px_rgba(212,175,55,0.15)] cursor-pointer"
           >
             {/* Background Portrait */}
@@ -597,7 +641,7 @@ export const Landing: React.FC = () => {
               </div>
               <span className="px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/20 text-[10px] font-mono text-[#D4AF37] flex items-center gap-1.5 shadow-sm group-hover/card:bg-[#D4AF37] group-hover/card:text-black transition-all">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e] animate-pulse" />
-                <span>Tap to Open ↗</span>
+                <span>Tap to Explore ↗</span>
               </span>
             </div>
 
@@ -684,7 +728,7 @@ export const Landing: React.FC = () => {
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handlePillarClick("trends");
+                          setActivePillarModal("biomarkers");
                         }}
                         className="w-full py-2 px-3 rounded-xl bg-[#D4AF37] hover:bg-[#C29D29] text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md transition-all active:scale-[0.98] cursor-pointer"
                       >
@@ -700,7 +744,7 @@ export const Landing: React.FC = () => {
 
           {/* Card 3: AI Chatbot */}
           <div 
-            onClick={() => handlePillarClick("chat")}
+            onClick={() => setActivePillarModal("chat")}
             className="clinical-card group/card relative min-h-[520px] md:min-h-[560px] rounded-[2.2rem] overflow-hidden shadow-[0_15px_45px_rgba(0,0,0,0.03)] border border-[#EFECE6] bg-[#FFF] flex flex-col justify-end p-5 transition-all duration-300 hover:-translate-y-1 hover:border-[#D4AF37]/50 hover:shadow-[0_20px_50px_rgba(212,175,55,0.15)] cursor-pointer"
           >
             {/* Background Portrait */}
@@ -721,7 +765,7 @@ export const Landing: React.FC = () => {
               </div>
               <span className="px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/20 text-[10px] font-mono text-[#D4AF37] flex items-center gap-1.5 shadow-sm group-hover/card:bg-[#D4AF37] group-hover/card:text-black transition-all">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e] animate-pulse" />
-                <span>Tap to Open ↗</span>
+                <span>Tap to Chat ↗</span>
               </span>
             </div>
 
@@ -775,7 +819,7 @@ export const Landing: React.FC = () => {
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    handlePillarClick("chat");
+                    setActivePillarModal("chat");
                   }}
                   className="w-full py-2 px-3 rounded-xl bg-[#D4AF37] hover:bg-[#C29D29] text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md transition-all active:scale-[0.98] cursor-pointer"
                 >
@@ -787,6 +831,390 @@ export const Landing: React.FC = () => {
           </div>
 
         </section>
+
+        {/* ================= LIVE WORKING PILLAR MODALS ================= */}
+        {activePillarModal && (
+          <div 
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-200"
+            onClick={() => { setActivePillarModal(null); setOcrScanStep("idle"); }}
+          >
+            <div 
+              className="relative w-full max-w-2xl bg-[#FCFAF6] border border-[#D4AF37]/40 rounded-[2rem] shadow-2xl overflow-hidden p-6 md:p-8 font-sans max-h-[90vh] overflow-y-auto text-left"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Close Button */}
+              <button 
+                onClick={() => { setActivePillarModal(null); setOcrScanStep("idle"); }}
+                className="absolute top-5 right-5 p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors cursor-pointer"
+                title="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              {/* MODAL 1: OCR SCANNER */}
+              {activePillarModal === "ocr" && (
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="px-2.5 py-0.5 rounded-full bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/30 text-[10px] font-mono font-bold">
+                      ⚡ PILLAR 01: LIVE OCR DEMO
+                    </span>
+                    <span className="text-[11px] text-gray-500 font-mono">Pypdf + Tesseract Engine</span>
+                  </div>
+                  <h3 className="text-2xl font-heading font-semibold text-[#1A1A1A]">
+                    OCR Document Analysis & Extraction
+                  </h3>
+                  <p className="text-xs text-gray-600 mt-1 mb-6 font-light">
+                    Experience how HealthLens scans raw PDF reports, detects biomarker tables, and normalizes clinical units.
+                  </p>
+
+                  <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-xs mb-4">
+                    <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-4">
+                      <div className="flex items-center gap-2.5">
+                        <FileText className="w-5 h-5 text-[#D4AF37]" />
+                        <div>
+                          <div className="text-xs font-bold text-gray-900">Comprehensive_Metabolic_Panel.pdf</div>
+                          <div className="text-[10px] text-gray-500 font-mono">Sample Clinical Lab Panel • Quest Diagnostics</div>
+                        </div>
+                      </div>
+                      <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold ${
+                        ocrScanStep === "completed" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-amber-50 text-amber-700 border border-amber-200"
+                      }`}>
+                        {ocrScanStep === "completed" ? "Extracted" : "Ready to Scan"}
+                      </span>
+                    </div>
+
+                    {ocrScanStep === "idle" && (
+                      <div className="py-8 text-center space-y-4">
+                        <div className="inline-flex p-3.5 rounded-full bg-[#FFFDF0] border border-[#D4AF37]/30 text-[#D4AF37] shadow-xs">
+                          <Sparkles className="w-7 h-7 animate-pulse" />
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-bold text-gray-900">Trigger Multi-Engine OCR Parsing</h4>
+                          <p className="text-xs text-gray-500 max-w-sm mx-auto mt-1 font-light">
+                            Extract tabular biomarkers, reference ranges, and abnormal indicators in one click.
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={runOcrSimulation}
+                          className="px-6 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#B8962D] text-white font-bold text-xs shadow-md transition-all active:scale-95 cursor-pointer inline-flex items-center gap-2"
+                        >
+                          <Zap className="w-4 h-4 fill-current" />
+                          <span>Run Instant OCR Scan</span>
+                        </button>
+                      </div>
+                    )}
+
+                    {ocrScanStep === "scanning" && (
+                      <div className="py-10 text-center space-y-3 relative">
+                        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent animate-pulse shadow-[0_0_12px_#D4AF37]" />
+                        <RefreshCw className="w-8 h-8 text-[#D4AF37] animate-spin mx-auto" />
+                        <div className="text-xs font-bold text-gray-800">Processing Document Layout & Extracting Text...</div>
+                        <div className="text-[10px] font-mono text-gray-500">Normalizing mg/dL, U/L, ng/mL against medical standard</div>
+                      </div>
+                    )}
+
+                    {ocrScanStep === "completed" && (
+                      <div className="space-y-4 animate-in fade-in duration-300">
+                        <div className="flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded-xl p-3">
+                          <div className="flex items-center gap-2">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                            <span className="text-xs font-bold text-emerald-900">Extraction Complete: 12 Biomarkers Identified</span>
+                          </div>
+                          <span className="text-[10px] font-mono font-bold text-emerald-700 bg-white px-2 py-0.5 rounded-md border border-emerald-200">
+                            99.8% Precision
+                          </span>
+                        </div>
+
+                        <div className="divide-y divide-gray-100 border border-gray-100 rounded-xl overflow-hidden text-xs">
+                          <div className="grid grid-cols-12 bg-gray-50 p-2 text-[10px] font-bold text-gray-500 uppercase tracking-wider font-mono">
+                            <div className="col-span-5">Biomarker</div>
+                            <div className="col-span-3">Result</div>
+                            <div className="col-span-2">Status</div>
+                            <div className="col-span-2 text-right">Reference</div>
+                          </div>
+                          {[
+                            { name: "Fasting Blood Glucose", val: "92 mg/dL", status: "Optimal", color: "text-emerald-700 bg-emerald-50", ref: "70 - 99" },
+                            { name: "Serum Creatinine", val: "0.9 mg/dL", status: "Normal", color: "text-emerald-700 bg-emerald-50", ref: "0.7 - 1.3" },
+                            { name: "Blood Urea Nitrogen (BUN)", val: "14 mg/dL", status: "Normal", color: "text-emerald-700 bg-emerald-50", ref: "7 - 20" },
+                            { name: "Alanine Aminotransferase (ALT)", val: "24 U/L", status: "Normal", color: "text-emerald-700 bg-emerald-50", ref: "7 - 56" },
+                            { name: "Serum Ferritin (Iron Stores)", val: "10.8 g/dl", status: "Low", color: "text-rose-700 bg-rose-50", ref: "12 - 150" },
+                            { name: "25-Hydroxy Vitamin D", val: "19.5 ng/mL", status: "Deficient", color: "text-amber-700 bg-amber-50", ref: "30 - 100" }
+                          ].map((row, i) => (
+                            <div key={i} className="grid grid-cols-12 p-2 items-center hover:bg-gray-50/60 transition-colors">
+                              <div className="col-span-5 font-semibold text-gray-900">{row.name}</div>
+                              <div className="col-span-3 font-mono font-bold text-gray-800">{row.val}</div>
+                              <div className="col-span-2">
+                                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full font-mono ${row.color}`}>
+                                  {row.status}
+                                </span>
+                              </div>
+                              <div className="col-span-2 text-right font-mono text-[10px] text-gray-500">{row.ref}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-2.5 pt-2">
+                    {ocrScanStep === "completed" && (
+                      <button
+                        type="button"
+                        onClick={runOcrSimulation}
+                        className="px-4 py-2.5 rounded-xl border border-gray-200 hover:bg-gray-50 text-xs font-semibold text-gray-700 transition-all cursor-pointer text-center"
+                      >
+                        🔄 Re-scan Demo
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => { setActivePillarModal(null); handlePillarClick("upload"); }}
+                      className="flex-1 py-2.5 px-4 rounded-xl bg-[#D4AF37] hover:bg-[#B8962D] text-white text-xs font-bold transition-all shadow-md cursor-pointer flex items-center justify-center gap-2"
+                    >
+                      <span>🚀 Launch Full Workspace & Upload PDF</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* MODAL 2: BIOMARKERS */}
+              {activePillarModal === "biomarkers" && (
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="px-2.5 py-0.5 rounded-full bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/30 text-[10px] font-mono font-bold">
+                      📊 PILLAR 02: BIOMARKER TRACKING
+                    </span>
+                    <span className="text-[11px] text-gray-500 font-mono">Interactive Ranges</span>
+                  </div>
+                  <h3 className="text-2xl font-heading font-semibold text-[#1A1A1A]">
+                    Biomarker Trends & Clinical Bounds
+                  </h3>
+                  <p className="text-xs text-gray-600 mt-1 mb-5 font-light">
+                    Select a panel below to test dynamic reference interval tracking and abnormal flag indicators.
+                  </p>
+
+                  {/* Category Pills */}
+                  <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
+                    {[
+                      { id: "cmp", label: "Metabolic (CMP)" },
+                      { id: "cbc", label: "Complete Blood (CBC)" },
+                      { id: "lipid", label: "Lipid Profile" },
+                      { id: "vitamins", label: "Vitamins & Minerals" }
+                    ].map((tab) => (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        onClick={() => setBiomarkerCategory(tab.id as any)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
+                          biomarkerCategory === tab.id
+                            ? "bg-[#D4AF37] text-white shadow-xs"
+                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Dynamic Biomarkers List for Selected Category */}
+                  <div className="space-y-3 mb-6">
+                    {biomarkerCategory === "cmp" && [
+                      { name: "Fasting Blood Glucose", val: "92 mg/dL", status: "Optimal", color: "text-emerald-700 bg-emerald-50", markerPos: "45%", ref: "70 - 99", note: "Healthy glycemic control and insulin sensitivity." },
+                      { name: "Serum Creatinine", val: "0.9 mg/dL", status: "Normal", color: "text-emerald-700 bg-emerald-50", markerPos: "50%", ref: "0.7 - 1.3", note: "Adequate renal filtration and kidney health." },
+                      { name: "ALT (Liver Enzyme)", val: "24 U/L", status: "Normal", color: "text-emerald-700 bg-emerald-50", markerPos: "35%", ref: "7 - 56", note: "Normal hepatic metabolic activity." }
+                    ].map((bm, i) => (
+                      <div key={i} className="p-3.5 rounded-2xl bg-white border border-gray-200 shadow-xs space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs font-bold text-gray-900">{bm.name}</span>
+                          <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${bm.color}`}>{bm.status}</span>
+                        </div>
+                        <div className="flex justify-between items-baseline">
+                          <span className="text-base font-mono font-bold text-gray-800">{bm.val}</span>
+                          <span className="text-[10px] font-mono text-gray-500">Ref: {bm.ref}</span>
+                        </div>
+                        <div className="h-1.5 w-full bg-gray-100 rounded-full relative overflow-hidden">
+                          <div className="absolute left-[20%] right-[20%] top-0 bottom-0 bg-emerald-100 rounded-full" />
+                          <div className="absolute top-0 bottom-0 w-2.5 bg-emerald-500 rounded-full" style={{ left: bm.markerPos }} />
+                        </div>
+                        <p className="text-[10.5px] text-gray-600 font-light">{bm.note}</p>
+                      </div>
+                    ))}
+
+                    {biomarkerCategory === "cbc" && [
+                      { name: "Hemoglobin", val: "14.2 g/dL", status: "Optimal", color: "text-emerald-700 bg-emerald-50", markerPos: "55%", ref: "13.8 - 17.2", note: "Healthy oxygen transport capacity." },
+                      { name: "Platelet Count", val: "250 x10^3/uL", status: "Normal", color: "text-emerald-700 bg-emerald-50", markerPos: "48%", ref: "150 - 450", note: "Adequate blood coagulation capability." }
+                    ].map((bm, i) => (
+                      <div key={i} className="p-3.5 rounded-2xl bg-white border border-gray-200 shadow-xs space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs font-bold text-gray-900">{bm.name}</span>
+                          <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${bm.color}`}>{bm.status}</span>
+                        </div>
+                        <div className="flex justify-between items-baseline">
+                          <span className="text-base font-mono font-bold text-gray-800">{bm.val}</span>
+                          <span className="text-[10px] font-mono text-gray-500">Ref: {bm.ref}</span>
+                        </div>
+                        <div className="h-1.5 w-full bg-gray-100 rounded-full relative overflow-hidden">
+                          <div className="absolute left-[20%] right-[20%] top-0 bottom-0 bg-emerald-100 rounded-full" />
+                          <div className="absolute top-0 bottom-0 w-2.5 bg-emerald-500 rounded-full" style={{ left: bm.markerPos }} />
+                        </div>
+                        <p className="text-[10.5px] text-gray-600 font-light">{bm.note}</p>
+                      </div>
+                    ))}
+
+                    {biomarkerCategory === "lipid" && [
+                      { name: "Total Cholesterol", val: "215 mg/dL", status: "Borderline High", color: "text-rose-700 bg-rose-50", markerPos: "75%", ref: "< 200", note: "Slight elevation. Dietary evaluation recommended." },
+                      { name: "HDL (Good) Cholesterol", val: "48 mg/dL", status: "Optimal", color: "text-emerald-700 bg-emerald-50", markerPos: "50%", ref: "> 40", note: "Protective cardiovascular profile." }
+                    ].map((bm, i) => (
+                      <div key={i} className="p-3.5 rounded-2xl bg-white border border-gray-200 shadow-xs space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs font-bold text-gray-900">{bm.name}</span>
+                          <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${bm.color}`}>{bm.status}</span>
+                        </div>
+                        <div className="flex justify-between items-baseline">
+                          <span className="text-base font-mono font-bold text-gray-800">{bm.val}</span>
+                          <span className="text-[10px] font-mono text-gray-500">Ref: {bm.ref}</span>
+                        </div>
+                        <div className="h-1.5 w-full bg-gray-100 rounded-full relative overflow-hidden">
+                          <div className="absolute left-[20%] right-[20%] top-0 bottom-0 bg-emerald-100 rounded-full" />
+                          <div className="absolute top-0 bottom-0 w-2.5 bg-rose-500 rounded-full" style={{ left: bm.markerPos }} />
+                        </div>
+                        <p className="text-[10.5px] text-gray-600 font-light">{bm.note}</p>
+                      </div>
+                    ))}
+
+                    {biomarkerCategory === "vitamins" && [
+                      { name: "Ferritin (Blood Iron)", val: "10.8 g/dl", status: "Borderline Low", color: "text-rose-700 bg-rose-50", markerPos: "15%", ref: "12 - 150", note: "Depleted iron reserves detected. May cause fatigue." },
+                      { name: "Vitamin D (25-OH)", val: "19.5 ng/mL", status: "Deficiency Alert", color: "text-amber-700 bg-amber-50", markerPos: "20%", ref: "30 - 100", note: "Sub-optimal level. Discuss D3 drops with doctor." }
+                    ].map((bm, i) => (
+                      <div key={i} className="p-3.5 rounded-2xl bg-white border border-gray-200 shadow-xs space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs font-bold text-gray-900">{bm.name}</span>
+                          <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${bm.color}`}>{bm.status}</span>
+                        </div>
+                        <div className="flex justify-between items-baseline">
+                          <span className="text-base font-mono font-bold text-gray-800">{bm.val}</span>
+                          <span className="text-[10px] font-mono text-gray-500">Ref: {bm.ref}</span>
+                        </div>
+                        <div className="h-1.5 w-full bg-gray-100 rounded-full relative overflow-hidden">
+                          <div className="absolute left-[20%] right-[20%] top-0 bottom-0 bg-emerald-100 rounded-full" />
+                          <div className="absolute top-0 bottom-0 w-2.5 bg-amber-500 rounded-full" style={{ left: bm.markerPos }} />
+                        </div>
+                        <p className="text-[10.5px] text-gray-600 font-light">{bm.note}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => { setActivePillarModal(null); handlePillarClick("trends"); }}
+                    className="w-full py-2.5 px-4 rounded-xl bg-[#D4AF37] hover:bg-[#B8962D] text-white text-xs font-bold transition-all shadow-md cursor-pointer flex items-center justify-center gap-2"
+                  >
+                    <span>📊 Open Full Biomarker Trends Workspace</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+
+              {/* MODAL 3: AI CHATBOT */}
+              {activePillarModal === "chat" && (
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="px-2.5 py-0.5 rounded-full bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/30 text-[10px] font-mono font-bold">
+                      💬 PILLAR 03: LIVE AI CHAT
+                    </span>
+                    <span className="text-[11px] text-gray-500 font-mono">Groq Clinical Engine</span>
+                  </div>
+                  <h3 className="text-2xl font-heading font-semibold text-[#1A1A1A]">
+                    HealthLens AI Health Coach
+                  </h3>
+                  <p className="text-xs text-gray-600 mt-1 mb-4 font-light">
+                    Ask real questions or tap the prompt pills below to test immediate clinical explanations.
+                  </p>
+
+                  {/* Suggestion Chips */}
+                  <div className="flex gap-1.5 mb-3 overflow-x-auto pb-1">
+                    {[
+                      "What causes low Ferritin?",
+                      "How to improve Vitamin D?",
+                      "Is 92 mg/dL glucose safe?",
+                      "Tips for high Cholesterol"
+                    ].map((prompt, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => handleSendDemoChat(prompt)}
+                        className="px-2.5 py-1 rounded-full bg-[#FFFDF0] hover:bg-[#D4AF37]/15 text-[10.5px] font-medium text-gray-800 border border-[#D4AF37]/30 transition-all shrink-0 cursor-pointer"
+                      >
+                        {prompt} ↗
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Messages Bubble Area */}
+                  <div className="h-60 rounded-2xl bg-white border border-gray-200 p-4 overflow-y-auto space-y-3 mb-3 text-xs">
+                    {demoChatMessages.map((msg, i) => (
+                      <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                        <div className={`max-w-[85%] p-3 rounded-2xl ${
+                          msg.role === "user"
+                            ? "bg-[#D4AF37] text-white font-medium rounded-tr-xs"
+                            : "bg-[#F9F8F5] border border-gray-200/80 text-gray-800 rounded-tl-xs font-light leading-relaxed"
+                        }`}>
+                          {msg.role === "assistant" && (
+                            <div className="text-[9px] font-bold uppercase tracking-wider text-[#D4AF37] font-mono mb-1">
+                              HealthLens AI
+                            </div>
+                          )}
+                          <div>{msg.text}</div>
+                        </div>
+                      </div>
+                    ))}
+                    {demoChatTyping && (
+                      <div className="flex justify-start">
+                        <div className="bg-[#F9F8F5] border border-gray-200/80 p-3 rounded-2xl text-[11px] text-gray-500 italic flex items-center gap-2">
+                          <Sparkles className="w-3.5 h-3.5 text-[#D4AF37] animate-spin" />
+                          HealthLens AI is analyzing clinical data...
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Chat Input Bar */}
+                  <form 
+                    onSubmit={(e) => { e.preventDefault(); handleSendDemoChat(); }}
+                    className="flex gap-2 mb-4"
+                  >
+                    <input
+                      type="text"
+                      value={demoChatInput}
+                      onChange={(e) => setDemoChatInput(e.target.value)}
+                      placeholder="Ask about your lab tests, diet, or symptoms..."
+                      className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-[#D4AF37] text-xs bg-white"
+                    />
+                    <button
+                      type="submit"
+                      disabled={demoChatTyping || !demoChatInput.trim()}
+                      className="px-4 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#B8962D] disabled:opacity-50 text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center gap-1"
+                    >
+                      <Send className="w-3.5 h-3.5" />
+                      <span>Send</span>
+                    </button>
+                  </form>
+
+                  <button
+                    type="button"
+                    onClick={() => { setActivePillarModal(null); handlePillarClick("chat"); }}
+                    className="w-full py-2.5 px-4 rounded-xl bg-gray-900 hover:bg-black text-white text-xs font-bold transition-all shadow-md cursor-pointer flex items-center justify-center gap-2"
+                  >
+                    <span>💬 Open Full Health Assistant Workspace</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Workflow / How It Works Section */}
         <section 
