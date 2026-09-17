@@ -148,32 +148,6 @@ export const Login: React.FC = () => {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow-sm border border-gray-100 rounded-2xl sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit}>
-          {/* Demo Credentials Card - For Hackathon Judges */}
-          {!isSignUp && (
-            <div className="mb-2 p-4 rounded-2xl bg-gradient-to-br from-[#FFFDF3] to-[#FFF8E1] border border-[#D4AF37]/30 shadow-sm">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="w-2 h-2 rounded-full bg-[#22c55e] animate-pulse" />
-                <span className="text-xs font-bold text-[#1A1A1A] tracking-wide">🎯 Demo Account — Try Instantly</span>
-              </div>
-              <div className="grid grid-cols-2 gap-2 mb-3">
-                <div className="bg-white/70 rounded-xl px-3 py-2 border border-[#D4AF37]/20">
-                  <div className="text-[9px] font-bold uppercase tracking-wider text-[#71797E] mb-0.5">Email</div>
-                  <div className="text-xs font-mono font-semibold text-[#1A1A1A] select-all">demo@healthlens.ai</div>
-                </div>
-                <div className="bg-white/70 rounded-xl px-3 py-2 border border-[#D4AF37]/20">
-                  <div className="text-[9px] font-bold uppercase tracking-wider text-[#71797E] mb-0.5">Password</div>
-                  <div className="text-xs font-mono font-semibold text-[#1A1A1A] select-all">Demo@12345</div>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => { setEmail("demo@healthlens.ai"); setPassword("Demo@12345"); }}
-                className="w-full py-2 rounded-xl text-xs font-bold text-white bg-[#D4AF37] hover:bg-[#B8962D] transition-all active:scale-[0.98] cursor-pointer"
-              >
-                ✨ Auto-fill Demo Credentials
-              </button>
-            </div>
-          )}
 
           {isMockMode && (
             <div className="p-3 rounded-lg text-xs bg-amber-50 text-amber-800 border border-amber-200">
