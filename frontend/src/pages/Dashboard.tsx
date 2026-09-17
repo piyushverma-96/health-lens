@@ -385,7 +385,7 @@ export const Dashboard: React.FC = () => {
         )}
 
         {/* Content Container (Scrollable) */}
-        <div className="flex-1 overflow-y-auto flex flex-col justify-between">
+        <div className={`flex-1 flex flex-col ${activeTab === "chat" ? "overflow-hidden min-h-0" : "overflow-y-auto justify-between"}`}>
           {activeTab === "chat" ? (
             /* For Chat/Health Assistant, occupy 100% space with no wrapper margins or paddings */
             <div className="flex-1 min-h-0 h-full relative" key={activeTab}>

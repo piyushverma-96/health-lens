@@ -706,7 +706,7 @@ export const HealthAssistant: React.FC<HealthAssistantProps> = ({
         </div>
 
         {/* Chat Messages Log OR Welcome View */}
-        <div className="flex-1 overflow-y-auto pt-6 pb-28 px-4 sm:px-6 space-y-6 bg-[#FAF9F6]/30">
+        <div className="flex-1 overflow-y-auto pt-6 pb-40 sm:pb-48 px-4 sm:px-6 space-y-6 bg-[#FAF9F6]/30">
           {chatError && (
             <div className="p-4 bg-red-50 border border-red-200 text-red-700 text-xs rounded-2xl flex items-start justify-between gap-3 max-w-2xl mx-auto shadow-xs">
               <div className="flex items-start gap-2.5">
@@ -828,7 +828,7 @@ export const HealthAssistant: React.FC<HealthAssistantProps> = ({
             </div>
           ) : (
             /* ================= WELCOME SCREEN ================= */
-            <div className="h-full flex flex-col justify-center max-w-3xl mx-auto py-8 px-2 space-y-8 animate-fade-in">
+            <div className="w-full max-w-3xl mx-auto py-6 px-2 space-y-8 animate-fade-in">
               <div className="text-center space-y-3">
                 <div className="w-14 h-14 rounded-2xl bg-gold-leaf/10 border border-gold-leaf/25 flex items-center justify-center mx-auto text-gold-leaf shadow-xs">
                   <HeartPulse className="h-7 w-7" />
@@ -901,10 +901,13 @@ export const HealthAssistant: React.FC<HealthAssistantProps> = ({
 
                 <ReportUploader onUploadSuccess={() => onNavigate("history")} />
               </div>
+
+              {/* Generous bottom clearance spacer so nothing gets hidden behind the floating chat bar */}
+              <div className="h-20 sm:h-24 w-full" aria-hidden="true" />
             </div>
           )}
 
-          <div ref={messagesEndRef} />
+          <div ref={messagesEndRef} className="h-4" />
         </div>
 
         {/* ================= FLOATING CHAT INPUT BAR ================= */}
