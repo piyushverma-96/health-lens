@@ -185,7 +185,7 @@ export const Landing: React.FC = () => {
     if (user) {
       navigate(`/dashboard?tab=${tab}`);
     } else {
-      navigate(`/login?tab=${tab}&auto=1`);
+      navigate(`/login?tab=${tab}`);
     }
   };
 
@@ -328,7 +328,7 @@ export const Landing: React.FC = () => {
     if (user) {
       navigate("/dashboard?tab=upload");
     } else {
-      navigate("/login?tab=upload&auto=1");
+      navigate("/login?mode=signup");
     }
   };
 
@@ -443,9 +443,10 @@ export const Landing: React.FC = () => {
 
                 <button 
                   onClick={() => navigate("/login?auto=1")}
-                  className="px-8 py-4 rounded-full bg-white hover:bg-slate-50 text-slate-800 text-sm font-bold tracking-wide border border-slate-200 shadow-xs hover:shadow-md transition-all active:scale-[0.98] cursor-pointer"
+                  className="px-8 py-4 rounded-full bg-white hover:bg-slate-50 text-slate-800 text-sm font-bold tracking-wide border border-slate-200 shadow-xs hover:shadow-md transition-all active:scale-[0.98] cursor-pointer flex items-center gap-2"
                 >
-                  <span>No credit card needed · 100% free</span>
+                  <Sparkles className="h-4 w-4 text-[#0D9488]" />
+                  <span>Try Demo Free</span>
                 </button>
               </div>
 
@@ -458,10 +459,12 @@ export const Landing: React.FC = () => {
               <div className="absolute inset-0 bg-radial from-teal-400/20 via-teal-300/5 to-transparent rounded-full blur-3xl pointer-events-none" />
               
               {/* Subtle Concentric Rings */}
-              <div className="absolute w-[440px] h-[440px] rounded-full border border-teal-500/15 pointer-events-none" />
-              <div className="absolute w-[560px] h-[560px] rounded-full border border-teal-500/10 pointer-events-none hidden sm:block" />
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="w-[320px] h-[320px] sm:w-[420px] sm:h-[420px] rounded-full border border-teal-500/10 animate-pulse" />
+                <div className="absolute w-[440px] h-[440px] sm:w-[560px] sm:h-[560px] rounded-full border border-teal-500/5" />
+              </div>
 
-              {/* Large Anatomical Medical Visualization (Three-Quarter Pose looking left) */}
+              {/* Anatomy Hero Illustration */}
               <div className="relative z-10 w-full max-w-[500px] sm:max-w-[560px] lg:max-w-[620px] flex items-center justify-center">
                 <img 
                   src="/hero_anatomy.png" 
@@ -472,7 +475,7 @@ export const Landing: React.FC = () => {
 
               {/* Floating Biomarker Card 1: Lipid Profile (Top Right, near shoulder/neck) */}
               <div 
-                onClick={() => navigate(user ? "/dashboard?tab=trends" : "/login?tab=trends&auto=1")}
+                onClick={() => navigate(user ? "/dashboard?tab=trends" : "/login?tab=trends")}
                 className="absolute top-6 sm:top-8 right-0 sm:right-2 z-20 p-4 rounded-2xl bg-white/95 border border-slate-200/90 shadow-[0_15px_35px_rgba(0,0,0,0.08)] backdrop-blur-md max-w-[210px] w-full transition-all duration-300 hover:scale-105 cursor-pointer animate-float-slow"
               >
                 <div className="flex items-center justify-between gap-1 mb-2">
@@ -493,7 +496,7 @@ export const Landing: React.FC = () => {
 
               {/* Floating Biomarker Card 2: Vitamin D (Bottom Left, near lower ribs/waist) */}
               <div 
-                onClick={() => navigate(user ? "/dashboard?tab=trends" : "/login?tab=trends&auto=1")}
+                onClick={() => navigate(user ? "/dashboard?tab=trends" : "/login?tab=trends")}
                 className="absolute bottom-6 sm:bottom-10 left-0 sm:left-4 z-20 p-4 rounded-2xl bg-white/95 border border-slate-200/90 shadow-[0_15px_35px_rgba(0,0,0,0.08)] backdrop-blur-md max-w-[210px] w-full transition-all duration-300 hover:scale-105 cursor-pointer animate-float-slower"
               >
                 <div className="flex items-center justify-between gap-1 mb-2">

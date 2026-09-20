@@ -17,7 +17,7 @@ export const Login: React.FC = () => {
   const [searchParams] = useSearchParams();
   const targetTab = searchParams.get("tab");
   const redirectTarget = targetTab ? `/dashboard?tab=${targetTab}` : "/dashboard";
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(searchParams.get("mode") === "signup");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   
@@ -37,6 +37,12 @@ export const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [infoMessage, setInfoMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (searchParams.get("mode") === "signup") {
+      setIsSignUp(true);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (searchParams.get("auto") === "1") {
@@ -180,7 +186,7 @@ export const Login: React.FC = () => {
           return;
         }
 
-        setInfoMessage("Account created successfully! You can now sign in below.");
+        setInfoMessage("Account created! Please verify your email inbox/spam to confirm your account before signing in, or disable 'Confirm email' in your Supabase Dashboard for direct access.");
         setIsSignUp(false);
       } else {
         const cleanEmail = email.trim().toLowerCase();
@@ -192,6 +198,9 @@ export const Login: React.FC = () => {
         if (signInError) {
           if (signInError.message?.toLowerCase().includes("invalid login credentials")) {
             throw new Error("Invalid email or password. Please verify the spelling of your email address or check your password.");
+          }
+          if (signInError.message?.toLowerCase().includes("email not confirmed")) {
+            throw new Error("Email confirm nahi hui hai! Kripya apna email inbox (aur spam folder) check karein aur verification link pe click karein. Agar aap direct login chahte hain to Supabase dashboard mein 'Confirm email' disable kar dein.");
           }
           throw signInError;
         }
@@ -462,21 +471,32 @@ export const Login: React.FC = () => {
                 </div>
               )}
 
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-950 text-white text-xs font-bold uppercase tracking-wider shadow-md hover:shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 mt-2"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin text-white" />
-                    <span>Processing...</span>
-                  </>
-                ) : (
-                  <span>{isSignUp ? "Create Health Profile" : "Sign in"}</span>
-                )}
-              </button>
+              {/* Submit Buttons Row: Main Action + Side-by-Side Demo */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-950 text-white text-xs font-bold uppercase tracking-wider shadow-md hover:shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin text-white" />
+                      <span>Processing...</span>
+                    </>
+                  ) : (
+                    <span>{isSignUp ? "Create Health Profile" : "Sign in"}</span>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleDemoClick}
+                  className="w-full py-3 px-4 rounded-xl bg-teal-50 hover:bg-teal-100/90 text-teal-800 border border-teal-200/90 text-xs font-bold uppercase tracking-wider shadow-xs hover:shadow-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Sparkles className="h-4 w-4 text-teal-600" />
+                  <span>Try Demo Free</span>
+                </button>
+              </div>
 
             </form>
 
