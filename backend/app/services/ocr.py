@@ -151,31 +151,33 @@ def validate_file_signature(file_path: str) -> bool:
 # ---------------------------------------------------------------------------
 
 def _preprocess_image(img: Image.Image) -> Image.Image:
-    """Apply clinical-document pre-processing for better OCR accuracy."""
+    """Apply fast, high-accuracy clinical-document pre-processing for OCR."""
+    from PIL import ImageOps
     img = img.convert("L")
 
     width, height = img.size
-    min_side = min(width, height)
-    if min_side < 2000:
-        factor = max(2, int(2000 / min_side))
-        img = img.resize((width * factor, height * factor), Image.Resampling.LANCZOS)
+    # Optimize dimensions: maintain crisp resolution without excessive CPU overhead
+    if width < 1000:
+        factor = 1400.0 / width
+        img = img.resize((int(width * factor), int(height * factor)), Image.Resampling.BILINEAR)
+    elif width > 2400:
+        factor = 2000.0 / width
+        img = img.resize((int(width * factor), int(height * factor)), Image.Resampling.BILINEAR)
 
-    blur_radius = 31
-    img_blur = img.filter(ImageFilter.GaussianBlur(blur_radius))
-    arr_orig = np.array(img, dtype=np.float32)
-    arr_blur = np.array(img_blur, dtype=np.float32)
-    binary_arr = np.where(arr_orig < (arr_blur - 12.0), 0, 255).astype(np.uint8)
-    img = Image.fromarray(binary_arr)
-
-    img = img.filter(ImageFilter.MedianFilter(size=3))
-    img = img.filter(ImageFilter.SHARPEN)
+    # Fast autocontrast for crisp text edges without slow multi-pass blur filters
+    img = ImageOps.autocontrast(img, cutoff=1)
     return img
 
 
 def _correct_orientation(img: Image.Image) -> Image.Image:
-    """Use Tesseract OSD to detect and correct image rotation."""
+    """Fast orientation detection using a small thumbnail to prevent lag."""
     try:
-        osd = pytesseract.image_to_osd(img)
+        width, height = img.size
+        max_dim = max(width, height)
+        scale = 600.0 / max_dim
+        thumb = img.resize((int(width * scale), int(height * scale)), Image.Resampling.BILINEAR)
+        
+        osd = pytesseract.image_to_osd(thumb)
         rotation = 0
         for line in osd.split("\n"):
             if "Rotate:" in line:
@@ -190,7 +192,7 @@ def _correct_orientation(img: Image.Image) -> Image.Image:
 
 
 def extract_text_from_image(image_path: str) -> str:
-    """Extract text from a single image file using Tesseract OCR."""
+    """Extract text from a single image file using optimized Tesseract OCR."""
     if not TESSERACT_AVAILABLE:
         raise RuntimeError(
             "Tesseract OCR is not installed or not found on this system.\n"
@@ -203,7 +205,7 @@ def extract_text_from_image(image_path: str) -> str:
         img = Image.open(image_path)
         img = _correct_orientation(img)
         img = _preprocess_image(img)
-        custom_config = r"--oem 3 --psm 3"
+        custom_config = r"--oem 3 --psm 4"
         text = pytesseract.image_to_string(img, config=custom_config)
         logger.debug(f"OCR extracted {len(text)} characters from '{image_path}'")
         return text

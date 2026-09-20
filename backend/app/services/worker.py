@@ -92,9 +92,14 @@ def process_report_background_job(report_id: str, file_path: str, mime_type: str
                     "recorded_at": str(row["recorded_at"])
                 })
 
-        # 6. Retrieve relevant medical facts for each extracted biomarker name via RAG
+        # 6. Retrieve relevant medical facts for key/abnormal biomarkers via RAG (fast targeted lookup)
         medical_facts = []
-        for biomarker in analysis.biomarkers:
+        abnormal_biomarkers = [
+            b for b in analysis.biomarkers 
+            if evaluate_biomarker_status(b.value, b.reference_range) != "normal"
+        ]
+        target_biomarkers = abnormal_biomarkers[:4] if abnormal_biomarkers else analysis.biomarkers[:3]
+        for biomarker in target_biomarkers:
             results = similarity_search_knowledge(biomarker.name, limit=1)
             if results:
                 medical_facts.extend(results)

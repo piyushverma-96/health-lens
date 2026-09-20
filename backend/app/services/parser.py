@@ -22,9 +22,9 @@ class ExtractedBiomarker(BaseModel):
 class ExtractedReportData(BaseModel):
     patient_name: Optional[str] = Field(None, description="The name of the patient as written on the report. If not found or anonymous, leave as None.")
     biomarkers: List[ExtractedBiomarker] = Field(description="List of all extracted biomarkers from the report")
-    summary: str = Field(description="A 2-3 sentence overview of the health report findings")
-    abnormal_findings: List[str] = Field(description="Short descriptions of metrics that are out of bounds")
-    explanation: str = Field(description="A patient-friendly explanation of findings, including potential educational explanations for high or low values. Must begin with the disclaimer: 'This is educational information and not a medical diagnosis.'")
+    summary: Optional[str] = Field(None, description="Optional brief summary")
+    abnormal_findings: Optional[List[str]] = Field(default_factory=list, description="Optional abnormal findings")
+    explanation: Optional[str] = Field(None, description="Optional explanation")
 
 class GeneratedHealthReport(BaseModel):
     summary: str = Field(description="A clean, concise 2-3 sentence executive summary of the health report findings.")
@@ -192,41 +192,27 @@ def parse_report_text(raw_text: str) -> ExtractedReportData:
     a structured Pydantic schema of extracted biomarkers.
     """
     prompt = f"""
-    Analyze the following extracted text from a clinical lab report.
-    Identify the patient's name if written on the report (e.g. 'Patient Name: John Doe', 'Name: Mary') and set the 'patient_name' field.
-    Identify all biomarker names, values, units, and reference ranges.
+    Analyze the following clinical lab report text.
+    Extract the patient's name (if present) and all numerical biomarker measurements with units and reference ranges.
     
-    Normalize the biomarker names if possible to standard terms like:
-    - Hemoglobin
-    - RBC
-    - WBC
-    - Platelets
-    - LDL
-    - HDL
-    - Triglycerides
-    - Vitamin D
-    - TSH
-    - Creatinine
-    - HbA1c
+    Common biomarkers: Hemoglobin, RBC, WBC, Platelets, Total Cholesterol, LDL, HDL, Triglycerides, Vitamin D, TSH, HbA1c, Creatinine, Fasting Glucose, ALT, AST, Bilirubin, Uric Acid, etc.
     
-    Here is the report text:
+    Report text:
     ---
     {raw_text}
     ---
-    
-    Return the structured data matching the schema.
     """
 
     try:
-        # Call Groq utilizing configured model (e.g. openai/gpt-oss-120b)
+        # Fast structured extraction with Groq
         extracted_data = client.chat.completions.create(
             model=settings.GROQ_MODEL,
             response_model=ExtractedReportData,
             messages=[
-                {"role": "system", "content": "You are an expert clinical laboratory data extraction system."},
+                {"role": "system", "content": "You are a fast, highly accurate clinical laboratory biomarker extraction parser. Extract patient name and biomarkers list directly into the schema."},
                 {"role": "user", "content": prompt}
             ],
-            temperature=0.1 # Low temperature for factual extraction
+            temperature=0.0
         )
         
         # Normalize names and validate status indicators/units
@@ -357,27 +343,44 @@ def generate_personalized_report(
     """
 
     try:
-        response = client.chat.completions.create(
+        # Fast direct Markdown generation without JSON wrapper bottleneck
+        raw_completion = groq_client.chat.completions.create(
             model=settings.GROQ_MODEL,
-            response_model=GeneratedHealthReport,
             messages=[
-                {"role": "system", "content": "You are a world-class health intelligence report generator."},
+                {"role": "system", "content": "You are a world-class clinical laboratory AI that generates concise, beautifully structured patient health reports in clean Markdown."},
                 {"role": "user", "content": prompt}
             ],
-            temperature=0.3
+            temperature=0.2,
+            max_tokens=1800
         )
         
+        report_markdown = raw_completion.choices[0].message.content or ""
+        
+        # Extract executive summary directly from section 1
+        summary = "Processed laboratory biomarkers successfully."
+        summary_match = re.search(r"(?:##\s*(?:1\.?\s*)?Executive Summary\s*\n+)(.*?)(?=\n+## |\Z)", report_markdown, re.DOTALL | re.IGNORECASE)
+        if summary_match and len(summary_match.group(1).strip()) > 15:
+            summary = summary_match.group(1).strip()
+        else:
+            # Fallback to first non-heading paragraph
+            non_heading = [l.strip() for l in report_markdown.split("\n") if l.strip() and not l.startswith("#")]
+            if non_heading:
+                summary = non_heading[0]
+
         # Enforce exact phrasing for Section 3 (Health Trend Analysis) if no history exists
-        if not historical_data and response.explanation:
-            pattern = r"(## Health Trend Analysis\s*\n+)(.*?)(?=\n+## |\Z)"
+        if not historical_data and report_markdown:
+            pattern = r"(##\s*(?:3\.?\s*)?Health Trend Analysis\s*\n+)(.*?)(?=\n+## |\Z)"
             replacement = r"\1This is your first report. Future reports will be used to identify health trends.\n\n"
-            response.explanation = re.sub(pattern, replacement, response.explanation, flags=re.IGNORECASE | re.DOTALL)
+            report_markdown = re.sub(pattern, replacement, report_markdown, flags=re.IGNORECASE | re.DOTALL)
             
-        return response
+        return GeneratedHealthReport(
+            summary=summary,
+            explanation=report_markdown
+        )
     except Exception as e:
         logger.error(f"Personalized report generation failed: {str(e)}")
         # Fallback to direct mapping
         return GeneratedHealthReport(
             summary="Processed biomarkers successfully.",
-            explanation="Failed to generate personalized layout. " + str(e)
+            explanation="Failed to generate personalized layout: " + str(e)
         )

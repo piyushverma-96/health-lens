@@ -176,7 +176,7 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
 
       // Step 2 & 3: Trigger OCR & Groq parsing
       setPipelineStep(2);
-      await new Promise((r) => setTimeout(r, 600));
+      await new Promise((r) => setTimeout(r, 150));
       setPipelineStep(3);
 
       await api.post("/reports", {
@@ -188,14 +188,13 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
 
       // Step 4 & 5: Insights & Saving
       setPipelineStep(4);
-      await new Promise((r) => setTimeout(r, 700));
+      await new Promise((r) => setTimeout(r, 150));
       setPipelineStep(5);
-      await new Promise((r) => setTimeout(r, 600));
 
       setSuccess(`Report "${demo.title}" parsed successfully!`);
       setTimeout(() => {
         onUploadSuccess();
-      }, 1000);
+      }, 400);
     } catch (err: any) {
       setError(err.message || "Failed to analyze demo report.");
       console.error("Demo analysis error:", err);
@@ -236,9 +235,9 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
         throw new Error(`Storage upload failed: ${storageError.message}`);
       }
 
-      // Step 2: Trigger backend OCR
+      // Step 2 & 3: Trigger backend OCR
       setPipelineStep(2);
-      await new Promise((r) => setTimeout(r, 600));
+      await new Promise((r) => setTimeout(r, 150));
       setPipelineStep(3);
 
       await api.post("/reports", {
@@ -250,9 +249,8 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
 
       // Step 4 & 5: Structuring & Saving
       setPipelineStep(4);
-      await new Promise((r) => setTimeout(r, 800));
+      await new Promise((r) => setTimeout(r, 150));
       setPipelineStep(5);
-      await new Promise((r) => setTimeout(r, 600));
 
       setSuccess("Report uploaded successfully! Added to your health intelligence timeline.");
       setFile(null);
@@ -260,7 +258,7 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
       
       setTimeout(() => {
         onUploadSuccess();
-      }, 1000);
+      }, 400);
     } catch (err: any) {
       setError(err.message || "Failed to process and upload document.");
       console.error("Upload error details:", err);
