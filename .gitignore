@@ -56,3 +56,9 @@ lerna-debug.log*
 *.sln
 *.sw?
 Thumbs.db
+
+# Presentation & pitch deck files
+*.pptx
+generate_pitch_deck.py
+preview_slides.html
+presentation/

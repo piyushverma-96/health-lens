@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useAuth } from "../hooks/useAuth";
 import { useBiomarkers } from "../hooks/useBiomarkers";
 import type { Biomarker } from "../hooks/useBiomarkers";
 import { 
@@ -16,6 +17,7 @@ import {
 } from "lucide-react";
 
 export const HealthMemory: React.FC = () => {
+  const { profile } = useAuth();
   const { useGetBiomarkerHistory, useUpdateBiomarker, useDeleteBiomarker, useCreateBiomarker } = useBiomarkers();
   const { data: biomarkers, isLoading, error } = useGetBiomarkerHistory();
   
@@ -212,36 +214,58 @@ export const HealthMemory: React.FC = () => {
 
   return (
     <div className="bg-white rounded-3xl border border-gold-border shadow-md p-6 lg:p-8 space-y-6 fade-in">
-      <div className="border-b border-gray-150 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-4">
         <div>
-          <h2 className="text-xl font-heading font-bold text-clinical-slate flex items-center gap-2">
-            <Database className="h-5.5 w-5.5 text-gold-leaf" />
-            <span>Health Memory Control Panel</span>
+          <h2 className="text-xl font-heading font-bold text-slate-900 flex items-center gap-2">
+            <Database className="h-5 w-5 text-teal-600" />
+            <span>Health Memory & Clinical Records</span>
           </h2>
-          <p className="text-xs text-gray-500 mt-1">
-            Review, correct, or remove individual biomarker records. Adjusting values dynamically updates charts and chat context.
+          <p className="text-xs text-slate-500 mt-1">
+            Persistent biomarkers and clinical facts that anchor your AI Health Assistant and trend timelines.
           </p>
         </div>
 
         {/* Search Input */}
         <div className="relative max-w-xs w-full">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
           <input
             type="text"
             placeholder="Search biomarkers by name..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-gold-leaf focus:border-gold-leaf text-clinical-slate bg-white font-medium"
+            className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 text-slate-900 bg-white font-medium"
           />
         </div>
       </div>
 
+      {/* Health Facts Memory Timeline Chips */}
+      <div className="p-4 rounded-2xl bg-teal-50/60 border border-teal-100 space-y-2">
+        <span className="text-[10px] font-mono uppercase tracking-wider text-teal-800 font-bold block">
+          Persistent Health Memory Context
+        </span>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="px-3 py-1 bg-white rounded-full border border-teal-200 text-xs font-semibold text-teal-900">
+            👤 Patient: {profile?.first_name || "User"} {profile?.last_name || ""}
+          </span>
+          <span className="px-3 py-1 bg-white rounded-full border border-teal-200 text-xs font-semibold text-teal-900">
+            🩸 Blood: {profile?.blood_group || "B+"}
+          </span>
+          <span className="px-3 py-1 bg-white rounded-full border border-teal-200 text-xs font-semibold text-teal-900">
+            🧬 {profile?.intake_responses?.family_history?.join(", ") || "No major hereditary flags"}
+          </span>
+          <span className="px-3 py-1 bg-white rounded-full border border-teal-200 text-xs font-semibold text-teal-900">
+            🥗 {profile?.intake_responses?.diet || "Balanced"} Diet
+          </span>
+        </div>
+      </div>
+
       {/* Database Warning Banner */}
-      <div className="border-l-2 border-amber-500/80 pl-4 flex items-start gap-3 my-4">
+      <div className="border-l-2 border-amber-500 pl-4 flex items-start gap-3 my-4">
         <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
-        <div className="text-[11px] text-gray-500 leading-relaxed">
-          <span className="font-bold text-clinical-slate mr-1.5">Database Memory Warning:</span>
-          The records below represent your isolated clinical history. Updates will affect trend analyses and the chatbot coach. Only change records if they were extracted incorrectly from the scans.
+        <div className="text-xs text-slate-600 leading-relaxed">
+          <span className="font-bold text-slate-900 mr-1">Database Sovereignty:</span>
+          Records below represent your isolated clinical history. Updates dynamically affect trends and AI consultation context.
         </div>
       </div>
 

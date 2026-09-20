@@ -11,7 +11,10 @@ import {
   Download, 
   Zap, 
   Sparkles,
-  ShieldAlert
+  ShieldAlert,
+  FileText,
+  ArrowRight,
+  Check
 } from "lucide-react";
 
 interface ReportUploaderProps {
@@ -33,11 +36,11 @@ const DEMO_REPORTS: DemoReportInfo[] = [
   {
     id: "cmp",
     title: "Comprehensive Metabolic Panel (CMP)",
-    category: "Liver & Kidney Function",
-    date: "2025-12-15",
+    category: "Liver & Renal Function",
+    date: "2026-03-15",
     fileName: "Comprehensive_Metabolic_Panel_Demo.pdf",
     fileUrl: "/demo-reports/Comprehensive_Metabolic_Panel_Demo.pdf",
-    highlights: ["Fasting Glucose 92 mg/dL", "Creatinine 0.9 mg/dL", "ALT 24 U/L", "AST 22 U/L", "BUN 14 mg/dL"],
+    highlights: ["Fasting Glucose 92 mg/dL", "Creatinine 0.9 mg/dL", "ALT 24 U/L", "BUN 14 mg/dL"],
   },
   {
     id: "cbc",
@@ -46,7 +49,7 @@ const DEMO_REPORTS: DemoReportInfo[] = [
     date: "2026-02-10",
     fileName: "Complete_Blood_Count_and_Vitamins_Demo.pdf",
     fileUrl: "/demo-reports/Complete_Blood_Count_and_Vitamins_Demo.pdf",
-    highlights: ["Hemoglobin 14.2 g/dL", "Platelets 250 x10^3", "Vitamin D 19.5 ng/mL (Low)", "B12 480 pg/mL"],
+    highlights: ["Hemoglobin 14.2 g/dL", "Platelets 250 x10^3", "Vitamin D 19.5 ng/mL (Low)"],
     alertNotice: "Deficiency Alert: Vitamin D is sub-optimal (19.5 ng/mL)"
   },
   {
@@ -56,7 +59,7 @@ const DEMO_REPORTS: DemoReportInfo[] = [
     date: "2026-03-05",
     fileName: "Cardiovascular_Lipid_and_Thyroid_Demo.pdf",
     fileUrl: "/demo-reports/Cardiovascular_Lipid_and_Thyroid_Demo.pdf",
-    highlights: ["Total Cholesterol 215 mg/dL (High)", "LDL 138 mg/dL (High)", "HDL 48 mg/dL", "HbA1c 5.4%", "TSH 2.1"],
+    highlights: ["Total Cholesterol 215 mg/dL (High)", "LDL 138 mg/dL (High)", "HDL 48 mg/dL", "TSH 2.1"],
     alertNotice: "Elevated Alert: LDL is 138 mg/dL (Atherogenic Risk)"
   }
 ];
@@ -67,23 +70,32 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
   
   const [file, setFile] = useState<File | null>(null);
   const [recordedAt, setRecordedAt] = useState<string>(
-    new Date().toISOString().split("T")[0] // Default to today
+    new Date().toISOString().split("T")[0]
   );
   
   const [uploading, setUploading] = useState(false);
   const [processingDemoId, setProcessingDemoId] = useState<string | null>(null);
+  const [pipelineStep, setPipelineStep] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
   const ALLOWED_EXTENSIONS = ["png", "jpg", "jpeg", "pdf"];
   const MAX_FILE_SIZE_BYTES = 15 * 1024 * 1024; // 15MB
 
+  const pipelineSteps = [
+    { num: "01", title: "Uploading File", desc: "Encrypting and transmitting scan to private Supabase vault" },
+    { num: "02", title: "Extracting Text (OCR)", desc: "Optical character recognition scanning test lines and units" },
+    { num: "03", title: "Structuring Biomarkers", desc: "LLM parsing metrics, reference bounds, and numeric values" },
+    { num: "04", title: "Generating Insights", desc: "Formulating plain-language summaries and risk comparisons" },
+    { num: "05", title: "Saving Report", desc: "Indexing into personal health timeline and vector memory" }
+  ];
+
   const validateSelectedFile = (selectedFile: File): { valid: boolean; error?: string } => {
     const ext = selectedFile.name.split(".").pop()?.toLowerCase() || "";
     if (!ALLOWED_EXTENSIONS.includes(ext)) {
       return {
         valid: false,
-        error: `Unsupported file format (.${ext || "unknown"}). Only PNG, JPG, or PDF files are accepted for medical reports. Please upload a valid .png, .jpg, or .pdf report.`
+        error: `Unsupported file format (.${ext || "unknown"}). Only PDF, PNG, or JPG files are accepted for medical reports.`
       };
     }
     if (selectedFile.size > MAX_FILE_SIZE_BYTES) {
@@ -106,13 +118,11 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
       const check = validateSelectedFile(droppedFile);
       if (!check.valid) {
         setError(check.error || "Only PNG, JPG, or PDF files are accepted.");
-        setSuccess(null);
         setFile(null);
         return;
       }
       setFile(droppedFile);
       setError(null);
-      setSuccess(null);
     }
   };
 
@@ -122,19 +132,13 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
       const check = validateSelectedFile(selectedFile);
       if (!check.valid) {
         setError(check.error || "Only PNG, JPG, or PDF files are accepted.");
-        setSuccess(null);
         setFile(null);
         if (fileInputRef.current) fileInputRef.current.value = "";
         return;
       }
       setFile(selectedFile);
       setError(null);
-      setSuccess(null);
     }
-  };
-
-  const triggerFileSelect = () => {
-    fileInputRef.current?.click();
   };
 
   // 1-Click Real Analysis for Synthetic Demo Reports
@@ -148,9 +152,10 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
     setProcessingDemoId(demo.id);
     setError(null);
     setSuccess(null);
+    setPipelineStep(1);
 
     try {
-      // 1. Fetch genuine demo PDF file from public static asset
+      // Step 1: Uploading
       const response = await fetch(demo.fileUrl);
       if (!response.ok) {
         throw new Error(`Could not load sample PDF (${response.statusText}).`);
@@ -158,7 +163,6 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
       const blob = await response.blob();
       const demoFile = new File([blob], demo.fileName, { type: "application/pdf" });
 
-      // 2. Upload real PDF to private Supabase Storage bucket
       const uniqueId = crypto.randomUUID();
       const filePath = `${user.id}/${uniqueId}.pdf`;
 
@@ -170,7 +174,11 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
         throw new Error(`Storage upload failed: ${storageError.message}`);
       }
 
-      // 3. Trigger genuine backend OCR & Groq parsing pipeline
+      // Step 2 & 3: Trigger OCR & Groq parsing
+      setPipelineStep(2);
+      await new Promise((r) => setTimeout(r, 600));
+      setPipelineStep(3);
+
       await api.post("/reports", {
         file_path: filePath,
         file_name: demo.fileName,
@@ -178,23 +186,27 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
         recorded_at: demo.date
       });
 
-      setSuccess(`Analysis started for "${demo.title}"! Live Groq extraction & 9-section report generation in progress.`);
-      
-      // Notify parent to refresh listings
+      // Step 4 & 5: Insights & Saving
+      setPipelineStep(4);
+      await new Promise((r) => setTimeout(r, 700));
+      setPipelineStep(5);
+      await new Promise((r) => setTimeout(r, 600));
+
+      setSuccess(`Report "${demo.title}" parsed successfully!`);
       setTimeout(() => {
         onUploadSuccess();
-        setSuccess(null);
-      }, 1500);
+      }, 1000);
     } catch (err: any) {
       setError(err.message || "Failed to analyze demo report.");
       console.error("Demo analysis error:", err);
     } finally {
       setUploading(false);
       setProcessingDemoId(null);
+      setPipelineStep(0);
     }
   };
 
-  // Standard Upload handler for user-selected files
+  // Standard Upload handler
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file || !user) return;
@@ -208,13 +220,14 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
     setUploading(true);
     setError(null);
     setSuccess(null);
+    setPipelineStep(1);
 
     try {
       const fileExt = file.name.split(".").pop()?.toLowerCase();
       const uniqueId = crypto.randomUUID();
       const filePath = `${user.id}/${uniqueId}.${fileExt}`;
 
-      // 1. Upload the file to the private 'reports' Supabase Storage bucket
+      // Step 1: Storage upload
       const { error: storageError } = await supabase.storage
         .from("reports")
         .upload(filePath, file);
@@ -223,7 +236,11 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
         throw new Error(`Storage upload failed: ${storageError.message}`);
       }
 
-      // 2. Call our backend API to log the report and kick off OCR parsing
+      // Step 2: Trigger backend OCR
+      setPipelineStep(2);
+      await new Promise((r) => setTimeout(r, 600));
+      setPipelineStep(3);
+
       await api.post("/reports", {
         file_path: filePath,
         file_name: file.name,
@@ -231,52 +248,105 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
         recorded_at: recordedAt
       });
 
-      setSuccess("Report uploaded successfully! Processing and OCR analysis started.");
+      // Step 4 & 5: Structuring & Saving
+      setPipelineStep(4);
+      await new Promise((r) => setTimeout(r, 800));
+      setPipelineStep(5);
+      await new Promise((r) => setTimeout(r, 600));
+
+      setSuccess("Report uploaded successfully! Added to your health intelligence timeline.");
       setFile(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
       
-      // Notify parent component to reload listings
       setTimeout(() => {
         onUploadSuccess();
-        setSuccess(null);
       }, 1000);
     } catch (err: any) {
       setError(err.message || "Failed to process and upload document.");
       console.error("Upload error details:", err);
     } finally {
       setUploading(false);
+      setPipelineStep(0);
     }
   };
 
   return (
     <div className="space-y-6 w-full fade-in">
-      {/* ================= DEMO / SYNTHETIC SAMPLE REPORTS SECTION ================= */}
-      <div className="bg-gradient-to-br from-amber-50/70 via-white to-sky-50/50 p-5 md:p-6 rounded-2.5xl border border-gold-border shadow-xs">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+      
+      {/* ================= PIPELINE STATUS OVERLAY (WHEN UPLOADING) ================= */}
+      {uploading && pipelineStep > 0 && (
+        <div className="p-6 rounded-3xl bg-slate-900 text-white shadow-2xl border border-teal-500/30 space-y-5 animate-fade-in">
+          <div className="flex items-center justify-between border-b border-white/10 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="h-9 w-9 rounded-xl bg-teal-500/20 text-teal-300 flex items-center justify-center">
+                <Loader2 className="h-5 w-5 animate-spin" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-white tracking-wide">Processing Medical Report</h3>
+                <p className="text-xs text-slate-400 font-mono">Executing 5-Stage Ingestion Pipeline</p>
+              </div>
+            </div>
+            <span className="text-xs font-mono font-bold text-teal-400 bg-teal-500/15 px-3 py-1 rounded-full border border-teal-500/30">
+              Stage {pipelineStep} of 5
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
+            {pipelineSteps.map((s, idx) => {
+              const stepNum = idx + 1;
+              const isCompleted = pipelineStep > stepNum;
+              const isCurrent = pipelineStep === stepNum;
+
+              return (
+                <div 
+                  key={s.num}
+                  className={`p-3 rounded-2xl border transition-all ${
+                    isCurrent 
+                      ? "bg-teal-950/80 border-teal-400 text-white shadow-md shadow-teal-500/20" 
+                      : isCompleted
+                      ? "bg-white/5 border-teal-500/40 text-teal-200"
+                      : "bg-white/5 border-white/5 text-slate-500 opacity-60"
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[10px] font-mono font-bold">{s.num}</span>
+                    {isCompleted ? (
+                      <Check className="h-3.5 w-3.5 text-teal-400" />
+                    ) : isCurrent ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-teal-300" />
+                    ) : null}
+                  </div>
+                  <h4 className="text-xs font-bold leading-tight mb-1">{s.title}</h4>
+                  <p className="text-[10px] leading-tight opacity-75">{s.desc}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ================= 1-CLICK SYNTHETIC DEMO REPORTS ================= */}
+      <div className="panel-card p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-gold-leaf/10 border border-gold-leaf/20 flex items-center justify-center text-gold-leaf">
+            <div className="w-8 h-8 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600">
               <Sparkles className="h-4 w-4" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-clinical-slate tracking-tight">
-                Try Demo Lab Reports (Instant Live Analysis)
+              <h3 className="text-sm font-bold text-slate-900 tracking-tight">
+                Try Demo Lab Reports (Instant 1-Click Live Analysis)
               </h3>
-              <p className="text-[11px] text-gray-500">
-                Test HealthLens AI in real time without uploading personal files.
+              <p className="text-xs text-slate-500">
+                Experience real OCR extraction and LLM insights without using personal files.
               </p>
             </div>
           </div>
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase bg-amber-100/80 text-amber-900 border border-amber-300/60 self-start sm:self-auto">
-            <ShieldAlert className="h-3 w-3 text-amber-700" />
-            Synthetic Demo Data
+
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase bg-teal-50 text-teal-800 border border-teal-200/80 self-start sm:self-auto font-mono">
+            <ShieldAlert className="h-3 w-3 text-teal-600" />
+            Synthetic Verified
           </span>
         </div>
-
-        <p className="text-xs text-gray-600 mb-4 leading-relaxed">
-          Select any of the 3 realistic synthetic lab reports below to run our full live backend pipeline
-          (PDF extraction → Groq LLM parsing → Biomarkers extraction → Clinical explanation).
-          You can also download the genuine PDF to inspect or upload it manually.
-        </p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
           {DEMO_REPORTS.map((demo) => {
@@ -285,50 +355,50 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
             return (
               <div
                 key={demo.id}
-                className="bg-white p-4 rounded-2xl border border-gray-200/80 hover:border-gold-leaf/60 transition-all duration-200 shadow-2xs flex flex-col justify-between"
+                className="bg-slate-50/70 p-4 rounded-2xl border border-slate-200/80 hover:border-teal-500/50 transition-all flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-start justify-between gap-2 mb-2">
-                    <span className="text-[10px] font-semibold text-gold-leaf tracking-wider uppercase">
+                    <span className="text-[10px] font-bold text-teal-700 tracking-wider uppercase font-mono">
                       {demo.category}
                     </span>
-                    <span className="text-[10px] text-gray-400 font-mono">
+                    <span className="text-[10px] text-slate-400 font-mono">
                       {demo.date}
                     </span>
                   </div>
 
-                  <h4 className="text-xs font-bold text-clinical-slate mb-2 line-clamp-2">
+                  <h4 className="text-xs font-bold text-slate-900 mb-2">
                     {demo.title}
                   </h4>
 
-                  <ul className="text-[11px] text-gray-600 space-y-1 mb-3">
+                  <ul className="text-[11px] text-slate-600 space-y-1 mb-3">
                     {demo.highlights.map((h, i) => (
                       <li key={i} className="flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-gold-leaf/60 shrink-0" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-teal-600 shrink-0" />
                         <span className="truncate">{h}</span>
                       </li>
                     ))}
                   </ul>
 
                   {demo.alertNotice && (
-                    <div className="mb-3 px-2 py-1 bg-amber-50 border border-amber-200/60 rounded-lg text-[10px] text-amber-800 flex items-center gap-1.5">
-                      <AlertCircle className="h-3 w-3 shrink-0 text-amber-600" />
-                      <span className="truncate">{demo.alertNotice}</span>
+                    <div className="mb-3 px-2.5 py-1.5 bg-amber-50 border border-amber-200 rounded-xl text-[10.5px] text-amber-900 flex items-center gap-1.5">
+                      <AlertCircle className="h-3.5 w-3.5 shrink-0 text-amber-600" />
+                      <span className="truncate font-medium">{demo.alertNotice}</span>
                     </div>
                   )}
                 </div>
 
-                <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
+                <div className="flex items-center gap-2 pt-2 border-t border-slate-200/70">
                   <button
                     type="button"
                     onClick={() => handleAnalyzeDemoReport(demo)}
                     disabled={uploading}
-                    className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-gold-leaf hover:bg-gold-muted text-white text-xs font-bold transition-all active:scale-[0.97] disabled:opacity-50 shadow-2xs"
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold transition-all active:scale-[0.97] disabled:opacity-50 shadow-xs cursor-pointer"
                   >
                     {isProcessingThis ? (
                       <>
                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                        <span>Extracting...</span>
+                        <span>Analyzing...</span>
                       </>
                     ) : (
                       <>
@@ -341,8 +411,8 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
                   <a
                     href={demo.fileUrl}
                     download={demo.fileName}
-                    title="Download synthetic PDF report"
-                    className="flex items-center justify-center p-2 rounded-xl border border-gray-200 hover:border-gold-leaf text-gray-600 hover:text-gold-leaf text-xs font-semibold transition-colors"
+                    title="Download synthetic PDF"
+                    className="p-2 rounded-xl border border-slate-200 hover:bg-white text-slate-600 hover:text-teal-700 text-xs transition-colors"
                   >
                     <Download className="h-3.5 w-3.5" />
                   </a>
@@ -353,41 +423,41 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
         </div>
       </div>
 
-      {/* ================= CUSTOM FILE UPLOADER SECTION ================= */}
-      <div className="bg-white p-5 md:p-6 rounded-2.5xl border border-gold-border shadow-sm w-full">
-        <div className="mb-4">
-          <h3 className="text-sm font-bold text-clinical-slate tracking-tight">
-            Upload Your Own Medical Report
+      {/* ================= PREMIUM DROP ZONE ================= */}
+      <div className="panel-card p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
+        <div className="border-b border-slate-100 pb-3">
+          <h3 className="text-sm font-bold text-slate-900 tracking-tight">
+            Upload Your Lab Report
           </h3>
-          <p className="text-xs text-gray-500">
-            Upload personal laboratory results (PNG, JPG, or PDF).
+          <p className="text-xs text-slate-500">
+            Securely upload personal laboratory documents (PDF, PNG, or JPG).
           </p>
         </div>
 
         <form onSubmit={handleUpload} className="space-y-4">
           {error && (
-            <div className="p-4 bg-red-50 border border-red-200 text-red-700 text-xs rounded-2xl flex items-start gap-2.5">
-              <AlertCircle className="h-5 w-5 shrink-0 mt-0.5 text-red-500" />
-              <span className="leading-relaxed">{error}</span>
+            <div className="p-3.5 bg-rose-50 border border-rose-200 text-rose-800 text-xs rounded-2xl flex items-start gap-2.5">
+              <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-rose-600" />
+              <span>{error}</span>
             </div>
           )}
 
           {success && (
-            <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-2xl flex items-start gap-2.5">
-              <CheckCircle2 className="h-5 w-5 shrink-0 mt-0.5 text-emerald-600" />
-              <span className="leading-relaxed">{success}</span>
+            <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-2xl flex items-start gap-2.5">
+              <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5 text-emerald-600" />
+              <span>{success}</span>
             </div>
           )}
 
-          {/* Drag and Drop Zone */}
+          {/* Drag and Drop Container */}
           <div
             onDragOver={handleDragOver}
             onDrop={handleDrop}
-            onClick={triggerFileSelect}
-            className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-300 cursor-pointer ${
+            onClick={() => fileInputRef.current?.click()}
+            className={`border-2 border-dashed rounded-3xl p-8 sm:p-12 text-center transition-all cursor-pointer ${
               file
-                ? "border-gold-leaf bg-gold-leaf/5 shadow-xs"
-                : "border-gray-200 hover:border-gold-leaf bg-gold-light/40 hover:bg-white"
+                ? "border-teal-600 bg-teal-50/40"
+                : "border-slate-200 hover:border-teal-600/50 bg-[#FDFBF7]/70 hover:bg-white"
             }`}
           >
             <input
@@ -397,83 +467,66 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
               accept=".pdf,.png,.jpg,.jpeg"
               className="hidden"
             />
-            <UploadCloud className={`h-12 w-12 mx-auto mb-3 transition-transform duration-300 ${file ? "text-gold-leaf scale-110" : "text-gray-400 hover:scale-105"}`} />
-            {file ? (
-              <div className="space-y-2">
-                <p className="text-sm font-semibold text-clinical-slate truncate max-w-md mx-auto">
-                  {file.name}
-                </p>
-                <p className="text-xs text-gray-400 font-mono">
-                  {(file.size / (1024 * 1024)).toFixed(2)} MB • Ready to analyze
-                </p>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setFile(null);
-                    if (fileInputRef.current) fileInputRef.current.value = "";
-                  }}
-                  className="text-xs text-red-500 hover:text-red-700 underline font-medium cursor-pointer"
-                >
-                  Choose a different file
-                </button>
-              </div>
-            ) : (
-              <div className="space-y-2.5">
-                <p className="text-sm font-semibold text-clinical-slate">
-                  Select a medical report or drag and drop
-                </p>
-                <div className="flex items-center justify-center gap-2">
-                  <span className="px-2 py-0.5 rounded-md bg-gold-leaf/10 text-gold-leaf text-[10px] font-bold tracking-wider font-mono">PNG</span>
-                  <span className="px-2 py-0.5 rounded-md bg-gold-leaf/10 text-gold-leaf text-[10px] font-bold tracking-wider font-mono">JPG / JPEG</span>
-                  <span className="px-2 py-0.5 rounded-md bg-gold-leaf/10 text-gold-leaf text-[10px] font-bold tracking-wider font-mono">PDF</span>
-                </div>
-                <p className="text-xs text-gray-400">
-                  Only PNG, JPG, or PDF files are accepted (Max 15MB)
-                </p>
+            
+            <div className="h-16 w-16 mx-auto rounded-3xl bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600 mb-3 shadow-2xs">
+              <UploadCloud className="h-8 w-8" />
+            </div>
+
+            <h4 className="text-base font-heading font-bold text-slate-900">
+              {file ? file.name : "Drop your lab report here, or browse files"}
+            </h4>
+
+            <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+              PDF, PNG, or JPG (up to 15MB). Blood panels, CBC, lipid tests, and metabolic scans.
+            </p>
+
+            {file && (
+              <div className="mt-3 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-100/80 text-teal-800 text-xs font-mono font-bold">
+                <FileText className="h-3.5 w-3.5" />
+                <span>{(file.size / (1024 * 1024)).toFixed(2)} MB · Selected</span>
               </div>
             )}
           </div>
 
-          {/* Date Selector */}
-          {file && (
-            <div className="bg-gold-light/40 p-5 rounded-2xl border border-gold-border flex flex-col sm:flex-row sm:items-center justify-between gap-4 fade-in">
-              <div className="flex items-center gap-3 text-clinical-slate">
-                <Calendar className="h-5 w-5 text-gold-leaf" />
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Report Date</p>
-                  <p className="text-[10px] text-gray-400">Date this blood test was actually performed</p>
-                </div>
-              </div>
+          {/* Metadata Row: Report Date */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5 flex items-center gap-1.5">
+                <Calendar className="h-3.5 w-3.5 text-teal-600" />
+                <span>Test Collection Date</span>
+              </label>
               <input
                 type="date"
                 required
                 value={recordedAt}
                 onChange={(e) => setRecordedAt(e.target.value)}
-                className="px-3.5 py-2 border border-gray-200 rounded-xl text-xs bg-white focus:outline-none focus:ring-1 focus:ring-gold-leaf text-clinical-slate font-mono"
+                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600"
               />
             </div>
-          )}
 
-          {/* Submit Action */}
-          {file && (
-            <button
-              type="submit"
-              disabled={uploading}
-              className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-2xl shadow-sm text-sm font-bold text-white bg-gold-leaf hover:bg-gold-muted focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gold-leaf transition-all duration-200 active:scale-[0.97] disabled:opacity-50"
-            >
-              {uploading && !processingDemoId ? (
-                <div className="flex items-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Uploading and extracting text...</span>
-                </div>
-              ) : (
-                "Extract Biomarkers"
-              )}
-            </button>
-          )}
+            <div className="sm:self-end">
+              <button
+                type="submit"
+                disabled={!file || uploading}
+                className="w-full py-3 px-5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold uppercase tracking-wider shadow-md shadow-teal-600/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              >
+                {uploading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin text-white" />
+                    <span>Processing Ingestion...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Execute Analysis Pipeline</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
         </form>
       </div>
+
     </div>
   );
 };

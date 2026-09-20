@@ -11,13 +11,20 @@ import {
   ResponsiveContainer,
   ReferenceArea
 } from "recharts";
-import { Activity, TrendingUp, TrendingDown, Loader2 } from "lucide-react";
+import { 
+  Activity, 
+  TrendingUp, 
+  TrendingDown, 
+  Loader2, 
+  Sparkles
+} from "lucide-react";
 
 export const BiomarkerTrends: React.FC = () => {
   const { useGetBiomarkerSummary, useGetBiomarkerHistory } = useBiomarkers();
   const { data: summary, isLoading: summaryLoading } = useGetBiomarkerSummary();
   
   const [selectedBiomarker, setSelectedBiomarker] = useState<string>("");
+  const [timeRange, setTimeRange] = useState<"3M" | "6M" | "1Y">("6M");
   const { data: history, isLoading: historyLoading } = useGetBiomarkerHistory(
     selectedBiomarker || undefined
   );
@@ -59,7 +66,7 @@ export const BiomarkerTrends: React.FC = () => {
   };
 
   const getTrendAnalysis = (data: Biomarker[]) => {
-    if (data.length < 2) return null;
+    if (!data || data.length < 2) return null;
     const first = data[0].value;
     const last = data[data.length - 1].value;
     const diff = last - first;
@@ -69,40 +76,54 @@ export const BiomarkerTrends: React.FC = () => {
       return {
         direction: "up",
         label: `Increased by ${pct}%`,
-        color: "text-gold-leaf bg-gold-leaf/10 border border-gold-leaf/20",
+        color: "text-amber-400 bg-amber-500/10 border-amber-500/20",
         icon: TrendingUp
       };
     } else if (diff < 0) {
       return {
         direction: "down",
         label: `Decreased by ${Math.abs(parseFloat(pct))}%`,
-        color: "text-gray-500 bg-gray-50 border border-gray-150",
+        color: "text-teal-400 bg-teal-500/10 border-teal-500/20",
         icon: TrendingDown
       };
     }
     return {
       direction: "stable",
       label: "Stable (no change)",
-      color: "text-gray-400 bg-gold-light/40 border border-gold-border",
+      color: "text-slate-400 bg-white/5 border-white/10",
       icon: Activity
     };
   };
 
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "high":
+        return <span className="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-rose-500/20 text-rose-300 border border-rose-500/30">High</span>;
+      case "low":
+        return <span className="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-amber-500/20 text-amber-300 border border-amber-500/30">Low</span>;
+      case "normal":
+      default:
+        return <span className="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-teal-500/20 text-teal-300 border border-teal-500/30">Normal</span>;
+    }
+  };
+
   if (summaryLoading) {
     return (
-      <div className="flex flex-col justify-center items-center py-24">
-        <Loader2 className="h-10 w-10 text-gold-leaf animate-spin mb-4" />
-        <p className="text-sm text-gray-400 font-semibold font-heading uppercase tracking-widest">Loading biomarker analytics...</p>
+      <div className="flex flex-col justify-center items-center py-24 space-y-3">
+        <Loader2 className="h-10 w-10 text-teal-600 animate-spin" />
+        <p className="text-xs font-mono uppercase tracking-widest text-slate-500 font-bold">
+          Loading biomarker analytics...
+        </p>
       </div>
     );
   }
 
   if (!summary || summary.length === 0) {
     return (
-      <div className="bg-white p-12 rounded-3xl border border-gold-border text-center shadow-md max-w-lg mx-auto mt-6">
-        <Activity className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-        <h3 className="text-xl font-heading font-bold text-clinical-slate mb-2">No Biomarkers Logged</h3>
-        <p className="text-sm text-gray-500 max-w-sm mx-auto mb-6 leading-relaxed">
+      <div className="panel-card p-12 rounded-3xl border border-slate-200/80 text-center shadow-sm max-w-lg mx-auto mt-6 space-y-3">
+        <Activity className="h-12 w-12 text-slate-300 mx-auto" />
+        <h3 className="text-base font-bold text-slate-800">No Biomarkers Logged</h3>
+        <p className="text-xs text-slate-500 leading-relaxed max-w-sm mx-auto">
           Once your uploaded clinical scans are successfully processed, your biomarker measurements will show up here as trend graphs.
         </p>
       </div>
@@ -115,98 +136,136 @@ export const BiomarkerTrends: React.FC = () => {
   const TrendIcon = trend?.icon;
 
   return (
-    <div className="space-y-6 fade-in">
-      {/* Top Filter Selection Row */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gold-border/60">
-        <div>
-          <h3 className="text-[10px] font-mono uppercase tracking-wider text-gray-400">Select Health Metric</h3>
-          <p className="text-xs text-gray-500 mt-1">Plot historical measurements and track changes over time</p>
-        </div>
-        <select
-          value={selectedBiomarker}
-          onChange={(e) => setSelectedBiomarker(e.target.value)}
-          className="px-4 py-2.5 border border-gray-200 rounded-xl text-xs font-bold uppercase tracking-wider text-clinical-slate bg-white focus:outline-none focus:ring-1 focus:ring-gold-leaf cursor-pointer transition-colors hover:border-gold-leaf"
-        >
-          {summary.map((b) => (
-            <option key={b.name} value={b.name}>
-              {b.name} ({b.unit})
-            </option>
-          ))}
-        </select>
-      </div>
+    <div className="space-y-6 animate-fade-in">
+      
+      {/* ================= DARK CLINICAL TREND CARD (MATCHING REFERENCE UI BOTTOM-CENTER) ================= */}
+      <div className="clinical-dark-card rounded-3xl p-6 sm:p-8 text-white shadow-2xl border border-white/10 space-y-6 relative overflow-hidden">
+        
+        {/* Glowing Background Radial */}
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
 
-      {/* Main Trend Card */}
-      {selectedBiomarker && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Chart Frame - 9 cols */}
-          <div className="lg:col-span-9 bg-white p-6 rounded-3xl border border-gold-border shadow-sm space-y-4 min-w-0">
-            <div className="flex items-center justify-between border-b border-gold-border pb-4">
+        {/* Top Header Row with Time Range Selectors */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10 relative z-10">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-teal-400 animate-pulse" />
+              <h2 className="text-xl font-heading font-bold text-white tracking-tight">Biomarker Trends</h2>
+            </div>
+            <p className="text-xs text-slate-400 font-mono mt-0.5">
+              Track your key health indicators over time
+            </p>
+          </div>
+
+          {/* Time Filters matching reference image: 3M | 6M | 1Y */}
+          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-white/5 border border-white/10 self-start sm:self-auto">
+            {(["3M", "6M", "1Y"] as const).map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => setTimeRange(t)}
+                className={`px-3 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                  timeRange === t 
+                    ? "bg-teal-500 text-slate-950 shadow-xs" 
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Metric Selector Pills matching reference design */}
+        <div className="flex flex-wrap items-center gap-2 relative z-10">
+          {summary.map((b) => {
+            const isSelected = b.name === selectedBiomarker;
+            return (
+              <button
+                key={b.name}
+                type="button"
+                onClick={() => setSelectedBiomarker(b.name)}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-mono font-semibold transition-all cursor-pointer flex items-center gap-2 ${
+                  isSelected
+                    ? "bg-teal-500 text-slate-950 font-bold shadow-md shadow-teal-500/20"
+                    : "bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10"
+                }`}
+              >
+                <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? "bg-slate-950" : "bg-teal-400"}`} />
+                <span>{b.name}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Main Chart and Latest Values Split Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start relative z-10">
+          
+          {/* Recharts Canvas (8 cols) */}
+          <div className="lg:col-span-8 p-4 rounded-2xl bg-white/[0.03] border border-white/10 min-w-0">
+            <div className="flex items-center justify-between pb-3 border-b border-white/5 mb-3">
               <div>
-                <h2 className="text-lg font-heading font-bold text-clinical-slate">{selectedBiomarker} Timeline</h2>
-                <p className="text-xs text-gray-400 font-mono mt-1">Normal Range: {activeBiomarker?.reference_range || "Not specified"}</p>
+                <h3 className="text-sm font-bold text-white">{selectedBiomarker} Progression</h3>
+                <span className="text-[11px] text-slate-400 font-mono">
+                  Ref Bounds: {activeBiomarker?.reference_range || "Established target interval"}
+                </span>
               </div>
-              
-              {/* Latest Value badge */}
+
               {activeBiomarker && (
                 <div className="text-right">
-                   <p className="text-2xl font-bold font-mono text-gold-leaf">{activeBiomarker.value}</p>
-                   <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">{activeBiomarker.unit} (Latest)</p>
+                  <span className="text-xl font-bold font-mono text-teal-300">{activeBiomarker.value}</span>
+                  <span className="text-xs text-slate-400 ml-1 font-mono">{activeBiomarker.unit}</span>
                 </div>
               )}
             </div>
 
-            {/* Recharts Canvas */}
             {historyLoading ? (
-              <div className="h-64 flex justify-center items-center">
-                <Loader2 className="h-6 w-6 text-gold-leaf animate-spin" />
+              <div className="h-64 flex items-center justify-center">
+                <Loader2 className="h-6 w-6 text-teal-400 animate-spin" />
               </div>
             ) : history && history.length > 0 ? (
-              <div className="h-64 sm:h-80 w-full pt-4 min-w-0">
+              <div className="h-64 sm:h-72 w-full min-w-0">
                 {mounted && (
-                  <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
-                    <LineChart data={history} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#EFECE6" />
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={history} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255, 255, 255, 0.08)" />
                       <XAxis 
                         dataKey="recorded_at" 
                         tickLine={false} 
                         axisLine={false} 
-                        tick={{ fontSize: 9, fill: "#9ca3af", fontFamily: "Geist Mono" }}
-                        dy={10}
+                        tick={{ fontSize: 10, fill: "#94A3B8", fontFamily: "Geist Mono" }}
+                        dy={8}
                       />
                       <YAxis 
                         tickLine={false} 
                         axisLine={false} 
-                        tick={{ fontSize: 9, fill: "#9ca3af", fontFamily: "Geist Mono" }} 
+                        tick={{ fontSize: 10, fill: "#94A3B8", fontFamily: "Geist Mono" }} 
                         domain={['auto', 'auto']}
                       />
                       <Tooltip 
                         contentStyle={{ 
-                          background: "#FFFFFF", 
-                          border: "1px solid #EFECE6", 
-                          borderRadius: "16px", 
+                          background: "#0A1128", 
+                          border: "1px solid rgba(255, 255, 255, 0.15)", 
+                          borderRadius: "14px", 
                           fontSize: "11px",
                           fontFamily: "Geist Mono",
-                          color: "#4A5568"
+                          color: "#F8FAFC"
                         }}
                       />
-                      
-                      {/* Shaded Reference Area indicating normal ranges */}
                       {bounds && (
                         <ReferenceArea 
                           y1={bounds.min} 
                           y2={bounds.max} 
-                          fill="rgba(212, 175, 55, 0.05)" 
+                          fill="rgba(13, 148, 136, 0.1)" 
                           ifOverflow="extendDomain" 
                         />
                       )}
-
                       <Line 
                         type="monotone" 
                         dataKey="value" 
-                        stroke="#D4AF37" 
-                        strokeWidth={2.5} 
-                        dot={{ r: 5, stroke: "#FFFFFF", strokeWidth: 2, fill: "#D4AF37" }}
-                        activeDot={{ r: 7, strokeWidth: 0 }}
+                        stroke="#14B8A6" 
+                        strokeWidth={3} 
+                        dot={{ r: 5, stroke: "#0B132B", strokeWidth: 2, fill: "#14B8A6" }}
+                        activeDot={{ r: 7, strokeWidth: 0, fill: "#2DD4BF" }}
                         name={selectedBiomarker}
                       />
                     </LineChart>
@@ -214,72 +273,66 @@ export const BiomarkerTrends: React.FC = () => {
                 )}
               </div>
             ) : (
-              <div className="h-64 flex items-center justify-center text-xs text-gray-500">
-                No historical records found for this biomarker.
+              <div className="h-64 flex items-center justify-center text-xs text-slate-400">
+                No historical readings recorded yet.
               </div>
             )}
           </div>
 
-          {/* Quick Metrics Insights - 3 cols, borderless and clean */}
-          <div className="lg:col-span-3 space-y-6 pl-2">
-            {/* Trend Summary Widget */}
-            {trend && (
-              <div className="space-y-2">
-                <h4 className="text-[10px] font-mono uppercase tracking-wider text-gray-400">Trend Direction</h4>
-                <div className="flex items-center gap-3.5">
-                  <div className={`p-2.5 rounded-xl ${trend.color} shrink-0`}>
-                    {TrendIcon && <TrendIcon className="h-5 w-5" />}
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-clinical-slate">{trend.label}</p>
-                    <p className="text-[9px] text-gray-400 mt-0.5 font-mono">Over {history?.length} readings</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Quick Context Card */}
-            {activeBiomarker && (
-              <div className="space-y-3 pt-4 border-t border-gold-border/60">
-                <h4 className="text-[10px] font-mono uppercase tracking-wider text-gray-400">Reference Info</h4>
-                <div className="space-y-2 text-xs">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-400">Status</span>
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-semibold capitalize ${
-                      activeBiomarker.status === "normal"
-                        ? "bg-emerald-50 text-emerald-700 border border-emerald-150"
-                        : activeBiomarker.status === "high"
-                          ? "bg-red-50 text-red-700 border border-red-150"
-                          : "bg-blue-50 text-blue-700 border border-blue-150"
-                    }`}>
-                      {activeBiomarker.status}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-400">Range</span>
-                    <span className="font-mono font-bold text-clinical-slate">{activeBiomarker.reference_range || "N/A"}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-400">Recorded</span>
-                    <span className="font-mono text-clinical-slate">{activeBiomarker.recorded_at}</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Educational alert box */}
-            <div className="border-l-2 border-gold-leaf/60 pl-4 space-y-2 pt-1">
-              <div className="font-semibold text-gold-leaf flex items-center gap-1.5 font-heading text-xs">
-                <Activity className="h-4 w-4" />
-                About Shaded Area
-              </div>
-              <p className="leading-relaxed text-[11px] text-gray-500">
-                The gold shaded region in the graph represents the standard normal bounds for this metric. Values outside this area will trigger status warning highlights.
-              </p>
+          {/* Right Panel: Latest Values matching reference design (4 cols) */}
+          <div className="lg:col-span-4 p-5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-4">
+            <div className="flex items-center justify-between border-b border-white/10 pb-2">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300 font-mono">
+                Latest Values
+              </h4>
+              <span className="text-[10px] text-teal-400 font-mono">Current Status</span>
             </div>
+
+            <div className="space-y-3">
+              {summary.slice(0, 5).map((b) => (
+                <div 
+                  key={b.name}
+                  onClick={() => setSelectedBiomarker(b.name)}
+                  className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
+                    b.name === selectedBiomarker
+                      ? "bg-teal-500/10 border-teal-500/40"
+                      : "bg-white/5 border-white/5 hover:border-white/20"
+                  }`}
+                >
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-white truncate">{b.name}</p>
+                    <p className="text-[11px] font-mono text-slate-400 mt-0.5">
+                      {b.value} {b.unit}
+                    </p>
+                  </div>
+                  {getStatusBadge(b.status)}
+                </div>
+              ))}
+            </div>
+
+            {trend && (
+              <div className={`p-3 rounded-xl border text-xs font-mono flex items-center gap-2.5 ${trend.color}`}>
+                {TrendIcon && <TrendIcon className="h-4 w-4 shrink-0" />}
+                <span>{trend.label} across recorded tests</span>
+              </div>
+            )}
           </div>
+
         </div>
-      )}
+
+        {/* Bottom Insight Narrative Strip matching reference design */}
+        <div className="p-4 rounded-2xl bg-teal-950/60 border border-teal-500/30 flex items-start gap-3 relative z-10">
+          <Sparkles className="h-4 w-4 text-teal-400 shrink-0 mt-0.5" />
+          <p className="text-xs text-teal-100 leading-relaxed font-sans">
+            <span className="font-bold text-teal-300">HealthLens Clinical Narrative:</span>{" "}
+            {activeBiomarker 
+              ? `Your ${activeBiomarker.name} is currently ${activeBiomarker.value} ${activeBiomarker.unit} (${activeBiomarker.status}). Reference intervals suggest maintaining regular clinical evaluation.`
+              : "Track how your biological markers evolve to evaluate lifestyle interventions."}
+          </p>
+        </div>
+
+      </div>
+
     </div>
   );
 };

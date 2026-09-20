@@ -566,24 +566,24 @@ export const HealthAssistant: React.FC<HealthAssistantProps> = ({
 
   const suggestions = [
     {
-      title: "Review Cholesterol",
-      desc: "Analyze my LDL trends and cardiovascular profile.",
-      prompt: "Can you review my latest cholesterol levels and summarize my cardiovascular health markers?"
+      title: "Explain High LDL",
+      desc: "Understand what my LDL reading means.",
+      prompt: "What does my high LDL mean, and should I be concerned about cardiovascular risk?"
     },
     {
-      title: "Vitamin D Insights",
-      desc: "How can I improve my Vitamin D levels?",
-      prompt: "What are my Vitamin D trend levels, and what diet/lifestyle actions support them?"
+      title: "Improve Vitamin D",
+      desc: "Practical steps to optimize Vitamin D levels.",
+      prompt: "How can I improve my Vitamin D levels based on my recent blood test?"
     },
     {
-      title: "Explain HbA1c",
-      desc: "Check my blood sugar and metabolic markers.",
-      prompt: "What is my HbA1c baseline and what do these blood sugar values imply?"
+      title: "Thyroid Check",
+      desc: "Evaluate TSH and endocrine balance.",
+      prompt: "Is my thyroid level normal based on my latest lab reports?"
     },
     {
-      title: "Health Tracker Plan",
-      desc: "Create a biomarker monitoring schedule.",
-      prompt: "I want to set up a personalized biomarker tracking schedule. What markers should I monitor regularly?"
+      title: "Doctor Questions",
+      desc: "Actionable questions for next physician visit.",
+      prompt: "What should I ask my doctor about my recent abnormal biomarker findings?"
     }
   ];
 
