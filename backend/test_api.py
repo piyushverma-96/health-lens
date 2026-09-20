@@ -9,8 +9,20 @@ from app.main import app
 from app.core.security import get_current_user
 from app.core.config import settings
 
-# Override the authentication dependency to return a static mock user
-MOCK_USER_ID = "f5b9406f-616f-437b-83ef-6f8b8fae089e"
+from app.core.db import init_db_pool, get_db_cursor
+
+# Initialize DB connection pool
+init_db_pool()
+
+# Fetch an existing valid user_id from profiles or use default
+try:
+    with get_db_cursor() as cur:
+        cur.execute("SELECT id FROM public.profiles LIMIT 1;")
+        row = cur.fetchone()
+        MOCK_USER_ID = str(row["id"]) if row else "03a7cbcd-fb53-4e08-8217-c6a11b48c182"
+except Exception:
+    MOCK_USER_ID = "03a7cbcd-fb53-4e08-8217-c6a11b48c182"
+
 app.dependency_overrides[get_current_user] = lambda: MOCK_USER_ID
 
 client = TestClient(app)
