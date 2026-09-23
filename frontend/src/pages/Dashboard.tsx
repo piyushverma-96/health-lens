@@ -55,11 +55,11 @@ export const Dashboard: React.FC = () => {
   const [chatPreload, setChatPreload] = useState<string | null>(null);
   const [showIntakeRetake, setShowIntakeRetake] = useState(false);
 
-  // Navigation Items matching the reference UI sidebar exactly:
-  // Dashboard | Reports | Biomarker Trends | AI Assistant | Health Memory | Profile
+  // Navigation Items:
+  // Dashboard | Upload Report | Biomarker Trends | AI Assistant | Health Memory | Profile
   const navigation = [
     { id: "overview", name: "Dashboard", icon: LayoutDashboard },
-    { id: "history", name: "Reports", icon: FileText },
+    { id: "upload", name: "Upload Report", icon: UploadCloud },
     { id: "trends", name: "Biomarker Trends", icon: LineChart },
     { id: "chat", name: "AI Assistant", icon: MessageSquare },
     { id: "memory", name: "Health Memory", icon: Database },
@@ -245,22 +245,22 @@ export const Dashboard: React.FC = () => {
             {/* DIVIDER */}
             <div className="my-2.5 border-t border-slate-200/70 mx-1" />
 
-            {/* 7. ACTION AREA: Upload Report */}
+            {/* 7. ACTION AREA: Reports */}
             <div className="space-y-1">
               <button
-                onClick={() => handleTabChange("upload")}
+                onClick={() => handleTabChange("history")}
                 className={`w-full flex items-center rounded-xl transition-all duration-200 active:scale-[0.98] cursor-pointer group ${
                   sidebarExpanded ? "px-3.5 py-2.5 text-left" : "p-3 justify-center"
                 } ${
-                  activeTab === "upload" 
+                  activeTab === "history" 
                     ? "bg-[#0D9488] text-white shadow-sm shadow-teal-700/20 font-semibold" 
                     : "bg-[#E6F4F1]/90 hover:bg-[#D5EFEA] text-[#0D9488] border border-[#B2DFDB]/80 font-semibold shadow-2xs"
                 }`}
-                title={!sidebarExpanded ? "Upload Report" : undefined}
+                title={!sidebarExpanded ? "Reports" : undefined}
               >
-                <UploadCloud className={`h-4.5 w-4.5 shrink-0 ${sidebarExpanded ? "mr-3" : ""} ${activeTab === "upload" ? "text-white" : "text-[#0D9488]"}`} />
+                <FileText className={`h-4.5 w-4.5 shrink-0 ${sidebarExpanded ? "mr-3" : ""} ${activeTab === "history" ? "text-white" : "text-[#0D9488]"}`} />
                 {sidebarExpanded && (
-                  <span className="text-[13px] font-semibold tracking-normal">Upload Report</span>
+                  <span className="text-[13px] font-semibold tracking-normal">Reports</span>
                 )}
               </button>
             </div>
@@ -433,20 +433,20 @@ export const Dashboard: React.FC = () => {
                   {/* Divider */}
                   <div className="my-2.5 border-t border-slate-200/70 mx-1" />
 
-                  {/* 7. Action Area: Upload Report */}
+                  {/* 7. Action Area: Reports */}
                   <button
                     onClick={() => {
-                      handleTabChange("upload");
+                      handleTabChange("history");
                       setMobileMenuOpen(false);
                     }}
                     className={`w-full flex items-center px-3.5 py-2.5 rounded-xl transition-all text-[13px] ${
-                      activeTab === "upload"
+                      activeTab === "history"
                         ? "bg-[#0D9488] text-white font-semibold shadow-sm shadow-teal-700/20"
                         : "bg-[#E6F4F1] text-[#0D9488] border border-[#B2DFDB]/80 font-semibold"
                     }`}
                   >
-                    <UploadCloud className={`mr-3 h-4.5 w-4.5 ${activeTab === "upload" ? "text-white" : "text-[#0D9488]"}`} />
-                    <span>Upload Report</span>
+                    <FileText className={`mr-3 h-4.5 w-4.5 ${activeTab === "history" ? "text-white" : "text-[#0D9488]"}`} />
+                    <span>Reports</span>
                   </button>
 
                   {/* Divider */}
@@ -536,13 +536,13 @@ export const Dashboard: React.FC = () => {
           </button>
 
           <button
-            onClick={() => handleTabChange("history")}
+            onClick={() => handleTabChange("upload")}
             className={`flex flex-col items-center py-1 px-3 rounded-xl transition-colors ${
-              activeTab === "history" ? "text-teal-600 font-bold" : "text-slate-400"
+              activeTab === "upload" ? "text-teal-600 font-bold" : "text-slate-400"
             }`}
           >
-            <FileText className="h-5 w-5" />
-            <span className="text-[10px] mt-0.5 font-medium">Reports</span>
+            <UploadCloud className="h-5 w-5" />
+            <span className="text-[10px] mt-0.5 font-medium">Upload</span>
           </button>
 
           <button

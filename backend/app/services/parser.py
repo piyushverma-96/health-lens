@@ -205,15 +205,29 @@ def parse_report_text(raw_text: str) -> ExtractedReportData:
 
     try:
         # Fast structured extraction with Groq
-        extracted_data = client.chat.completions.create(
-            model=settings.GROQ_MODEL,
-            response_model=ExtractedReportData,
-            messages=[
-                {"role": "system", "content": "You are a fast, highly accurate clinical laboratory biomarker extraction parser. Extract patient name and biomarkers list directly into the schema."},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.0
-        )
+        extraction_model = getattr(settings, "GROQ_EXTRACTION_MODEL", "openai/gpt-oss-20b") or "openai/gpt-oss-20b"
+        try:
+            extracted_data = client.chat.completions.create(
+                model=extraction_model,
+                response_model=ExtractedReportData,
+                messages=[
+                    {"role": "system", "content": "You are a fast, highly accurate clinical laboratory biomarker extraction parser. Extract patient name and biomarkers list directly into the schema."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.0
+            )
+        except Exception as primary_ext_err:
+            logger.warning(f"Primary extraction model {extraction_model} failed: {primary_ext_err}. Retrying with backup...")
+            backup_model = "openai/gpt-oss-120b" if extraction_model != "openai/gpt-oss-120b" else "openai/gpt-oss-20b"
+            extracted_data = client.chat.completions.create(
+                model=backup_model,
+                response_model=ExtractedReportData,
+                messages=[
+                    {"role": "system", "content": "You are a fast, highly accurate clinical laboratory biomarker extraction parser. Extract patient name and biomarkers list directly into the schema."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.0
+            )
         
         # Normalize names and validate status indicators/units
         for biomarker in extracted_data.biomarkers:
@@ -343,16 +357,28 @@ def generate_personalized_report(
     """
 
     try:
-        # Fast direct Markdown generation without JSON wrapper bottleneck
-        raw_completion = groq_client.chat.completions.create(
-            model=settings.GROQ_MODEL,
-            messages=[
-                {"role": "system", "content": "You are a world-class clinical laboratory AI that generates concise, beautifully structured patient health reports in clean Markdown."},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.2,
-            max_tokens=1800
-        )
+        # Fast direct Markdown generation with model fallback
+        generation_models = [settings.GROQ_MODEL, "openai/gpt-oss-120b", "openai/gpt-oss-20b"]
+        raw_completion = None
+        for gen_model in generation_models:
+            max_t = 800 if "qwen" in gen_model.lower() else 1800
+            try:
+                raw_completion = groq_client.chat.completions.create(
+                    model=gen_model,
+                    messages=[
+                        {"role": "system", "content": "You are a world-class clinical laboratory AI that generates concise, beautifully structured patient health reports in clean Markdown."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=0.2,
+                    max_tokens=max_t
+                )
+                if raw_completion and raw_completion.choices and raw_completion.choices[0].message.content:
+                    break
+            except Exception as gen_err:
+                logger.warning(f"Report generation with model {gen_model} failed: {gen_err}. Trying fallback...")
+
+        if not raw_completion or not raw_completion.choices:
+            raise RuntimeError("All models failed to generate the markdown report.")
         
         report_markdown = raw_completion.choices[0].message.content or ""
         

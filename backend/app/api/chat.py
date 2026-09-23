@@ -348,14 +348,39 @@ def send_chat_message(
         # Append user query
         messages_payload.append({"role": "user", "content": user_query})
 
-        # 7. Call Groq model
-        logger.info(f"Submitting query to Groq model ({settings.GROQ_MODEL}) for session {session_id}...")
-        response = groq_client.chat.completions.create(
-            model=settings.GROQ_MODEL,
-            messages=messages_payload,
-            temperature=0.3
-        )
-        assistant_reply = response.choices[0].message.content
+        # 7. Call Groq model with resilient fallback and token limits
+        candidate_models = []
+        if getattr(settings, "GROQ_MODEL", None):
+            candidate_models.append(settings.GROQ_MODEL)
+        for fb in ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.8-27b"]:
+            if fb not in candidate_models:
+                candidate_models.append(fb)
+
+        assistant_reply = None
+        last_error = None
+
+        for model_candidate in candidate_models:
+            # Enforce safe output token limits per model tier
+            # qwen has a strict 1000 OTPM limit on Groq; gpt-oss models have 8000+
+            max_toks = 800 if "qwen" in model_candidate.lower() else 1800
+            try:
+                logger.info(f"Submitting query to Groq model ({model_candidate}, max_tokens={max_toks}) for session {session_id}...")
+                response = groq_client.chat.completions.create(
+                    model=model_candidate,
+                    messages=messages_payload,
+                    temperature=0.3,
+                    max_tokens=max_toks
+                )
+                if response.choices and response.choices[0].message and response.choices[0].message.content:
+                    assistant_reply = response.choices[0].message.content
+                    break
+            except Exception as model_err:
+                logger.warning(f"Groq model {model_candidate} call failed: {model_err}. Attempting next model candidate...")
+                last_error = model_err
+
+        if not assistant_reply:
+            raise last_error or RuntimeError("Failed to generate response from all available AI models.")
+
 
         # 8. Record sources list to return to client
         sources = []
@@ -428,10 +453,15 @@ def send_chat_message(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Chat execution failed: {str(e)}")
+        err_msg = str(e)
+        logger.error(f"Chat execution failed: {err_msg}")
+        if "rate_limit_exceeded" in err_msg or "429" in err_msg:
+            user_facing = "AI consultation service is currently handling high volume. Please wait a few seconds and try again."
+        else:
+            user_facing = f"Assistant consultation encountered an issue: {err_msg}"
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Chat execution failed: {str(e)}"
+            detail=user_facing
         )
 
 @router.delete("/sessions/{session_id}", status_code=status.HTTP_204_NO_CONTENT)
