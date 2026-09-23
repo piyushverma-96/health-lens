@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { supabase } from "../services/supabase";
 import { api } from "../services/api";
@@ -64,6 +64,43 @@ const DEMO_REPORTS: DemoReportInfo[] = [
   }
 ];
 
+// ---------------------------------------------------------------------------
+// Pipeline stage definitions — maps backend status to real stage index
+// ---------------------------------------------------------------------------
+
+const PIPELINE_STEPS = [
+  { num: "01", title: "Uploading Report",      desc: "Encrypting and transmitting scan to private Supabase vault" },
+  { num: "02", title: "Reading Report",        desc: "Downloading file and extracting text (native PDF or OCR)" },
+  { num: "03", title: "Extracting Biomarkers", desc: "LLM parsing metrics, reference bounds, and numeric values" },
+  { num: "04", title: "Generating Insights",   desc: "Formulating plain-language summaries and risk comparisons" },
+  { num: "05", title: "Analysis Ready",        desc: "Report saved to your personal health intelligence timeline" },
+];
+
+/**
+ * Maps a backend report status string to a pipeline stage number (1-5).
+ * Stage 1 = upload in progress (set by the frontend before POST returns).
+ * Stage 2 = backend set status to 'processing'.
+ * Stage 3 = still processing (advanced after ~4 s to show Groq is working).
+ * Stage 4 = status = 'completed' (briefly shown before redirect).
+ */
+function statusToStage(backendStatus: string, processingElapsedSeconds: number): number {
+  switch (backendStatus) {
+    case "pending":     return 2;   // Registered, worker about to start
+    case "processing":
+      // After ~4 s in 'processing', advance to stage 3 to show Groq is running
+      return processingElapsedSeconds >= 4 ? 3 : 2;
+    case "completed":   return 4;
+    case "failed":      return 0;   // Error — handled separately
+    default:            return 1;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Poll timeout (ms) — give up after 2 minutes
+// ---------------------------------------------------------------------------
+const POLL_TIMEOUT_MS = 120_000;
+const POLL_INTERVAL_MS = 2_000;
+
 export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess }) => {
   const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -79,16 +116,20 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+  // Refs for the polling loop — cleaned up on unmount
+  const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pollStartTimeRef = useRef<number>(0);
+  const processingStartTimeRef = useRef<number>(0);
+
   const ALLOWED_EXTENSIONS = ["png", "jpg", "jpeg", "pdf"];
   const MAX_FILE_SIZE_BYTES = 15 * 1024 * 1024; // 15MB
 
-  const pipelineSteps = [
-    { num: "01", title: "Uploading File", desc: "Encrypting and transmitting scan to private Supabase vault" },
-    { num: "02", title: "Extracting Text (OCR)", desc: "Optical character recognition scanning test lines and units" },
-    { num: "03", title: "Structuring Biomarkers", desc: "LLM parsing metrics, reference bounds, and numeric values" },
-    { num: "04", title: "Generating Insights", desc: "Formulating plain-language summaries and risk comparisons" },
-    { num: "05", title: "Saving Report", desc: "Indexing into personal health timeline and vector memory" }
-  ];
+  // Clean up any pending poll on unmount
+  useEffect(() => {
+    return () => {
+      if (pollTimerRef.current) clearTimeout(pollTimerRef.current);
+    };
+  }, []);
 
   const validateSelectedFile = (selectedFile: File): { valid: boolean; error?: string } => {
     const ext = selectedFile.name.split(".").pop()?.toLowerCase() || "";
@@ -141,7 +182,76 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
     }
   };
 
+  // ---------------------------------------------------------------------------
+  // Real-status polling after POST /reports returns
+  // ---------------------------------------------------------------------------
+
+  const startPolling = useCallback((reportId: string, reportTitle: string) => {
+    pollStartTimeRef.current = Date.now();
+    processingStartTimeRef.current = 0;
+
+    const poll = async () => {
+      // Timeout guard
+      if (Date.now() - pollStartTimeRef.current > POLL_TIMEOUT_MS) {
+        setError("Analysis is taking longer than expected. Please refresh the page to check status.");
+        setUploading(false);
+        setPipelineStep(0);
+        return;
+      }
+
+      try {
+        const report = await api.get<{ status: string; error_message?: string }>(`/reports/${reportId}`);
+
+        if (report.status === "failed") {
+          setError(report.error_message || "Report analysis failed. Please try again or upload a clearer document.");
+          setUploading(false);
+          setPipelineStep(0);
+          return;
+        }
+
+        if (report.status === "completed") {
+          setPipelineStep(4);
+          setSuccess(`Report "${reportTitle}" analysed successfully!`);
+          // Brief pause so user sees stage 4 before redirect
+          setTimeout(() => {
+            setUploading(false);
+            setPipelineStep(0);
+            onUploadSuccess();
+          }, 600);
+          return;
+        }
+
+        // Track how long we've been in 'processing' state for stage 3 advancement
+        if (report.status === "processing") {
+          if (processingStartTimeRef.current === 0) {
+            processingStartTimeRef.current = Date.now();
+          }
+        }
+
+        const processingElapsed = processingStartTimeRef.current > 0
+          ? (Date.now() - processingStartTimeRef.current) / 1000
+          : 0;
+
+        const stage = statusToStage(report.status, processingElapsed);
+        if (stage > 0) setPipelineStep(stage);
+
+        // Schedule next poll
+        pollTimerRef.current = setTimeout(poll, POLL_INTERVAL_MS);
+      } catch (pollErr: any) {
+        // Non-fatal: keep polling (transient network issues)
+        console.warn("Poll error (retrying):", pollErr.message);
+        pollTimerRef.current = setTimeout(poll, POLL_INTERVAL_MS);
+      }
+    };
+
+    // Kick off the first poll after a short delay to let the worker start
+    pollTimerRef.current = setTimeout(poll, 1_500);
+  }, [onUploadSuccess]);
+
+  // ---------------------------------------------------------------------------
   // 1-Click Real Analysis for Synthetic Demo Reports
+  // ---------------------------------------------------------------------------
+
   const handleAnalyzeDemoReport = async (demo: DemoReportInfo) => {
     if (!user) {
       setError("Please sign in to analyze reports.");
@@ -155,7 +265,7 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
     setPipelineStep(1);
 
     try {
-      // Step 1: Uploading
+      // Step 1: Download demo PDF and upload to Supabase Storage
       const response = await fetch(demo.fileUrl);
       if (!response.ok) {
         throw new Error(`Could not load sample PDF (${response.statusText}).`);
@@ -174,38 +284,31 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
         throw new Error(`Storage upload failed: ${storageError.message}`);
       }
 
-      // Step 2 & 3: Trigger OCR & Groq parsing
+      // Step 2: Register report — backend fires background worker
       setPipelineStep(2);
-      await new Promise((r) => setTimeout(r, 150));
-      setPipelineStep(3);
-
-      await api.post("/reports", {
+      const createdReport = await api.post<{ id: string }>("/reports", {
         file_path: filePath,
         file_name: demo.fileName,
         mime_type: "application/pdf",
         recorded_at: demo.date
       });
 
-      // Step 4 & 5: Insights & Saving
-      setPipelineStep(4);
-      await new Promise((r) => setTimeout(r, 150));
-      setPipelineStep(5);
+      // Step 3+: Poll real backend status
+      startPolling(createdReport.id, demo.title);
 
-      setSuccess(`Report "${demo.title}" parsed successfully!`);
-      setTimeout(() => {
-        onUploadSuccess();
-      }, 400);
     } catch (err: any) {
       setError(err.message || "Failed to analyze demo report.");
       console.error("Demo analysis error:", err);
-    } finally {
       setUploading(false);
       setProcessingDemoId(null);
       setPipelineStep(0);
     }
   };
 
-  // Standard Upload handler
+  // ---------------------------------------------------------------------------
+  // Standard file upload handler
+  // ---------------------------------------------------------------------------
+
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file || !user) return;
@@ -226,7 +329,7 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
       const uniqueId = crypto.randomUUID();
       const filePath = `${user.id}/${uniqueId}.${fileExt}`;
 
-      // Step 1: Storage upload
+      // Step 1: Upload to Supabase Storage
       const { error: storageError } = await supabase.storage
         .from("reports")
         .upload(filePath, file);
@@ -235,34 +338,23 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
         throw new Error(`Storage upload failed: ${storageError.message}`);
       }
 
-      // Step 2 & 3: Trigger backend OCR
+      // Step 2: Register report — backend fires background worker
       setPipelineStep(2);
-      await new Promise((r) => setTimeout(r, 150));
-      setPipelineStep(3);
-
-      await api.post("/reports", {
+      const createdReport = await api.post<{ id: string }>("/reports", {
         file_path: filePath,
         file_name: file.name,
         mime_type: file.type || "application/octet-stream",
         recorded_at: recordedAt
       });
 
-      // Step 4 & 5: Structuring & Saving
-      setPipelineStep(4);
-      await new Promise((r) => setTimeout(r, 150));
-      setPipelineStep(5);
-
-      setSuccess("Report uploaded successfully! Added to your health intelligence timeline.");
+      // Step 3+: Poll real backend status
       setFile(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
-      
-      setTimeout(() => {
-        onUploadSuccess();
-      }, 400);
+      startPolling(createdReport.id, file.name);
+
     } catch (err: any) {
       setError(err.message || "Failed to process and upload document.");
       console.error("Upload error details:", err);
-    } finally {
       setUploading(false);
       setPipelineStep(0);
     }
@@ -290,7 +382,7 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
-            {pipelineSteps.map((s, idx) => {
+            {PIPELINE_STEPS.map((s, idx) => {
               const stepNum = idx + 1;
               const isCompleted = pipelineStep > stepNum;
               const isCurrent = pipelineStep === stepNum;

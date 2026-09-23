@@ -93,9 +93,14 @@ def list_reports(user_id: str = Depends(get_current_user)):
 def get_report(report_id: str, user_id: str = Depends(get_current_user)):
     """
     Retrieves full details of a specific report.
+    Uses a single DB connection for both the report and its biomarkers.
     """
     try:
+        biomarkers = []
+        report = None
+
         with get_db_cursor() as cur:
+            # Fetch report
             cur.execute(
                 """
                 SELECT id, user_id, file_path, file_name, mime_type, status, raw_ocr_text, summary, explanation, error_message, patient_name, is_mismatched, approved_for_history, extracted_biomarkers_json, recorded_at, uploaded_at, updated_at
@@ -105,18 +110,16 @@ def get_report(report_id: str, user_id: str = Depends(get_current_user)):
                 (report_id, user_id)
             )
             report = cur.fetchone()
-            
-        if not report:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Report not found or access denied."
-            )
 
-        # Retrieve associated biomarkers
-        biomarkers = []
-        if report["status"] == "completed":
-            if report.get("approved_for_history", True):
-                with get_db_cursor() as cur:
+            if not report:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Report not found or access denied."
+                )
+
+            # Fetch biomarkers in the same connection — avoids a second round-trip
+            if report["status"] == "completed":
+                if report.get("approved_for_history", True):
                     cur.execute(
                         """
                         SELECT id, report_id, user_id, name, value, unit, reference_range, status, recorded_at
@@ -127,22 +130,22 @@ def get_report(report_id: str, user_id: str = Depends(get_current_user)):
                         (report_id,)
                     )
                     biomarkers = cur.fetchall()
-            else:
-                # Load from extracted_biomarkers_json to render in detailed table before approval
-                if report.get("extracted_biomarkers_json"):
-                    raw_json = report["extracted_biomarkers_json"]
-                    if isinstance(raw_json, str):
-                        biomarkers = json.loads(raw_json)
-                    else:
-                        biomarkers = raw_json
-                    
-                    # Format to fit BiomarkerResponse structure
-                    for idx, b in enumerate(biomarkers):
-                        b["id"] = f"temp-{idx}"
-                        b["report_id"] = report_id
-                        b["user_id"] = user_id
-                        b["status"] = evaluate_biomarker_status(b["value"], b.get("reference_range"))
-                        b["recorded_at"] = report["recorded_at"]
+                else:
+                    # Load from extracted_biomarkers_json to render in detailed table before approval
+                    if report.get("extracted_biomarkers_json"):
+                        raw_json = report["extracted_biomarkers_json"]
+                        if isinstance(raw_json, str):
+                            biomarkers = json.loads(raw_json)
+                        else:
+                            biomarkers = raw_json
+
+                        # Format to fit BiomarkerResponse structure
+                        for idx, b in enumerate(biomarkers):
+                            b["id"] = f"temp-{idx}"
+                            b["report_id"] = report_id
+                            b["user_id"] = user_id
+                            b["status"] = evaluate_biomarker_status(b["value"], b.get("reference_range"))
+                            b["recorded_at"] = report["recorded_at"]
 
         # Inject biomarkers list into dictionary response
         report["biomarkers"] = biomarkers

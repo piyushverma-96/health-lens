@@ -29,6 +29,7 @@ Poppler configuration (PDF -> image rasterisation for scanned PDFs)
 """
 
 import os
+import time
 import concurrent.futures
 import logging
 import shutil
@@ -54,6 +55,14 @@ supabase: Client = create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVIC
 # ---------------------------------------------------------------------------
 TEMP_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "temp")
 os.makedirs(TEMP_DIR, exist_ok=True)
+
+# ---------------------------------------------------------------------------
+# Constants
+# ---------------------------------------------------------------------------
+
+# Minimum characters from native PDF extraction to consider it sufficient
+# and skip OCR entirely.
+MIN_NATIVE_TEXT_CHARS = 50
 
 # ---------------------------------------------------------------------------
 # Tesseract configuration - environment-aware, never hardcoded
@@ -119,13 +128,18 @@ TESSERACT_AVAILABLE: bool = _configure_tesseract()
 # ---------------------------------------------------------------------------
 
 def download_storage_file(file_path: str) -> str:
+    t0 = time.perf_counter()
     file_name = os.path.basename(file_path)
     local_path = os.path.join(TEMP_DIR, file_name)
     try:
         response = supabase.storage.from_("reports").download(file_path)
         with open(local_path, "wb") as f:
             f.write(response)
-        logger.debug(f"Downloaded '{file_path}' to '{local_path}' ({len(response)} bytes)")
+        elapsed_ms = (time.perf_counter() - t0) * 1000
+        logger.debug(
+            f"[TIMING] Download: {elapsed_ms:.0f} ms — "
+            f"'{file_path}' -> '{local_path}' ({len(response)} bytes)"
+        )
         return local_path
     except Exception as e:
         if os.path.exists(local_path):
@@ -242,13 +256,16 @@ def extract_text_from_pdf(pdf_path: str) -> str:
     Extract text from a PDF using a two-stage pipeline:
 
     Stage 1 - Native digital extraction (pypdf)
-        No external dependencies. Used when PDF has embedded text (>50 chars).
+        No external dependencies. Used when PDF has embedded text (>MIN_NATIVE_TEXT_CHARS chars).
 
     Stage 2 - Scanned PDF fallback (pdf2image + Tesseract OCR)
         Activated when Stage 1 produces insufficient text.
         Requires: Tesseract OCR binary + Poppler.
+        Each page is OCR'd with a per-page timeout (settings.OCR_PAGE_TIMEOUT seconds)
+        to prevent a single slow page from hanging the whole pipeline.
     """
     # Stage 1: native digital PDF
+    t0 = time.perf_counter()
     try:
         from pypdf import PdfReader
         reader = PdfReader(pdf_path)
@@ -258,15 +275,17 @@ def extract_text_from_pdf(pdf_path: str) -> str:
             if page_text:
                 text += page_text + "\n"
 
-        if len(text.strip()) > 50:
+        native_elapsed_ms = (time.perf_counter() - t0) * 1000
+        if len(text.strip()) >= MIN_NATIVE_TEXT_CHARS:
             logger.info(
-                f"Native digital PDF extraction succeeded: "
-                f"{len(reader.pages)} page(s), {len(text.strip())} chars."
+                f"[TIMING] PDF native extraction: {native_elapsed_ms:.0f} ms — "
+                f"{len(reader.pages)} page(s), {len(text.strip())} chars. OCR skipped."
             )
             return text
         else:
             logger.info(
-                f"Native PDF produced insufficient text ({len(text.strip())} chars). Falling back to OCR."
+                f"[TIMING] PDF native extraction: {native_elapsed_ms:.0f} ms — "
+                f"insufficient text ({len(text.strip())} chars). Falling back to OCR."
             )
     except Exception as pdf_err:
         logger.warning(f"pypdf extraction failed: {pdf_err}. Falling back to OCR.")
@@ -282,20 +301,35 @@ def extract_text_from_pdf(pdf_path: str) -> str:
         )
 
     logger.info(f"Converting scanned PDF to images for OCR: {os.path.basename(pdf_path)}")
+    t_ocr_start = time.perf_counter()
     try:
-        poppler_path: Optional[str] = getattr(settings, "POPPLER_PATH", None) or os.getenv("POPPLER_PATH") or None
-        pages = convert_from_path(pdf_path, poppler_path=poppler_path or None)
+        poppler_path: Optional[str] = settings.POPPLER_PATH or None
+        pages = convert_from_path(pdf_path, poppler_path=poppler_path)
         pdf_basename = os.path.basename(pdf_path)
-        logger.info(f"Rasterised {len(pages)} page(s). Running parallel OCR...")
+        logger.info(f"Rasterised {len(pages)} page(s). Running parallel OCR with {settings.OCR_PAGE_TIMEOUT}s per-page timeout...")
 
         tasks = [(i, page, pdf_basename) for i, page in enumerate(pages)]
         max_workers = min(4, max(1, len(pages)))
+        page_results: list[str] = [""] * len(tasks)
 
+        # Use as_completed so we can apply a per-page timeout and skip stuck pages
         with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-            results = list(executor.map(_ocr_single_pdf_page, tasks))
+            future_to_idx = {executor.submit(_ocr_single_pdf_page, task): task[0] for task in tasks}
+            for future in concurrent.futures.as_completed(future_to_idx, timeout=settings.OCR_PAGE_TIMEOUT * len(tasks)):
+                idx = future_to_idx[future]
+                try:
+                    page_results[idx] = future.result(timeout=settings.OCR_PAGE_TIMEOUT)
+                except concurrent.futures.TimeoutError:
+                    logger.warning(f"OCR timeout on page {idx} — skipping page after {settings.OCR_PAGE_TIMEOUT}s")
+                except Exception as page_err:
+                    logger.warning(f"OCR failed on page {idx}: {page_err} — skipping page")
 
-        combined = "\n\n--- Page Break ---\n\n".join(results)
-        logger.info(f"Scanned PDF OCR completed: {len(combined)} chars extracted.")
+        combined = "\n\n--- Page Break ---\n\n".join(r for r in page_results if r.strip())
+        ocr_elapsed_ms = (time.perf_counter() - t_ocr_start) * 1000
+        logger.info(
+            f"[TIMING] OCR (scanned PDF, {len(pages)} pages): {ocr_elapsed_ms:.0f} ms — "
+            f"{len(combined)} chars extracted."
+        )
         return combined
     except RuntimeError:
         raise
@@ -339,7 +373,10 @@ def run_ocr_pipeline(file_path: str, mime_type: str) -> str:
         if is_pdf:
             return extract_text_from_pdf(local_file)
         elif is_image:
-            return extract_text_from_image(local_file)
+            t0 = time.perf_counter()
+            result = extract_text_from_image(local_file)
+            logger.info(f"[TIMING] Image OCR: {(time.perf_counter() - t0) * 1000:.0f} ms")
+            return result
         else:
             raise ValueError(
                 f"Unsupported file type '{mime_type}'. "

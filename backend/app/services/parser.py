@@ -1,4 +1,5 @@
 import re
+import time
 import logging
 import groq
 import instructor
@@ -190,9 +191,22 @@ def parse_report_text(raw_text: str) -> ExtractedReportData:
     """
     Sends the raw OCR text to Groq LLM using Instructor to obtain
     a structured Pydantic schema of extracted biomarkers.
+
+    Input text is truncated to settings.MAX_GROQ_INPUT_CHARS before sending
+    to avoid unnecessarily large token payloads from scanned PDFs.
+    Increase MAX_GROQ_INPUT_CHARS in .env if biomarkers are being missed.
     """
-    prompt = f"""
-    Analyze the following clinical lab report text.
+    # Truncation guard: keep only the first MAX_GROQ_INPUT_CHARS characters.
+    # Medical lab values are almost always in the first few pages of a report.
+    max_chars = settings.MAX_GROQ_INPUT_CHARS
+    if len(raw_text) > max_chars:
+        logger.warning(
+            f"[TIMING] Input text truncated from {len(raw_text)} to {max_chars} chars "
+            f"before Groq biomarker extraction (set MAX_GROQ_INPUT_CHARS to increase)."
+        )
+        raw_text = raw_text[:max_chars]
+
+    prompt = f"""Analyze the following clinical lab report text.
     Extract the patient's name (if present) and all numerical biomarker measurements with units and reference ranges.
     
     Common biomarkers: Hemoglobin, RBC, WBC, Platelets, Total Cholesterol, LDL, HDL, Triglycerides, Vitamin D, TSH, HbA1c, Creatinine, Fasting Glucose, ALT, AST, Bilirubin, Uric Acid, etc.
@@ -200,11 +214,11 @@ def parse_report_text(raw_text: str) -> ExtractedReportData:
     Report text:
     ---
     {raw_text}
-    ---
-    """
+    ---"""
 
     try:
         # Fast structured extraction with Groq
+        t0 = time.perf_counter()
         extracted_data = client.chat.completions.create(
             model=settings.GROQ_MODEL,
             response_model=ExtractedReportData,
@@ -213,6 +227,11 @@ def parse_report_text(raw_text: str) -> ExtractedReportData:
                 {"role": "user", "content": prompt}
             ],
             temperature=0.0
+        )
+        logger.info(
+            f"[TIMING] Groq biomarker extraction ({settings.GROQ_MODEL}): "
+            f"{(time.perf_counter() - t0) * 1000:.0f} ms — "
+            f"{len(extracted_data.biomarkers)} biomarkers found."
         )
         
         # Normalize names and validate status indicators/units
@@ -344,6 +363,7 @@ def generate_personalized_report(
 
     try:
         # Fast direct Markdown generation without JSON wrapper bottleneck
+        t0 = time.perf_counter()
         raw_completion = groq_client.chat.completions.create(
             model=settings.GROQ_MODEL,
             messages=[
@@ -352,6 +372,10 @@ def generate_personalized_report(
             ],
             temperature=0.2,
             max_tokens=950
+        )
+        logger.info(
+            f"[TIMING] Groq report generation ({settings.GROQ_MODEL}): "
+            f"{(time.perf_counter() - t0) * 1000:.0f} ms"
         )
         
         report_markdown = raw_completion.choices[0].message.content or ""
