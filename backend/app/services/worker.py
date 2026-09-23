@@ -43,18 +43,21 @@ def process_report_background_job(report_id: str, file_path: str, mime_type: str
                 "Please ensure you uploaded a supported blood panel or lab scan document containing values."
             )
         
-        # 3. Fetch the user ID associated with this report
+        # 3-5. Fetch user_id, profile, and historical data in a SINGLE db connection
+        user_id = None
+        user_profile = {}
+        historical_data = []
+        
         with get_db_cursor() as cur:
+            # 3. Get the user ID associated with this report
             cur.execute("SELECT user_id FROM public.reports WHERE id = %s", (report_id,))
             report = cur.fetchone()
             user_id = report["user_id"] if report else None
             
-        if not user_id:
-            raise RuntimeError(f"Report {report_id} owner user_id could not be found.")
-
-        # 4. Fetch User Profile (including height & blood_group)
-        user_profile = {}
-        with get_db_cursor() as cur:
+            if not user_id:
+                raise RuntimeError(f"Report {report_id} owner user_id could not be found.")
+            
+            # 4. Fetch User Profile (including height & blood_group)
             cur.execute("SELECT first_name, date_of_birth, gender, height, blood_group FROM public.profiles WHERE id = %s", (user_id,))
             profile = cur.fetchone()
             if profile:
@@ -70,10 +73,8 @@ def process_report_background_job(report_id: str, file_path: str, mime_type: str
                     "height": profile["height"],
                     "blood_group": profile["blood_group"]
                 }
-                
-        # 5. Fetch User Historical Biomarker values (records before current test date)
-        historical_data = []
-        with get_db_cursor() as cur:
+            
+            # 5. Fetch User Historical Biomarker values (records before current test date)
             cur.execute(
                 """
                 SELECT name, value, unit, recorded_at
@@ -92,17 +93,26 @@ def process_report_background_job(report_id: str, file_path: str, mime_type: str
                     "recorded_at": str(row["recorded_at"])
                 })
 
-        # 6. Retrieve relevant medical facts for key/abnormal biomarkers via RAG (fast targeted lookup)
+        # 6. Retrieve relevant medical facts via RAG — PARALLEL lookups for speed
         medical_facts = []
         abnormal_biomarkers = [
             b for b in analysis.biomarkers 
             if evaluate_biomarker_status(b.value, b.reference_range) != "normal"
         ]
         target_biomarkers = abnormal_biomarkers[:4] if abnormal_biomarkers else analysis.biomarkers[:3]
-        for biomarker in target_biomarkers:
-            results = similarity_search_knowledge(biomarker.name, limit=1)
-            if results:
-                medical_facts.extend(results)
+        
+        if target_biomarkers:
+            import concurrent.futures
+            
+            def _lookup_biomarker_facts(biomarker):
+                return similarity_search_knowledge(biomarker.name, limit=1)
+            
+            with concurrent.futures.ThreadPoolExecutor(max_workers=min(4, len(target_biomarkers))) as executor:
+                future_results = list(executor.map(_lookup_biomarker_facts, target_biomarkers))
+            
+            for results in future_results:
+                if results:
+                    medical_facts.extend(results)
                 
         # 7. Call generator for personalized 9-section report
         logger.info("Generating personalized clinical health summary and explanation report...")

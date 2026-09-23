@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     
     # LLM Settings
     GROQ_API_KEY: str
-    GROQ_MODEL: str = "qwen/qwen3.8-27b"
+    GROQ_MODEL: str = "llama-3.1-8b-instant"
     
     # DB settings
     DATABASE_URL: str

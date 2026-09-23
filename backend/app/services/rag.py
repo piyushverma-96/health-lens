@@ -91,24 +91,32 @@ def split_text_into_chunks(text: str, chunk_size: int = 500, overlap: int = 100)
 
 def save_report_chunks(report_id: str, user_id: str, raw_text: str):
     """
-    Splits text, embeds each chunk, and saves it in public.report_chunks.
+    Splits text, embeds ALL chunks in a single batch, and saves to public.report_chunks.
+    Batch encoding is 5-10x faster than per-chunk sequential embedding.
     """
     chunks = split_text_into_chunks(raw_text)
     if not chunks:
         return
         
-    logger.info(f"Chunked report {report_id} into {len(chunks)} pieces. Generating embeddings...")
+    logger.info(f"Chunked report {report_id} into {len(chunks)} pieces. Generating batch embeddings...")
     
     try:
+        # Batch encode all chunks at once (much faster than per-chunk)
+        model = ensure_embedding_model()
+        if model is None:
+            logger.warning("Embedding model unavailable; skipping report chunk indexing.")
+            return
+        
+        embeddings = model.encode(chunks, normalize_embeddings=True, batch_size=len(chunks))
+        
         with get_db_cursor(commit=True) as cur:
-            for idx, chunk in enumerate(chunks):
-                embedding = get_embedding(chunk)
+            for idx, (chunk, embedding) in enumerate(zip(chunks, embeddings)):
                 cur.execute(
                     """
                     INSERT INTO public.report_chunks (report_id, user_id, content, embedding, chunk_index)
                     VALUES (%s, %s, %s, %s, %s)
                     """,
-                    (report_id, user_id, chunk, embedding, idx)
+                    (report_id, user_id, chunk, embedding.tolist(), idx)
                 )
     except Exception as e:
         logger.warning(f"Failed to save report chunks (vector search will be limited): {str(e)}")
