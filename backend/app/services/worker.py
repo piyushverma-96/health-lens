@@ -374,6 +374,7 @@ def process_report_background_job(report_id: str, file_path: str, mime_type: str
                 """
                 UPDATE public.reports
                 SET status = 'completed', 
+                    error_message = NULL,
                     raw_ocr_text = %s, 
                     summary = %s,
                     explanation = %s,

@@ -389,8 +389,47 @@ def extract_text_from_pdf(pdf_path: str) -> str:
             "Alternatively, upload the native digital version of this report."
         )
 
-    logger.info(f"Converting scanned PDF to images for OCR: {os.path.basename(pdf_path)}")
+    # -------------------------------------------------------------------------
+    # Stage 2A: Direct embedded image extraction via pypdf (NO Poppler required!)
+    # Works on all platforms (Windows, Linux, Docker). Extracts scanned images
+    # directly from the PDF pages and OCRs them without needing pdftoppm.
+    # -------------------------------------------------------------------------
     t_ocr_start = time.perf_counter()
+    try:
+        embedded_ocr_texts = []
+        if "reader" in locals():
+            for page_idx, page in enumerate(reader.pages):
+                if hasattr(page, "images") and page.images:
+                    for img_idx, img_obj in enumerate(page.images):
+                        temp_embed_path = os.path.join(
+                            TEMP_DIR, f"embed_{page_idx}_{img_idx}_{os.path.basename(pdf_path)}.png"
+                        )
+                        try:
+                            with open(temp_embed_path, "wb") as f_img:
+                                f_img.write(img_obj.data)
+                            extracted_slice = extract_text_from_image(temp_embed_path)
+                            if extracted_slice and extracted_slice.strip():
+                                embedded_ocr_texts.append(extracted_slice.strip())
+                        finally:
+                            if os.path.exists(temp_embed_path):
+                                os.remove(temp_embed_path)
+
+        if embedded_ocr_texts:
+            combined_ocr = "\n\n--- Page Break ---\n\n".join(embedded_ocr_texts)
+            ocr_elapsed_ms = (time.perf_counter() - t_ocr_start) * 1000
+            logger.info(
+                f"[HealthLens Timing] OCR (embedded images via pypdf): {ocr_elapsed_ms:.0f} ms — "
+                f"{len(combined_ocr)} chars extracted without Poppler."
+            )
+            return combined_ocr
+    except Exception as embed_err:
+        logger.warning(f"Direct PDF image extraction failed: {embed_err}. Attempting raster fallback.")
+
+    # -------------------------------------------------------------------------
+    # Stage 2B: Full rasterisation fallback — pdf2image + Poppler
+    # Only needed if PDF has non-bitmap vector scans without embedded images.
+    # -------------------------------------------------------------------------
+    logger.info(f"Converting scanned PDF to images for OCR: {os.path.basename(pdf_path)}")
     try:
         from pdf2image import convert_from_path
         poppler_path: Optional[str] = settings.POPPLER_PATH or None
