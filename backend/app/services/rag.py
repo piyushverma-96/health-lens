@@ -1,6 +1,5 @@
 import os
 import re
-import time
 import logging
 from typing import List, Dict, Any, Optional
 
@@ -92,60 +91,25 @@ def split_text_into_chunks(text: str, chunk_size: int = 500, overlap: int = 100)
 
 def save_report_chunks(report_id: str, user_id: str, raw_text: str):
     """
-    Splits text, embeds ALL chunks in a single batch, and saves to public.report_chunks.
-    Batch encoding is 5-10x faster than per-chunk sequential embedding.
-    All chunks are inserted in a single batched DB statement (N round-trips -> 1).
+    Splits text, embeds each chunk, and saves it in public.report_chunks.
     """
     chunks = split_text_into_chunks(raw_text)
     if not chunks:
         return
         
-    logger.info(f"Chunked report {report_id} into {len(chunks)} pieces. Generating batch embeddings...")
+    logger.info(f"Chunked report {report_id} into {len(chunks)} pieces. Generating embeddings...")
     
     try:
-        # Batch encode all chunks at once (much faster than per-chunk)
-        model = ensure_embedding_model()
-        if model is None:
-            logger.warning("Embedding model unavailable; skipping report chunk indexing.")
-            return
-        
-        t0 = time.perf_counter()
-        embeddings = model.encode(chunks, normalize_embeddings=True, batch_size=len(chunks))
-        embed_elapsed_ms = (time.perf_counter() - t0) * 1000
-        logger.info(f"[TIMING] Embeddings ({len(chunks)} chunks): {embed_elapsed_ms:.0f} ms")
-
-        rows = [
-            (report_id, user_id, chunk, embedding.tolist(), idx)
-            for idx, (chunk, embedding) in enumerate(zip(chunks, embeddings))
-        ]
-
-        t_db = time.perf_counter()
         with get_db_cursor(commit=True) as cur:
-            # Try psycopg2 execute_values for maximum efficiency (single round-trip)
-            try:
-                from psycopg2.extras import execute_values
-                execute_values(
-                    cur._cursor if hasattr(cur, "_cursor") else cur,
+            for idx, chunk in enumerate(chunks):
+                embedding = get_embedding(chunk)
+                cur.execute(
                     """
                     INSERT INTO public.report_chunks (report_id, user_id, content, embedding, chunk_index)
-                    VALUES %s
+                    VALUES (%s, %s, %s, %s, %s)
                     """,
-                    rows,
+                    (report_id, user_id, chunk, embedding, idx)
                 )
-            except Exception:
-                # pg8000 fallback: individual inserts (still uses one connection)
-                for row in rows:
-                    cur.execute(
-                        """
-                        INSERT INTO public.report_chunks (report_id, user_id, content, embedding, chunk_index)
-                        VALUES (%s, %s, %s, %s, %s)
-                        """,
-                        row
-                    )
-
-        db_elapsed_ms = (time.perf_counter() - t_db) * 1000
-        logger.info(f"[TIMING] Chunk DB insert ({len(chunks)} rows): {db_elapsed_ms:.0f} ms")
-
     except Exception as e:
         logger.warning(f"Failed to save report chunks (vector search will be limited): {str(e)}")
 

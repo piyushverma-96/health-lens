@@ -1229,7 +1229,7 @@ export const Landing: React.FC = () => {
         <section 
           id="workflow" 
           ref={workflowRef}
-          className="w-full max-w-[1100px] mx-auto px-6 py-16 md:py-24 text-center"
+          className="w-full max-w-[1100px] mx-auto px-6 py-16 md:py-24 border-t border-slate-200/80 text-center"
         >
           <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-teal-700 font-mono block mb-3">Workflow</span>
           <h2 className="text-3xl md:text-4xl font-heading font-bold text-slate-900 mb-12">
@@ -1300,7 +1300,7 @@ export const Landing: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Feature 1 */}
-              <div className="feature-item p-6 bg-[#FDFBF7] border border-slate-200 rounded-[1.8rem] space-y-3 shadow-xs hover:border-teal-500/40 transition-colors duration-300">
+              <div className="feature-item p-6 bg-white border border-slate-200 rounded-[1.8rem] space-y-3 shadow-xs hover:border-teal-500/40 transition-colors duration-300">
                 <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center">
                   <ShieldCheck className="h-4 w-4 text-white" />
                 </div>
@@ -1311,7 +1311,7 @@ export const Landing: React.FC = () => {
               </div>
 
               {/* Feature 2 */}
-              <div className="feature-item p-6 bg-[#FDFBF7] border border-slate-200 rounded-[1.8rem] space-y-3 shadow-xs hover:border-teal-500/40 transition-colors duration-300">
+              <div className="feature-item p-6 bg-white border border-slate-200 rounded-[1.8rem] space-y-3 shadow-xs hover:border-teal-500/40 transition-colors duration-300">
                 <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center">
                   <Layers className="h-4 w-4 text-white" />
                 </div>
@@ -1322,7 +1322,7 @@ export const Landing: React.FC = () => {
               </div>
 
               {/* Feature 3 */}
-              <div className="feature-item p-6 bg-[#FDFBF7] border border-slate-200 rounded-[1.8rem] space-y-3 shadow-xs hover:border-teal-500/40 transition-colors duration-300">
+              <div className="feature-item p-6 bg-white border border-slate-200 rounded-[1.8rem] space-y-3 shadow-xs hover:border-teal-500/40 transition-colors duration-300">
                 <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center">
                   <Scale className="h-4 w-4 text-white" />
                 </div>
@@ -1333,7 +1333,7 @@ export const Landing: React.FC = () => {
               </div>
 
               {/* Feature 4 */}
-              <div className="feature-item p-6 bg-[#FDFBF7] border border-slate-200 rounded-[1.8rem] space-y-3 shadow-xs hover:border-teal-500/40 transition-colors duration-300">
+              <div className="feature-item p-6 bg-white border border-slate-200 rounded-[1.8rem] space-y-3 shadow-xs hover:border-teal-500/40 transition-colors duration-300">
                 <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center">
                   <Activity className="h-4 w-4 text-white" />
                 </div>
@@ -1344,7 +1344,7 @@ export const Landing: React.FC = () => {
               </div>
 
               {/* Feature 5 */}
-              <div className="feature-item p-6 bg-[#FDFBF7] border border-slate-200 rounded-[1.8rem] space-y-3 shadow-xs hover:border-teal-500/40 transition-colors duration-300">
+              <div className="feature-item p-6 bg-white border border-slate-200 rounded-[1.8rem] space-y-3 shadow-xs hover:border-teal-500/40 transition-colors duration-300">
                 <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center">
                   <Sparkles className="h-4 w-4 text-white" />
                 </div>
@@ -1355,7 +1355,7 @@ export const Landing: React.FC = () => {
               </div>
 
               {/* Feature 6 */}
-              <div className="feature-item p-6 bg-[#FDFBF7] border border-slate-200 rounded-[1.8rem] space-y-3 shadow-xs hover:border-teal-500/40 transition-colors duration-300">
+              <div className="feature-item p-6 bg-white border border-slate-200 rounded-[1.8rem] space-y-3 shadow-xs hover:border-teal-500/40 transition-colors duration-300">
                 <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center">
                   <HeartPulse className="h-4 w-4 text-white" />
                 </div>
@@ -1387,7 +1387,7 @@ export const Landing: React.FC = () => {
               return (
                 <div 
                   key={index} 
-                  className="border border-slate-200 bg-[#FDFBF7] rounded-2xl overflow-hidden transition-all duration-300"
+                  className="border border-slate-200 bg-white rounded-2xl overflow-hidden transition-all duration-300"
                 >
                   <button 
                     onClick={() => toggleFaq(index)}
@@ -1417,7 +1417,7 @@ export const Landing: React.FC = () => {
       </main>
 
       {/* ================= FOOTER ================= */}
-      <footer className="w-full max-w-[1300px] mx-auto px-6 py-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-slate-500 z-10 relative">
+      <footer className="w-full max-w-[1300px] mx-auto px-6 py-8 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-slate-500 z-10 relative">
         <span>© 2026 HealthLens AI. All rights reserved.</span>
         <span className="italic font-light text-center sm:text-right">
           Educational platform only. Not intended for professional medical diagnosis or clinical treatment.

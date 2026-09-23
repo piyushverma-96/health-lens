@@ -353,8 +353,7 @@ def send_chat_message(
         response = groq_client.chat.completions.create(
             model=settings.GROQ_MODEL,
             messages=messages_payload,
-            temperature=0.3,
-            max_tokens=900
+            temperature=0.3
         )
         assistant_reply = response.choices[0].message.content
 
