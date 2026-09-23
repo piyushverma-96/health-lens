@@ -351,7 +351,7 @@ def generate_personalized_report(
                 {"role": "user", "content": prompt}
             ],
             temperature=0.2,
-            max_tokens=1500
+            max_tokens=950
         )
         
         report_markdown = raw_completion.choices[0].message.content or ""
