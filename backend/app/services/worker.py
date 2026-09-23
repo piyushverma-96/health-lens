@@ -150,12 +150,23 @@ def process_report_background_job(report_id: str, file_path: str, mime_type: str
     
     try:
         # ------------------------------------------------------------------ #
-        # STAGE 1: Text extraction (download + native PDF or OCR)            #
+        # STAGE 1 (backend): Text extraction — download + native PDF or OCR  #
+        # Frontend: Stage 2 "Reading Report"                                  #
         # ------------------------------------------------------------------ #
+        # Update status so frontend knows we're actively extracting
+        try:
+            with get_db_cursor(commit=True) as cur:
+                cur.execute(
+                    "UPDATE public.reports SET status = 'extracting', updated_at = now() WHERE id = %s",
+                    (report_id,)
+                )
+        except Exception:
+            pass  # non-fatal
+
         t0 = time.perf_counter()
         extracted_text = run_ocr_pipeline(file_path, mime_type)
         logger.info(
-            f"[TIMING] Text extraction total: {(time.perf_counter() - t0) * 1000:.0f} ms "
+            f"[HealthLens Timing] Text extraction total: {(time.perf_counter() - t0) * 1000:.0f} ms "
             f"— {len(extracted_text)} chars"
         )
 
@@ -167,13 +178,23 @@ def process_report_background_job(report_id: str, file_path: str, mime_type: str
             )
         
         # ------------------------------------------------------------------ #
-        # STAGE 2: Groq biomarker extraction                                 #
+        # STAGE 2 (backend): Groq biomarker extraction                       #
+        # Frontend: Stage 3 "Extracting Biomarkers"                          #
         # ------------------------------------------------------------------ #
+        try:
+            with get_db_cursor(commit=True) as cur:
+                cur.execute(
+                    "UPDATE public.reports SET status = 'analyzing', updated_at = now() WHERE id = %s",
+                    (report_id,)
+                )
+        except Exception:
+            pass  # non-fatal
+
         logger.info(f"Sending extracted text to Groq for structured parsing...")
         t0 = time.perf_counter()
         analysis = parse_report_text(extracted_text)
         logger.info(
-            f"[TIMING] Groq biomarker extraction stage: {(time.perf_counter() - t0) * 1000:.0f} ms"
+            f"[HealthLens Timing] Groq biomarker extraction stage: {(time.perf_counter() - t0) * 1000:.0f} ms"
         )
         
         if not analysis.biomarkers:
@@ -239,7 +260,7 @@ def process_report_background_job(report_id: str, file_path: str, mime_type: str
                 })
 
         logger.info(
-            f"[TIMING] DB user/profile/history fetch: {(time.perf_counter() - t0) * 1000:.0f} ms"
+            f"[HealthLens Timing] DB user/profile/history fetch: {(time.perf_counter() - t0) * 1000:.0f} ms"
         )
 
         # ------------------------------------------------------------------ #
@@ -265,12 +286,22 @@ def process_report_background_job(report_id: str, file_path: str, mime_type: str
                     medical_facts.extend(results)
 
         logger.info(
-            f"[TIMING] RAG knowledge lookup: {(time.perf_counter() - t0) * 1000:.0f} ms"
+            f"[HealthLens Timing] RAG knowledge lookup: {(time.perf_counter() - t0) * 1000:.0f} ms"
         )
             
         # ------------------------------------------------------------------ #
-        # STAGE 5: Groq personalized report generation                       #
+        # STAGE 5 (backend): Groq personalized report generation             #
+        # Frontend: Stage 4 "Generating Insights"                            #
         # ------------------------------------------------------------------ #
+        try:
+            with get_db_cursor(commit=True) as cur:
+                cur.execute(
+                    "UPDATE public.reports SET status = 'generating', updated_at = now() WHERE id = %s",
+                    (report_id,)
+                )
+        except Exception:
+            pass  # non-fatal
+
         logger.info("Generating personalized clinical health summary and explanation report...")
         t0 = time.perf_counter()
         report_data = generate_personalized_report(
@@ -280,7 +311,7 @@ def process_report_background_job(report_id: str, file_path: str, mime_type: str
             medical_facts=medical_facts
         )
         logger.info(
-            f"[TIMING] Report generation stage: {(time.perf_counter() - t0) * 1000:.0f} ms"
+            f"[HealthLens Timing] Insight generation: {(time.perf_counter() - t0) * 1000:.0f} ms"
         )
 
         # ------------------------------------------------------------------ #
@@ -328,6 +359,16 @@ def process_report_background_job(report_id: str, file_path: str, mime_type: str
         # ------------------------------------------------------------------ #
         # STAGE 7 (CRITICAL): Save completed report → visible to user        #
         # ------------------------------------------------------------------ #
+        try:
+            with get_db_cursor(commit=True) as cur:
+                cur.execute(
+                    "UPDATE public.reports SET status = 'saving', updated_at = now() WHERE id = %s",
+                    (report_id,)
+                )
+        except Exception:
+            pass  # non-fatal
+
+        t_db_start = time.perf_counter()
         with get_db_cursor(commit=True) as cur:
             cur.execute(
                 """
@@ -355,11 +396,11 @@ def process_report_background_job(report_id: str, file_path: str, mime_type: str
                 )
             )
 
+        db_elapsed_ms = (time.perf_counter() - t_db_start) * 1000
+        logger.info(f"[HealthLens Timing] Database insert: {db_elapsed_ms:.0f} ms")
+
         critical_elapsed_ms = (time.perf_counter() - t_total_start) * 1000
-        logger.info(
-            f"[TIMING] ★ Critical pipeline complete: {critical_elapsed_ms:.0f} ms "
-            f"— report {report_id} is now visible to user."
-        )
+        logger.info(f"[HealthLens Timing] Total: {critical_elapsed_ms:.0f} ms")
 
         # ------------------------------------------------------------------ #
         # NON-CRITICAL: Biomarker timeline + embeddings in background thread #
@@ -378,7 +419,7 @@ def process_report_background_job(report_id: str, file_path: str, mime_type: str
 
         total_elapsed_ms = (time.perf_counter() - t_total_start) * 1000
         logger.info(
-            f"[TIMING] Total analysis time (critical only): {critical_elapsed_ms:.0f} ms | "
+            f"[HealthLens Timing] Total: {critical_elapsed_ms:.0f} ms (critical) | "
             f"Worker returned: {total_elapsed_ms:.0f} ms for report {report_id}"
         )
         

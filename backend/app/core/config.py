@@ -14,7 +14,12 @@ class Settings(BaseSettings):
     
     # LLM Settings
     GROQ_API_KEY: str
-    GROQ_MODEL: str = "llama-3.1-8b-instant"
+    # Model used for long-form report generation (explanation, summary).
+    # Needs to be a capable model for coherent clinical narrative.
+    GROQ_MODEL: str = "openai/gpt-oss-120b"
+    # Faster model used for structured biomarker extraction.
+    # Must support JSON mode. Smaller/faster = fewer instructor retry loops.
+    GROQ_EXTRACTION_MODEL: str = "openai/gpt-oss-20b"
 
     # Maximum characters of OCR text sent to Groq for biomarker extraction.
     # Prevents unnecessarily large token payloads from scanned PDFs.

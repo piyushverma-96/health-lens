@@ -77,20 +77,26 @@ const PIPELINE_STEPS = [
 ];
 
 /**
- * Maps a backend report status string to a pipeline stage number (1-5).
- * Stage 1 = upload in progress (set by the frontend before POST returns).
- * Stage 2 = backend set status to 'processing'.
- * Stage 3 = still processing (advanced after ~4 s to show Groq is working).
- * Stage 4 = status = 'completed' (briefly shown before redirect).
+ * Maps backend report status to a frontend pipeline stage (1–5).
+ *
+ * Backend status transitions (from worker.py):
+ *   pending    → registered, worker not yet started
+ *   processing → worker started (legacy / fallback)
+ *   extracting → Stage 2: actively downloading + extracting PDF/OCR text
+ *   analyzing  → Stage 3: Groq biomarker extraction + report generation
+ *   completed  → Stage 4: done, redirect imminent
+ *   failed     → 0: error UI
  */
-function statusToStage(backendStatus: string, processingElapsedSeconds: number): number {
+function statusToStage(backendStatus: string): number {
   switch (backendStatus) {
-    case "pending":     return 2;   // Registered, worker about to start
-    case "processing":
-      // After ~4 s in 'processing', advance to stage 3 to show Groq is running
-      return processingElapsedSeconds >= 4 ? 3 : 2;
-    case "completed":   return 4;
-    case "failed":      return 0;   // Error — handled separately
+    case "pending":     return 2;
+    case "processing":  return 2;
+    case "extracting":  return 2;
+    case "analyzing":   return 3;
+    case "generating":  return 4;
+    case "saving":      return 4;
+    case "completed":   return 5;
+    case "failed":      return 0;
     default:            return 1;
   }
 }
@@ -119,7 +125,6 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
   // Refs for the polling loop — cleaned up on unmount
   const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pollStartTimeRef = useRef<number>(0);
-  const processingStartTimeRef = useRef<number>(0);
 
   const ALLOWED_EXTENSIONS = ["png", "jpg", "jpeg", "pdf"];
   const MAX_FILE_SIZE_BYTES = 15 * 1024 * 1024; // 15MB
@@ -188,7 +193,6 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
 
   const startPolling = useCallback((reportId: string, reportTitle: string) => {
     pollStartTimeRef.current = Date.now();
-    processingStartTimeRef.current = 0;
 
     const poll = async () => {
       // Timeout guard
@@ -210,29 +214,19 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
         }
 
         if (report.status === "completed") {
-          setPipelineStep(4);
+          setPipelineStep(5);
           setSuccess(`Report "${reportTitle}" analysed successfully!`);
-          // Brief pause so user sees stage 4 before redirect
+          // Brief pause so user sees stage 5 (Analysis Ready) before redirect
           setTimeout(() => {
             setUploading(false);
+            setProcessingDemoId(null);
             setPipelineStep(0);
             onUploadSuccess();
-          }, 600);
+          }, 800);
           return;
         }
 
-        // Track how long we've been in 'processing' state for stage 3 advancement
-        if (report.status === "processing") {
-          if (processingStartTimeRef.current === 0) {
-            processingStartTimeRef.current = Date.now();
-          }
-        }
-
-        const processingElapsed = processingStartTimeRef.current > 0
-          ? (Date.now() - processingStartTimeRef.current) / 1000
-          : 0;
-
-        const stage = statusToStage(report.status, processingElapsed);
+        const stage = statusToStage(report.status);
         if (stage > 0) setPipelineStep(stage);
 
         // Schedule next poll
@@ -276,6 +270,7 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
       const uniqueId = crypto.randomUUID();
       const filePath = `${user.id}/${uniqueId}.pdf`;
 
+      const tUploadStart = performance.now();
       const { error: storageError } = await supabase.storage
         .from("reports")
         .upload(filePath, demoFile);
@@ -283,6 +278,7 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
       if (storageError) {
         throw new Error(`Storage upload failed: ${storageError.message}`);
       }
+      console.log(`[HealthLens Timing] Storage upload: ${Math.round(performance.now() - tUploadStart)} ms`);
 
       // Step 2: Register report — backend fires background worker
       setPipelineStep(2);
@@ -330,6 +326,7 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
       const filePath = `${user.id}/${uniqueId}.${fileExt}`;
 
       // Step 1: Upload to Supabase Storage
+      const tUploadStart = performance.now();
       const { error: storageError } = await supabase.storage
         .from("reports")
         .upload(filePath, file);
@@ -337,6 +334,7 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
       if (storageError) {
         throw new Error(`Storage upload failed: ${storageError.message}`);
       }
+      console.log(`[HealthLens Timing] Storage upload: ${Math.round(performance.now() - tUploadStart)} ms`);
 
       // Step 2: Register report — backend fires background worker
       setPipelineStep(2);
@@ -526,9 +524,26 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
 
         <form onSubmit={handleUpload} className="space-y-4">
           {error && (
-            <div className="p-3.5 bg-rose-50 border border-rose-200 text-rose-800 text-xs rounded-2xl flex items-start gap-2.5">
-              <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-rose-600" />
-              <span>{error}</span>
+            <div className="p-4 bg-rose-50 border border-rose-200 text-rose-800 text-xs rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-fade-in">
+              <div className="flex items-start gap-2.5">
+                <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-rose-600" />
+                <div>
+                  <p className="font-bold text-rose-900 text-xs">Analysis couldn't be completed</p>
+                  <p className="text-[11px] text-rose-700 mt-0.5">{error}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setError(null);
+                  setUploading(false);
+                  setProcessingDemoId(null);
+                  setPipelineStep(0);
+                }}
+                className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs transition-colors shrink-0 cursor-pointer shadow-xs"
+              >
+                Retry
+              </button>
             </div>
           )}
 
