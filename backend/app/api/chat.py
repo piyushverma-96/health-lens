@@ -1,5 +1,6 @@
 import re
 import json
+import time
 import logging
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
@@ -348,38 +349,67 @@ def send_chat_message(
         # Append user query
         messages_payload.append({"role": "user", "content": user_query})
 
-        # 7. Call Groq model with resilient fallback and token limits
+        # 7. Call Groq model with resilient fallback and safe token limits
+        # Model order: fastest/most available first, heaviest last.
+        # Token limits are kept conservative to stay within free-tier OTPM limits.
         candidate_models = []
-        if getattr(settings, "GROQ_MODEL", None):
-            candidate_models.append(settings.GROQ_MODEL)
-        for fb in ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.8-27b"]:
+        primary = getattr(settings, "GROQ_MODEL", "openai/gpt-oss-20b") or "openai/gpt-oss-20b"
+        # Prefer gpt-oss-20b first for chat (faster + generous limits), then 120b, then qwen fallback
+        ordered_fallbacks = ["openai/gpt-oss-20b", "openai/gpt-oss-120b", "qwen/qwen3.8-27b"]
+        # Put primary model first if not already in list
+        if primary not in ordered_fallbacks:
+            candidate_models.append(primary)
+        for fb in ordered_fallbacks:
             if fb not in candidate_models:
                 candidate_models.append(fb)
+
+        def _chat_max_tokens(model_name: str) -> int:
+            """Return a safe max_tokens for each model within free-tier OTPM limits."""
+            name = model_name.lower()
+            if "qwen" in name:
+                return 700   # qwen free tier: 1000 OTPM hard cap — keep well under
+            if "20b" in name:
+                return 1000  # gpt-oss-20b: generous limits, 1000 is safe
+            return 1000      # gpt-oss-120b: also 1000 to avoid burst OTPM issues
 
         assistant_reply = None
         last_error = None
 
         for model_candidate in candidate_models:
-            # Enforce safe output token limits per model tier
-            # qwen has a strict 1000 OTPM limit on Groq; gpt-oss models have 8000+
-            max_toks = 800 if "qwen" in model_candidate.lower() else 1800
-            try:
-                logger.info(f"Submitting query to Groq model ({model_candidate}, max_tokens={max_toks}) for session {session_id}...")
-                response = groq_client.chat.completions.create(
-                    model=model_candidate,
-                    messages=messages_payload,
-                    temperature=0.3,
-                    max_tokens=max_toks
-                )
-                if response.choices and response.choices[0].message and response.choices[0].message.content:
-                    assistant_reply = response.choices[0].message.content
-                    break
-            except Exception as model_err:
-                logger.warning(f"Groq model {model_candidate} call failed: {model_err}. Attempting next model candidate...")
-                last_error = model_err
-
-        if not assistant_reply:
-            raise last_error or RuntimeError("Failed to generate response from all available AI models.")
+            max_toks = _chat_max_tokens(model_candidate)
+            for attempt in range(3):  # Retry on transient network errors
+                try:
+                    logger.info(f"Submitting query to Groq model ({model_candidate}, max_tokens={max_toks}) for session {session_id}...")
+                    response = groq_client.chat.completions.create(
+                        model=model_candidate,
+                        messages=messages_payload,
+                        temperature=0.3,
+                        max_tokens=max_toks
+                    )
+                    if response.choices and response.choices[0].message and response.choices[0].message.content:
+                        assistant_reply = response.choices[0].message.content
+                        break
+                except Exception as model_err:
+                    err_str = str(model_err).lower()
+                    is_transient = any(p in err_str for p in (
+                        "wsarecv", "connection was forcibly closed", "stream reading error",
+                        "connection reset", "broken pipe", "econnreset", "timed out", "eof"
+                    ))
+                    is_rate_limit = "rate_limit" in err_str or "429" in err_str or "too large" in err_str
+                    if is_transient and attempt < 2:
+                        wait_s = 2.0 * (attempt + 1)
+                        logger.warning(f"Transient network error on chat model '{model_candidate}' (attempt {attempt+1}/3): {model_err}. Retrying in {wait_s:.0f}s...")
+                        time.sleep(wait_s)
+                    elif is_rate_limit:
+                        logger.warning(f"Rate limit hit on chat model '{model_candidate}': {model_err}. Trying next model...")
+                        last_error = model_err
+                        break  # Try next model immediately on rate limit
+                    else:
+                        logger.warning(f"Groq chat model '{model_candidate}' failed (attempt {attempt+1}): {model_err}. Trying next model...")
+                        last_error = model_err
+                        break
+            if assistant_reply:
+                break  # Got a reply — stop trying models
 
 
         # 8. Record sources list to return to client
