@@ -497,19 +497,19 @@ export const Dashboard: React.FC = () => {
         {/* Scrollable Viewport Content */}
         <div className={`flex-1 flex flex-col ${activeTab === "chat" ? "overflow-hidden min-h-0" : "overflow-y-auto"}`}>
           {activeTab === "chat" ? (
-            <div className="flex-1 min-h-0 h-full relative" key={activeTab}>
+            <div className="flex-1 min-h-0 h-full relative pb-16 md:pb-0" key={activeTab}>
               {renderActiveContent()}
             </div>
           ) : (
-            <main className="flex-grow p-4 md:p-8 flex flex-col pb-24 md:pb-8">
+            <main className="flex-grow p-3 sm:p-4 md:p-8 flex flex-col pb-24 md:pb-8">
               {/* Header Banner for non-overview & non-chat tabs */}
               {activeTab !== "overview" && (
-                <div className="mb-6 fade-up shrink-0">
+                <div className="mb-4 sm:mb-6 fade-up shrink-0">
                   <p className="section-kicker mb-1">{firstName} · {activePage.eyebrow}</p>
-                  <h1 className="text-2xl md:text-3xl font-heading font-bold text-slate-900 tracking-tight">
+                  <h1 className="text-xl sm:text-2xl md:text-3xl font-heading font-bold text-slate-900 tracking-tight">
                     {activePage.title}
                   </h1>
-                  <p className="mt-1.5 text-xs md:text-sm text-slate-500 leading-relaxed max-w-2xl">
+                  <p className="mt-1 text-xs md:text-sm text-slate-500 leading-relaxed max-w-2xl">
                     {activePage.description}
                   </p>
                 </div>

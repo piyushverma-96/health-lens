@@ -404,21 +404,21 @@ export const Landing: React.FC = () => {
       <main className="flex-1 flex flex-col items-center justify-center z-10 relative w-full">
         
         {/* ================= HERO SECTION (LIGHT HEALTHLENS ATMOSPHERE) ================= */}
-        <section id="home" className="w-full max-w-[1360px] mx-auto px-6 pt-4 pb-16 md:pb-24">
+        <section id="home" className="w-full max-w-[1360px] mx-auto px-4 sm:px-6 pt-2 sm:pt-4 pb-12 md:pb-24">
           
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
             
             {/* ===== LEFT COLUMN: EDITORIAL HERO CONTENT (approx 45% width) ===== */}
-            <div className="lg:col-span-6 space-y-6">
+            <div className="lg:col-span-6 space-y-4 sm:space-y-6">
               
               {/* Pill Kicker */}
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#E6F4F1] border border-[#B2DFDB] text-[#0D9488] text-xs font-semibold shadow-xs">
+              <div className="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-full bg-[#E6F4F1] border border-[#B2DFDB] text-[#0D9488] text-xs font-semibold shadow-xs">
                 <Sparkles className="h-3.5 w-3.5 text-[#0D9488]" />
-                <span className="font-mono text-[10.5px] uppercase tracking-wider font-bold">AI-POWERED HEALTH INSIGHTS</span>
+                <span className="font-mono text-[10px] sm:text-[10.5px] uppercase tracking-wider font-bold">AI-POWERED HEALTH INSIGHTS</span>
               </div>
 
               {/* Editorial Headline */}
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-heading font-extrabold text-[#0B1528] leading-[1.04] tracking-tight">
+              <h1 className="text-4xl sm:text-6xl lg:text-7xl font-heading font-extrabold text-[#0B1528] leading-[1.08] sm:leading-[1.04] tracking-tight">
                 <span className="block hero-title-line">Smarter Health</span>
                 <span className="block hero-title-line">Insights,</span>
                 <span className="block hero-title-line text-[#0D9488]">
@@ -427,21 +427,21 @@ export const Landing: React.FC = () => {
               </h1>
 
               {/* Supporting Description */}
-              <p className="hero-subtitle text-base sm:text-lg text-slate-600 font-light leading-relaxed max-w-xl">
+              <p className="hero-subtitle text-sm sm:text-lg text-slate-600 font-light leading-relaxed max-w-xl">
                 Upload your lab report — our AI instantly decodes every biomarker, tracks your health trends, and answers your questions in plain English.
               </p>
 
               {/* Primary & Secondary CTA Buttons */}
-              <div className="hero-cta pt-3 flex flex-wrap items-center gap-4">
+              <div className="hero-cta pt-2 sm:pt-3 flex flex-wrap items-center gap-3 sm:gap-4">
                 <button 
                   onClick={handleCTAClick}
-                  className="px-8 py-4 rounded-full bg-[#0D9488] hover:bg-[#0B7A70] text-white text-sm font-bold tracking-wide flex items-center gap-2 shadow-lg shadow-teal-900/15 hover:shadow-xl transition-all active:scale-[0.98] cursor-pointer group"
+                  className="px-6 sm:px-8 py-3.5 sm:py-4 rounded-full bg-[#0D9488] hover:bg-[#0B7A70] text-white text-xs sm:text-sm font-bold tracking-wide flex items-center gap-2 shadow-lg shadow-teal-900/15 hover:shadow-xl transition-all active:scale-[0.98] cursor-pointer group"
                 >
                   <span>Start Analyzing Free</span>
                   <ArrowRight className="h-4 w-4 transform group-hover:translate-x-1 transition-transform" />
                 </button>
 
-                <span className="text-sm text-slate-500 font-medium">
+                <span className="text-xs sm:text-sm text-slate-500 font-medium">
                   No credit card needed · 100% free
                 </span>
               </div>
@@ -449,19 +449,19 @@ export const Landing: React.FC = () => {
             </div>
 
             {/* ===== RIGHT COLUMN: LARGE ANATOMICAL VISUAL + FLOATING BIOMARKER CARDS (approx 55% width) ===== */}
-            <div className="lg:col-span-6 relative flex items-center justify-center min-h-[460px] sm:min-h-[520px] lg:min-h-[580px]">
+            <div className="lg:col-span-6 relative flex items-center justify-center min-h-[300px] sm:min-h-[460px] lg:min-h-[580px]">
               
               {/* Soft Ambient Teal Radial Glow behind anatomical figure */}
               <div className="absolute inset-0 bg-radial from-teal-400/20 via-teal-300/5 to-transparent rounded-full blur-3xl pointer-events-none" />
               
               {/* Subtle Concentric Rings */}
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="w-[320px] h-[320px] sm:w-[420px] sm:h-[420px] rounded-full border border-teal-500/10 animate-pulse" />
-                <div className="absolute w-[440px] h-[440px] sm:w-[560px] sm:h-[560px] rounded-full border border-teal-500/5" />
+                <div className="w-[260px] h-[260px] sm:w-[420px] sm:h-[420px] rounded-full border border-teal-500/10 animate-pulse" />
+                <div className="absolute w-[360px] h-[360px] sm:w-[560px] sm:h-[560px] rounded-full border border-teal-500/5" />
               </div>
 
               {/* Anatomy Hero Illustration */}
-              <div className="relative z-10 w-full max-w-[500px] sm:max-w-[560px] lg:max-w-[620px] flex items-center justify-center">
+              <div className="relative z-10 w-full max-w-[340px] sm:max-w-[560px] lg:max-w-[620px] flex items-center justify-center">
                 <img 
                   src="/hero_anatomy.png" 
                   alt="HealthLens Anatomical Intelligence" 
@@ -472,43 +472,43 @@ export const Landing: React.FC = () => {
               {/* Floating Biomarker Card 1: Lipid Profile (Top Right, near shoulder/neck) */}
               <div 
                 onClick={() => navigate(user ? "/dashboard?tab=trends" : "/login?tab=trends")}
-                className="absolute top-6 sm:top-8 right-0 sm:right-2 z-20 p-4 rounded-2xl bg-white/95 border border-slate-200/90 shadow-[0_15px_35px_rgba(0,0,0,0.08)] backdrop-blur-md max-w-[210px] w-full transition-all duration-300 hover:scale-105 cursor-pointer animate-float-slow"
+                className="absolute top-2 sm:top-8 right-0 sm:right-2 z-20 p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white/95 border border-slate-200/90 shadow-[0_15px_35px_rgba(0,0,0,0.08)] backdrop-blur-md max-w-[155px] sm:max-w-[210px] w-full transition-all duration-300 hover:scale-105 cursor-pointer animate-float-slow"
               >
-                <div className="flex items-center justify-between gap-1 mb-2">
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0" />
-                    <span className="text-xs font-bold text-slate-900">Lipid Profile</span>
+                <div className="flex items-center justify-between gap-1 mb-1.5 sm:mb-2">
+                  <div className="flex items-center gap-1 sm:gap-1.5 min-w-0">
+                    <span className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-rose-500 shrink-0" />
+                    <span className="text-[11px] sm:text-xs font-bold text-slate-900 truncate">Lipid Profile</span>
                   </div>
-                  <span className="text-[9.5px] font-mono font-bold uppercase px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 border border-rose-200">
+                  <span className="text-[8.5px] sm:text-[9.5px] font-mono font-bold uppercase px-1.5 sm:px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 border border-rose-200 shrink-0">
                     HIGH
                   </span>
                 </div>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-extrabold font-mono text-slate-900 leading-none">198</span>
-                  <span className="text-xs font-mono text-slate-400">mg/dL</span>
+                  <span className="text-lg sm:text-2xl font-extrabold font-mono text-slate-900 leading-none">198</span>
+                  <span className="text-[10px] sm:text-xs font-mono text-slate-400">mg/dL</span>
                 </div>
-                <p className="text-[10.5px] text-slate-400 font-normal mt-1">Total Cholesterol</p>
+                <p className="text-[9.5px] sm:text-[10.5px] text-slate-400 font-normal mt-0.5 sm:mt-1 truncate">Total Cholesterol</p>
               </div>
 
               {/* Floating Biomarker Card 2: Vitamin D (Bottom Left, near lower ribs/waist) */}
               <div 
                 onClick={() => navigate(user ? "/dashboard?tab=trends" : "/login?tab=trends")}
-                className="absolute bottom-6 sm:bottom-10 left-0 sm:left-4 z-20 p-4 rounded-2xl bg-white/95 border border-slate-200/90 shadow-[0_15px_35px_rgba(0,0,0,0.08)] backdrop-blur-md max-w-[210px] w-full transition-all duration-300 hover:scale-105 cursor-pointer animate-float-slower"
+                className="absolute bottom-2 sm:bottom-10 left-0 sm:left-4 z-20 p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white/95 border border-slate-200/90 shadow-[0_15px_35px_rgba(0,0,0,0.08)] backdrop-blur-md max-w-[155px] sm:max-w-[210px] w-full transition-all duration-300 hover:scale-105 cursor-pointer animate-float-slower"
               >
-                <div className="flex items-center justify-between gap-1 mb-2">
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
-                    <span className="text-xs font-bold text-slate-900">Vitamin D</span>
+                <div className="flex items-center justify-between gap-1 mb-1.5 sm:mb-2">
+                  <div className="flex items-center gap-1 sm:gap-1.5 min-w-0">
+                    <span className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-emerald-500 shrink-0" />
+                    <span className="text-[11px] sm:text-xs font-bold text-slate-900 truncate">Vitamin D</span>
                   </div>
-                  <span className="text-[9.5px] font-mono font-bold uppercase px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                  <span className="text-[8.5px] sm:text-[9.5px] font-mono font-bold uppercase px-1.5 sm:px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 shrink-0">
                     LOW
                   </span>
                 </div>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-extrabold font-mono text-slate-900 leading-none">14.2</span>
-                  <span className="text-xs font-mono text-slate-400">ng/mL</span>
+                  <span className="text-lg sm:text-2xl font-extrabold font-mono text-slate-900 leading-none">14.2</span>
+                  <span className="text-[10px] sm:text-xs font-mono text-slate-400">ng/mL</span>
                 </div>
-                <p className="text-[10.5px] text-slate-400 font-normal mt-1">25-Hydroxy Vitamin D</p>
+                <p className="text-[9.5px] sm:text-[10.5px] text-slate-400 font-normal mt-0.5 sm:mt-1 truncate">25-OH Vitamin D</p>
               </div>
 
             </div>

@@ -68,16 +68,16 @@ export const HealthCommandCenter: React.FC<HealthCommandCenterProps> = ({
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12 animate-fade-in">
+    <div className="space-y-4 sm:space-y-6 max-w-7xl mx-auto pb-12 animate-fade-in">
       
       {/* ================= TOP GREETING & STATUS BANNER ================= */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/70">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-heading font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <span>Good morning, {firstName}</span>
-            <span className="text-xl">👋</span>
+      <div className="flex items-center justify-between gap-3 pb-3 border-b border-slate-200/70">
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-heading font-bold text-slate-900 tracking-tight flex items-center gap-1.5 truncate">
+            <span>Good day, {firstName}</span>
+            <span className="text-lg sm:text-xl shrink-0">👋</span>
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-slate-500 mt-0.5 line-clamp-1 sm:line-clamp-none">
             Here's your health overview. Stay consistent, stay ahead.
           </p>
         </div>
@@ -85,12 +85,12 @@ export const HealthCommandCenter: React.FC<HealthCommandCenterProps> = ({
         {/* User Pill Badge matching reference design top-right */}
         <div 
           onClick={() => onNavigate("profile")}
-          className="self-start sm:self-auto flex items-center gap-3 bg-white px-3.5 py-2 rounded-2xl border border-slate-200/80 shadow-2xs hover:border-teal-600/40 transition-all cursor-pointer group"
+          className="shrink-0 flex items-center gap-2 sm:gap-3 bg-white px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl border border-slate-200/80 shadow-2xs hover:border-teal-600/40 transition-all cursor-pointer group"
         >
-          <div className="h-9 w-9 rounded-xl bg-teal-600 text-white font-bold text-xs flex items-center justify-center shadow-xs">
+          <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-lg sm:rounded-xl bg-teal-600 text-white font-bold text-xs flex items-center justify-center shadow-xs">
             {profile?.first_name ? profile.first_name[0].toUpperCase() : "U"}
           </div>
-          <div className="flex flex-col pr-1">
+          <div className="hidden sm:flex flex-col pr-1">
             <span className="text-xs font-bold text-slate-900 group-hover:text-teal-700 transition-colors">
               {fullName}
             </span>
@@ -102,21 +102,21 @@ export const HealthCommandCenter: React.FC<HealthCommandCenterProps> = ({
       </div>
 
       {/* ================= 4 TOP STAT CARDS (MATCHING REFERENCE UI) ================= */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
         
         {/* Card 1: Overall Health */}
-        <div className="panel-card p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-2xs space-y-2 hover:border-teal-500/30 transition-all">
+        <div className="panel-card p-3 sm:p-5 rounded-xl sm:rounded-2xl border border-slate-200/80 shadow-2xs space-y-1 sm:space-y-2 hover:border-teal-500/30 transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-[10.5px] font-bold uppercase tracking-wider text-slate-400">Overall Health</span>
-            <div className="h-7 w-7 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-              <HeartPulse className="h-4 w-4" />
+            <span className="text-[9.5px] sm:text-[10.5px] font-bold uppercase tracking-wider text-slate-400">Overall Health</span>
+            <div className="h-6 w-6 sm:h-7 sm:w-7 rounded-lg sm:rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <HeartPulse className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </div>
           </div>
           <div className="space-y-0.5">
-            <p className="text-lg sm:text-xl font-heading font-bold text-slate-900">
+            <p className="text-base sm:text-xl font-heading font-bold text-slate-900">
               {totalBiomarkers > 0 ? (abnormalBiomarkers.length === 0 ? "Optimal" : "Attention") : "Ready"}
             </p>
-            <p className="text-[11px] text-emerald-600 font-medium">
+            <p className="text-[10px] sm:text-[11px] text-emerald-600 font-medium truncate">
               {totalBiomarkers > 0 ? `${normalBiomarkers.length} of ${totalBiomarkers} in target` : "Upload a report to start"}
             </p>
           </div>
@@ -125,19 +125,19 @@ export const HealthCommandCenter: React.FC<HealthCommandCenterProps> = ({
         {/* Card 2: Latest Report */}
         <div 
           onClick={() => latestReport && onNavigate("history", latestReport.id)}
-          className="panel-card p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-2xs space-y-2 hover:border-teal-500/30 transition-all cursor-pointer group"
+          className="panel-card p-3 sm:p-5 rounded-xl sm:rounded-2xl border border-slate-200/80 shadow-2xs space-y-1 sm:space-y-2 hover:border-teal-500/30 transition-all cursor-pointer group"
         >
           <div className="flex items-center justify-between">
-            <span className="text-[10.5px] font-bold uppercase tracking-wider text-slate-400">Latest Report</span>
-            <div className="h-7 w-7 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-              <FileText className="h-4 w-4" />
+            <span className="text-[9.5px] sm:text-[10.5px] font-bold uppercase tracking-wider text-slate-400">Latest Report</span>
+            <div className="h-6 w-6 sm:h-7 sm:w-7 rounded-lg sm:rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </div>
           </div>
           <div className="space-y-0.5">
-            <p className="text-lg sm:text-xl font-heading font-bold text-slate-900 truncate" title={latestReport?.file_name || "No scans yet"}>
+            <p className="text-base sm:text-xl font-heading font-bold text-slate-900 truncate" title={latestReport?.file_name || "No scans yet"}>
               {latestReport?.file_name ? latestReport.file_name.replace(/\.[^/.]+$/, "") : "No reports yet"}
             </p>
-            <p className="text-[11px] text-slate-400 font-mono">
+            <p className="text-[10px] sm:text-[11px] text-slate-400 font-mono truncate">
               {latestReport?.recorded_at || "Awaiting scan"}
             </p>
           </div>
@@ -146,23 +146,23 @@ export const HealthCommandCenter: React.FC<HealthCommandCenterProps> = ({
         {/* Card 3: Key Biomarkers Status */}
         <div 
           onClick={() => onNavigate("trends")}
-          className="panel-card p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-2xs space-y-2 hover:border-teal-500/30 transition-all cursor-pointer group"
+          className="panel-card p-3 sm:p-5 rounded-xl sm:rounded-2xl border border-slate-200/80 shadow-2xs space-y-1 sm:space-y-2 hover:border-teal-500/30 transition-all cursor-pointer group"
         >
           <div className="flex items-center justify-between">
-            <span className="text-[10.5px] font-bold uppercase tracking-wider text-slate-400">Key Biomarkers</span>
-            <div className="h-7 w-7 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-              <Activity className="h-4 w-4" />
+            <span className="text-[9.5px] sm:text-[10.5px] font-bold uppercase tracking-wider text-slate-400">Key Biomarkers</span>
+            <div className="h-6 w-6 sm:h-7 sm:w-7 rounded-lg sm:rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <Activity className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </div>
           </div>
           <div className="space-y-0.5">
-            <p className="text-lg sm:text-xl font-heading font-bold text-slate-900">
+            <p className="text-base sm:text-xl font-heading font-bold text-slate-900">
               {abnormalBiomarkers.length > 0 ? (
                 <span className="text-rose-600">{abnormalBiomarkers.length} Abnormal</span>
               ) : (
                 <span className="text-slate-900">{totalBiomarkers} Tracked</span>
               )}
             </p>
-            <p className="text-[11px] text-slate-400 font-medium">
+            <p className="text-[10px] sm:text-[11px] text-slate-400 font-medium truncate">
               {abnormalBiomarkers.length > 0 ? "Requires review" : "All optimal"}
             </p>
           </div>
@@ -171,19 +171,19 @@ export const HealthCommandCenter: React.FC<HealthCommandCenterProps> = ({
         {/* Card 4: AI Insights */}
         <div 
           onClick={() => onNavigate("chat")}
-          className="panel-card p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-2xs space-y-2 hover:border-teal-500/30 transition-all cursor-pointer group"
+          className="panel-card p-3 sm:p-5 rounded-xl sm:rounded-2xl border border-slate-200/80 shadow-2xs space-y-1 sm:space-y-2 hover:border-teal-500/30 transition-all cursor-pointer group"
         >
           <div className="flex items-center justify-between">
-            <span className="text-[10.5px] font-bold uppercase tracking-wider text-slate-400">AI Insights</span>
-            <div className="h-7 w-7 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-              <Sparkles className="h-4 w-4" />
+            <span className="text-[9.5px] sm:text-[10.5px] font-bold uppercase tracking-wider text-slate-400">AI Insights</span>
+            <div className="h-6 w-6 sm:h-7 sm:w-7 rounded-lg sm:rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </div>
           </div>
           <div className="space-y-0.5">
-            <p className="text-lg sm:text-xl font-heading font-bold text-slate-900">
+            <p className="text-base sm:text-xl font-heading font-bold text-slate-900 truncate">
               {completedReports.length > 0 ? `${completedReports.length} Analysis Ready` : "Awaiting scan"}
             </p>
-            <p className="text-[11px] text-teal-600 font-medium flex items-center gap-1">
+            <p className="text-[10px] sm:text-[11px] text-teal-600 font-medium flex items-center gap-1">
               <span>Ask assistant</span>
               <ChevronRight className="h-3 w-3" />
             </p>
@@ -193,10 +193,10 @@ export const HealthCommandCenter: React.FC<HealthCommandCenterProps> = ({
       </div>
 
       {/* ================= MAIN TRI-COLUMN COMMAND ROW ================= */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-stretch">
         
         {/* SECTION A: Health Status & Circular Gauge Ring (3 cols) */}
-        <div className="lg:col-span-3 panel-card p-6 rounded-3xl border border-slate-200/80 shadow-sm flex flex-col justify-between items-center text-center">
+        <div className="lg:col-span-3 panel-card p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-sm flex flex-col justify-between items-center text-center">
           <div className="w-full text-left">
             <span className="text-[10.5px] font-mono uppercase tracking-wider text-slate-400 font-bold block">
               Health Status
@@ -204,9 +204,9 @@ export const HealthCommandCenter: React.FC<HealthCommandCenterProps> = ({
           </div>
 
           {/* SVG Circular Progress Ring */}
-          <div className="my-6 relative flex items-center justify-center">
+          <div className="my-3 sm:my-6 relative flex items-center justify-center">
             {healthScore !== null ? (
-              <div className="relative w-36 h-36 flex items-center justify-center">
+              <div className="relative w-28 h-28 sm:w-36 sm:h-36 flex items-center justify-center">
                 <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
                   <circle
                     cx="50"
@@ -230,19 +230,19 @@ export const HealthCommandCenter: React.FC<HealthCommandCenterProps> = ({
                   />
                 </svg>
                 <div className="absolute flex flex-col items-center justify-center text-center">
-                  <span className="text-3xl font-heading font-bold text-slate-900 leading-none">
+                  <span className="text-2xl sm:text-3xl font-heading font-bold text-slate-900 leading-none">
                     {healthScore}
                   </span>
                   <span className="text-[10px] text-slate-400 font-mono mt-0.5">/100</span>
-                  <span className="text-[10px] font-bold text-teal-700 font-mono mt-1">
+                  <span className="text-[10px] font-bold text-teal-700 font-mono mt-0.5">
                     {scoreLabel}
                   </span>
                 </div>
               </div>
             ) : (
-              <div className="w-36 h-36 rounded-full border-4 border-dashed border-slate-200 flex flex-col items-center justify-center p-3 text-center">
-                <UploadCloud className="h-7 w-7 text-slate-300 mb-1" />
-                <span className="text-[10px] text-slate-400 font-medium leading-tight">
+              <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-full border-3 border-dashed border-slate-200 flex flex-col items-center justify-center p-2 sm:p-3 text-center">
+                <UploadCloud className="h-6 w-6 sm:h-7 sm:w-7 text-slate-300 mb-1" />
+                <span className="text-[9.5px] sm:text-[10px] text-slate-400 font-medium leading-tight">
                   Upload scan to generate score
                 </span>
               </div>
@@ -272,7 +272,7 @@ export const HealthCommandCenter: React.FC<HealthCommandCenterProps> = ({
         </div>
 
         {/* SECTION C: Key Biomarkers Table (5 cols) */}
-        <div className="lg:col-span-5 panel-card p-6 rounded-3xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
+        <div className="lg:col-span-5 panel-card p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <h3 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-2">
@@ -287,20 +287,20 @@ export const HealthCommandCenter: React.FC<HealthCommandCenterProps> = ({
               </button>
             </div>
 
-            <div className="divide-y divide-slate-100 mt-2">
+            <div className="divide-y divide-slate-100 mt-1 sm:mt-2">
               {biomarkersLoading ? (
                 <div className="py-8 flex justify-center items-center">
                   <Loader2 className="h-6 w-6 text-teal-600 animate-spin" />
                 </div>
               ) : biomarkers && biomarkers.length > 0 ? (
                 biomarkers.slice(0, 4).map((b) => (
-                  <div key={b.name} className="py-3 flex items-center justify-between gap-3 group">
+                  <div key={b.name} className="py-2.5 sm:py-3 flex items-center justify-between gap-2.5 sm:gap-3 group">
                     <div className="min-w-0">
                       <p className="text-xs font-bold text-slate-900 truncate">{b.name}</p>
-                      <p className="text-[10px] text-slate-400 font-mono">Ref: {b.reference_range || "Standard interval"}</p>
+                      <p className="text-[10px] text-slate-400 font-mono truncate">Ref: {b.reference_range || "Standard interval"}</p>
                     </div>
 
-                    <div className="flex items-center gap-3 shrink-0">
+                    <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                       <div className="text-right">
                         <span className="text-xs font-mono font-bold text-slate-900">{b.value}</span>
                         <span className="text-[10px] text-slate-400 ml-1 font-mono">{b.unit}</span>
@@ -310,7 +310,7 @@ export const HealthCommandCenter: React.FC<HealthCommandCenterProps> = ({
                   </div>
                 ))
               ) : (
-                <div className="py-8 text-center text-xs text-slate-400">
+                <div className="py-6 sm:py-8 text-center text-xs text-slate-400">
                   No biomarkers logged yet. Upload a lab panel to extract metrics.
                 </div>
               )}
@@ -329,7 +329,7 @@ export const HealthCommandCenter: React.FC<HealthCommandCenterProps> = ({
         </div>
 
         {/* SECTION E: Intelligent AI Insight Panel (4 cols) */}
-        <div className="lg:col-span-4 panel-card p-6 rounded-3xl border border-slate-200/80 shadow-sm flex flex-col justify-between bg-gradient-to-br from-white via-white to-teal-50/30">
+        <div className="lg:col-span-4 panel-card p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-sm flex flex-col justify-between bg-gradient-to-br from-white via-white to-teal-50/30">
           <div className="space-y-3">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div className="flex items-center gap-2 text-teal-700">
@@ -342,8 +342,8 @@ export const HealthCommandCenter: React.FC<HealthCommandCenterProps> = ({
             </div>
 
             {latestReport?.summary ? (
-              <div className="space-y-3">
-                <p className="text-xs text-slate-700 leading-relaxed font-medium line-clamp-5">
+              <div className="space-y-2.5 sm:space-y-3">
+                <p className="text-xs text-slate-700 leading-relaxed font-medium line-clamp-4 sm:line-clamp-5">
                   {latestReport.summary}
                 </p>
                 {latestReport.biomarkers && latestReport.biomarkers.some(b => b.status === "high") && (
@@ -354,14 +354,14 @@ export const HealthCommandCenter: React.FC<HealthCommandCenterProps> = ({
                 )}
               </div>
             ) : (
-              <div className="py-6 text-center space-y-2 text-xs text-slate-500">
-                <Sparkles className="h-8 w-8 text-teal-500/40 mx-auto mb-2" />
+              <div className="py-4 sm:py-6 text-center space-y-2 text-xs text-slate-500">
+                <Sparkles className="h-7 w-7 sm:h-8 sm:w-8 text-teal-500/40 mx-auto mb-1 sm:mb-2" />
                 <p>HealthLens AI analyzes every uploaded document to provide plain-language takeaways.</p>
               </div>
             )}
           </div>
 
-          <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+          <div className="pt-3 sm:pt-4 border-t border-slate-100 flex items-center justify-between">
             <button
               onClick={() => {
                 if (latestReport) {
@@ -387,14 +387,14 @@ export const HealthCommandCenter: React.FC<HealthCommandCenterProps> = ({
       </div>
 
       {/* ================= SECTION B & D: HEALTH STORY & LATEST REPORT ================= */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
         
         {/* SECTION B: Health Story ("What Changed?") */}
-        <div className="lg:col-span-7 panel-card p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
+        <div className="lg:col-span-7 panel-card p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-sm space-y-3 sm:space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <div>
               <span className="text-[10px] font-mono uppercase tracking-wider text-teal-700 font-bold">Health Story</span>
-              <h3 className="text-base font-heading font-bold text-slate-900">What Changed In Your Health?</h3>
+              <h3 className="text-sm sm:text-base font-heading font-bold text-slate-900">What Changed In Your Health?</h3>
             </div>
             <button
               onClick={() => onNavigate("trends")}
@@ -404,23 +404,23 @@ export const HealthCommandCenter: React.FC<HealthCommandCenterProps> = ({
             </button>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             {abnormalBiomarkers.length > 0 ? (
               abnormalBiomarkers.map((b) => (
-                <div key={b.id} className="p-3.5 rounded-2xl bg-slate-50/70 border border-slate-200/70 flex items-center justify-between gap-4">
-                  <div className="space-y-0.5">
+                <div key={b.id} className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-slate-50/70 border border-slate-200/70 flex items-center justify-between gap-3 sm:gap-4">
+                  <div className="space-y-0.5 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-slate-900">{b.name}</span>
+                      <span className="text-xs font-bold text-slate-900 truncate">{b.name}</span>
                       {getStatusBadge(b.status)}
                     </div>
-                    <p className="text-[11px] text-slate-500">
+                    <p className="text-[10px] sm:text-[11px] text-slate-500 truncate">
                       Standard Reference Target: <span className="font-mono text-slate-700">{b.reference_range || "Established bounds"}</span>
                     </p>
                   </div>
 
                   <div className="text-right shrink-0">
-                    <div className="text-sm font-bold font-mono text-slate-900">
-                      {b.value} <span className="text-xs font-normal text-slate-400">{b.unit}</span>
+                    <div className="text-xs sm:text-sm font-bold font-mono text-slate-900">
+                      {b.value} <span className="text-[10px] sm:text-xs font-normal text-slate-400">{b.unit}</span>
                     </div>
                     <button
                       onClick={() => onAskMore(b.name, b.value, b.unit)}
@@ -432,8 +432,8 @@ export const HealthCommandCenter: React.FC<HealthCommandCenterProps> = ({
                 </div>
               ))
             ) : (
-              <div className="py-8 text-center text-xs text-slate-500 space-y-2">
-                <CheckCircle2 className="h-8 w-8 text-teal-600/40 mx-auto mb-1" />
+              <div className="py-6 sm:py-8 text-center text-xs text-slate-500 space-y-2">
+                <CheckCircle2 className="h-7 w-7 sm:h-8 sm:w-8 text-teal-600/40 mx-auto mb-1" />
                 <p className="font-semibold text-slate-700">No abnormal variances detected.</p>
                 <p className="text-[11px] text-slate-400 max-w-sm mx-auto">
                   As you upload more reports over time, HealthLens will compare progressive changes across panels.
@@ -444,12 +444,12 @@ export const HealthCommandCenter: React.FC<HealthCommandCenterProps> = ({
         </div>
 
         {/* SECTION D: Latest Report Quick Card */}
-        <div className="lg:col-span-5 panel-card p-6 rounded-3xl border border-slate-200/80 shadow-sm flex flex-col justify-between space-y-4">
-          <div className="space-y-3">
+        <div className="lg:col-span-5 panel-card p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-sm flex flex-col justify-between space-y-3 sm:space-y-4">
+          <div className="space-y-2.5 sm:space-y-3">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div className="flex items-center gap-2">
                 <FileText className="h-4 w-4 text-teal-600" />
-                <h3 className="text-base font-heading font-bold text-slate-900">Latest Processed Scan</h3>
+                <h3 className="text-sm sm:text-base font-heading font-bold text-slate-900">Latest Processed Scan</h3>
               </div>
               {latestReport && (
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono bg-emerald-50 text-emerald-700 border border-emerald-200">
@@ -459,10 +459,10 @@ export const HealthCommandCenter: React.FC<HealthCommandCenterProps> = ({
             </div>
 
             {latestReport ? (
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 <div>
-                  <h4 className="text-sm font-bold text-slate-900">{latestReport.file_name}</h4>
-                  <div className="flex items-center gap-3 text-xs text-slate-400 font-mono mt-1">
+                  <h4 className="text-sm font-bold text-slate-900 truncate">{latestReport.file_name}</h4>
+                  <div className="flex items-center gap-2 sm:gap-3 text-xs text-slate-400 font-mono mt-1">
                     <span className="flex items-center gap-1">
                       <Calendar className="h-3.5 w-3.5 text-teal-600" />
                       {latestReport.recorded_at}
@@ -483,11 +483,11 @@ export const HealthCommandCenter: React.FC<HealthCommandCenterProps> = ({
             )}
           </div>
 
-          <div className="pt-4 border-t border-slate-100 flex items-center gap-3">
+          <div className="pt-3 sm:pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
             {latestReport ? (
               <button
                 onClick={() => onNavigate("history", latestReport.id)}
-                className="flex-1 py-2.5 px-4 bg-slate-900 hover:bg-slate-950 text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="flex-1 py-2.5 px-3 sm:px-4 bg-slate-900 hover:bg-slate-950 text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span>View Full Report</span>
                 <ArrowRight className="h-3.5 w-3.5" />
@@ -496,7 +496,7 @@ export const HealthCommandCenter: React.FC<HealthCommandCenterProps> = ({
 
             <button
               onClick={() => onNavigate("upload")}
-              className="py-2.5 px-4 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+              className="py-2.5 px-3 sm:px-4 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <UploadCloud className="h-3.5 w-3.5" />
               <span>Upload Scan</span>
