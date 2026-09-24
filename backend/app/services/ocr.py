@@ -29,6 +29,7 @@ Poppler configuration (PDF -> image rasterisation for scanned PDFs)
 """
 
 import os
+import time
 import concurrent.futures
 import logging
 import shutil
@@ -121,16 +122,34 @@ TESSERACT_AVAILABLE: bool = _configure_tesseract()
 def download_storage_file(file_path: str) -> str:
     file_name = os.path.basename(file_path)
     local_path = os.path.join(TEMP_DIR, file_name)
-    try:
-        response = supabase.storage.from_("reports").download(file_path)
-        with open(local_path, "wb") as f:
-            f.write(response)
-        logger.debug(f"Downloaded '{file_path}' to '{local_path}' ({len(response)} bytes)")
-        return local_path
-    except Exception as e:
-        if os.path.exists(local_path):
-            os.remove(local_path)
-        raise RuntimeError(f"Failed to download report from Supabase Storage: {e}") from e
+    last_err = None
+    for attempt in range(3):  # Retry up to 3 times for transient network errors
+        try:
+            response = supabase.storage.from_("reports").download(file_path)
+            with open(local_path, "wb") as f:
+                f.write(response)
+            logger.debug(f"Downloaded '{file_path}' to '{local_path}' ({len(response)} bytes)")
+            return local_path
+        except Exception as e:
+            last_err = e
+            err_str = str(e).lower()
+            is_transient = any(p in err_str for p in (
+                "wsarecv", "connection was forcibly closed", "stream reading error",
+                "connection reset", "connection aborted", "remotedisconnected",
+                "broken pipe", "econnreset", "timed out", "timeout", "eof"
+            ))
+            if os.path.exists(local_path):
+                os.remove(local_path)
+            if is_transient and attempt < 2:
+                wait_s = 2.0 * (attempt + 1)
+                logger.warning(
+                    f"Transient network error downloading '{file_path}' "
+                    f"(attempt {attempt + 1}/3): {e}. Retrying in {wait_s:.0f}s..."
+                )
+                time.sleep(wait_s)
+            else:
+                break  # Non-transient error or exhausted retries
+    raise RuntimeError(f"Failed to download report from Supabase Storage: {last_err}") from last_err
 
 
 def validate_file_signature(file_path: str) -> bool:

@@ -1,4 +1,5 @@
 import re
+import time
 import logging
 import groq
 import instructor
@@ -12,6 +13,31 @@ logger = logging.getLogger("healthlens.parser")
 # Initialize the Instructor-wrapped Groq client
 groq_client = groq.Groq(api_key=settings.GROQ_API_KEY)
 client = instructor.from_groq(groq_client, mode=instructor.Mode.JSON)
+
+
+def _is_transient_network_error(exc: Exception) -> bool:
+    """
+    Returns True for transient TCP/network errors that are safe to retry.
+    These include: wsarecv connection resets, stream reading errors,
+    connection forcibly closed by remote host, and socket timeouts.
+    """
+    msg = str(exc).lower()
+    transient_patterns = [
+        "wsarecv",
+        "connection was forcibly closed",
+        "stream reading error",
+        "connection reset",
+        "connection aborted",
+        "remotedisconnected",
+        "broken pipe",
+        "econnreset",
+        "timed out",
+        "timeout",
+        "read timed out",
+        "ssl eof",
+        "eof occurred",
+    ]
+    return any(p in msg for p in transient_patterns)
 
 class ExtractedBiomarker(BaseModel):
     name: str = Field(description="Normalized name of the biomarker (e.g. 'Hemoglobin', 'RBC', 'WBC', 'Platelets', 'LDL', 'HDL', 'Triglycerides', 'Vitamin D', 'TSH', 'Creatinine', 'HbA1c')")
@@ -204,30 +230,49 @@ def parse_report_text(raw_text: str) -> ExtractedReportData:
     """
 
     try:
-        # Fast structured extraction with Groq
+        # Fast structured extraction with Groq (with retry for transient network errors)
         extraction_model = getattr(settings, "GROQ_EXTRACTION_MODEL", "qwen/qwen3.8-27b") or "qwen/qwen3.8-27b"
-        try:
-            extracted_data = client.chat.completions.create(
-                model=extraction_model,
-                response_model=ExtractedReportData,
-                messages=[
-                    {"role": "system", "content": "You are a fast, highly accurate clinical laboratory biomarker extraction parser. Extract patient name and biomarkers list directly into the schema."},
-                    {"role": "user", "content": prompt}
-                ],
-                temperature=0.0
-            )
-        except Exception as primary_ext_err:
-            logger.warning(f"Primary extraction model {extraction_model} failed: {primary_ext_err}. Retrying with backup...")
-            backup_model = "openai/gpt-oss-20b" if extraction_model != "openai/gpt-oss-20b" else "openai/gpt-oss-120b"
-            extracted_data = client.chat.completions.create(
-                model=backup_model,
-                response_model=ExtractedReportData,
-                messages=[
-                    {"role": "system", "content": "You are a fast, highly accurate clinical laboratory biomarker extraction parser. Extract patient name and biomarkers list directly into the schema."},
-                    {"role": "user", "content": prompt}
-                ],
-                temperature=0.0
-            )
+        extraction_models_to_try = [
+            extraction_model,
+            "openai/gpt-oss-20b",
+            "openai/gpt-oss-120b",
+        ]
+        extracted_data = None
+        last_ext_err = None
+        for ext_model in extraction_models_to_try:
+            success = False
+            for attempt in range(3):  # Up to 3 attempts per model for transient errors
+                try:
+                    extracted_data = client.chat.completions.create(
+                        model=ext_model,
+                        response_model=ExtractedReportData,
+                        messages=[
+                            {"role": "system", "content": "You are a fast, highly accurate clinical laboratory biomarker extraction parser. Extract patient name and biomarkers list directly into the schema."},
+                            {"role": "user", "content": prompt}
+                        ],
+                        temperature=0.0
+                    )
+                    success = True
+                    break  # Successful — stop retrying this model
+                except Exception as ext_err:
+                    last_ext_err = ext_err
+                    if _is_transient_network_error(ext_err) and attempt < 2:
+                        wait_s = 1.5 * (attempt + 1)
+                        logger.warning(
+                            f"Transient network error on extraction model '{ext_model}' "
+                            f"(attempt {attempt + 1}/3): {ext_err}. Retrying in {wait_s:.1f}s..."
+                        )
+                        time.sleep(wait_s)
+                    else:
+                        logger.warning(
+                            f"Extraction model '{ext_model}' failed (attempt {attempt + 1}): {ext_err}. "
+                            f"Trying next model..."
+                        )
+                        break  # Non-transient error or exhausted retries — try next model
+            if success:
+                break
+        if extracted_data is None:
+            raise RuntimeError(f"All extraction models failed: {last_ext_err}")
         
         # Normalize names and validate status indicators/units
         for biomarker in extracted_data.biomarkers:
@@ -357,25 +402,42 @@ def generate_personalized_report(
     """
 
     try:
-        # Fast direct Markdown generation with model fallback
+        # Fast direct Markdown generation with model fallback + retry on transient network errors
         generation_models = [settings.GROQ_MODEL, "openai/gpt-oss-120b", "openai/gpt-oss-20b"]
         raw_completion = None
         for gen_model in generation_models:
             max_t = 800 if "qwen" in gen_model.lower() else 1800
-            try:
-                raw_completion = groq_client.chat.completions.create(
-                    model=gen_model,
-                    messages=[
-                        {"role": "system", "content": "You are a world-class clinical laboratory AI that generates concise, beautifully structured patient health reports in clean Markdown."},
-                        {"role": "user", "content": prompt}
-                    ],
-                    temperature=0.2,
-                    max_tokens=max_t
-                )
-                if raw_completion and raw_completion.choices and raw_completion.choices[0].message.content:
-                    break
-            except Exception as gen_err:
-                logger.warning(f"Report generation with model {gen_model} failed: {gen_err}. Trying fallback...")
+            for attempt in range(3):  # Up to 3 attempts per model for transient errors
+                try:
+                    raw_completion = groq_client.chat.completions.create(
+                        model=gen_model,
+                        messages=[
+                            {"role": "system", "content": "You are a world-class clinical laboratory AI that generates concise, beautifully structured patient health reports in clean Markdown."},
+                            {"role": "user", "content": prompt}
+                        ],
+                        temperature=0.2,
+                        max_tokens=max_t
+                    )
+                    if raw_completion and raw_completion.choices and raw_completion.choices[0].message.content:
+                        break  # Got valid content — exit retry loop
+                except Exception as gen_err:
+                    if _is_transient_network_error(gen_err) and attempt < 2:
+                        wait_s = 2.0 * (attempt + 1)
+                        logger.warning(
+                            f"Transient network error on generation model '{gen_model}' "
+                            f"(attempt {attempt + 1}/3): {gen_err}. Retrying in {wait_s:.1f}s..."
+                        )
+                        time.sleep(wait_s)
+                        raw_completion = None
+                    else:
+                        logger.warning(
+                            f"Report generation with model '{gen_model}' failed (attempt {attempt + 1}): "
+                            f"{gen_err}. Trying next model..."
+                        )
+                        raw_completion = None
+                        break  # Non-transient or exhausted retries — try next model
+            if raw_completion and raw_completion.choices and raw_completion.choices[0].message.content:
+                break  # Valid completion found — stop iterating models
 
         if not raw_completion or not raw_completion.choices:
             raise RuntimeError("All models failed to generate the markdown report.")
