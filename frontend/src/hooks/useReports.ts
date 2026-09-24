@@ -36,7 +36,7 @@ export const useReports = () => {
         const hasPending = query.state.data?.some(
           (report) => report.status === "pending"
         );
-        return hasPending ? 1000 : false; // Fast 1s polling while pending
+        return hasPending ? 2000 : false; // Conservative 2s polling while pending to prevent DB pool contention
       }
     });
   };
@@ -48,7 +48,7 @@ export const useReports = () => {
       queryFn: () => api.get<Report>(`/reports/${id}`),
       enabled: !!id,
       refetchInterval: (query) => {
-        return query.state.data?.status === "pending" ? 1000 : false; // Fast 1s polling while pending
+        return query.state.data?.status === "pending" ? 2000 : false; // Conservative 2s polling while pending
       }
     });
   };

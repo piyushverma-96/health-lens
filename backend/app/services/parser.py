@@ -205,7 +205,7 @@ def parse_report_text(raw_text: str) -> ExtractedReportData:
 
     try:
         # Fast structured extraction with Groq
-        extraction_model = getattr(settings, "GROQ_EXTRACTION_MODEL", "openai/gpt-oss-20b") or "openai/gpt-oss-20b"
+        extraction_model = getattr(settings, "GROQ_EXTRACTION_MODEL", "qwen/qwen3.8-27b") or "qwen/qwen3.8-27b"
         try:
             extracted_data = client.chat.completions.create(
                 model=extraction_model,
@@ -218,7 +218,7 @@ def parse_report_text(raw_text: str) -> ExtractedReportData:
             )
         except Exception as primary_ext_err:
             logger.warning(f"Primary extraction model {extraction_model} failed: {primary_ext_err}. Retrying with backup...")
-            backup_model = "openai/gpt-oss-120b" if extraction_model != "openai/gpt-oss-120b" else "openai/gpt-oss-20b"
+            backup_model = "openai/gpt-oss-20b" if extraction_model != "openai/gpt-oss-20b" else "openai/gpt-oss-120b"
             extracted_data = client.chat.completions.create(
                 model=backup_model,
                 response_model=ExtractedReportData,
