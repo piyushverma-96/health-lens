@@ -192,21 +192,24 @@ export const HealthCommandCenter: React.FC<HealthCommandCenterProps> = ({
 
       </div>
 
-      {/* ================= MAIN TRI-COLUMN COMMAND ROW ================= */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-stretch">
+      {/* ================= ROW 1: HEALTH STATUS + AI HEALTH INSIGHT (SIDE BY SIDE ON MOBILE) ================= */}
+      <div className="grid grid-cols-2 lg:grid-cols-12 gap-2.5 sm:gap-6 items-stretch">
         
-        {/* SECTION A: Health Status & Circular Gauge Ring (3 cols) */}
-        <div className="lg:col-span-3 panel-card p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-sm flex flex-col justify-between items-center text-center">
-          <div className="w-full text-left">
-            <span className="text-[10.5px] font-mono uppercase tracking-wider text-slate-400 font-bold block">
+        {/* SECTION A: Health Status & Circular Gauge Ring */}
+        <div className="col-span-1 lg:col-span-4 panel-card p-3 sm:p-6 rounded-xl sm:rounded-3xl border border-slate-200/80 shadow-2xs flex flex-col justify-between items-center text-center">
+          <div className="w-full flex items-center justify-between">
+            <span className="text-[9.5px] sm:text-[10.5px] font-mono uppercase tracking-wider text-slate-400 font-bold">
               Health Status
+            </span>
+            <span className="text-[9px] sm:text-[10px] font-bold text-teal-700 font-mono bg-teal-50 px-1.5 py-0.5 rounded-md">
+              {scoreLabel}
             </span>
           </div>
 
           {/* SVG Circular Progress Ring */}
-          <div className="my-3 sm:my-6 relative flex items-center justify-center">
+          <div className="my-2 sm:my-5 relative flex items-center justify-center">
             {healthScore !== null ? (
-              <div className="relative w-28 h-28 sm:w-36 sm:h-36 flex items-center justify-center">
+              <div className="relative w-20 h-20 sm:w-32 sm:h-32 flex items-center justify-center">
                 <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
                   <circle
                     cx="50"
@@ -230,138 +233,78 @@ export const HealthCommandCenter: React.FC<HealthCommandCenterProps> = ({
                   />
                 </svg>
                 <div className="absolute flex flex-col items-center justify-center text-center">
-                  <span className="text-2xl sm:text-3xl font-heading font-bold text-slate-900 leading-none">
+                  <span className="text-xl sm:text-3xl font-heading font-bold text-slate-900 leading-none">
                     {healthScore}
                   </span>
-                  <span className="text-[10px] text-slate-400 font-mono mt-0.5">/100</span>
-                  <span className="text-[10px] font-bold text-teal-700 font-mono mt-0.5">
-                    {scoreLabel}
-                  </span>
+                  <span className="text-[9px] sm:text-[10px] text-slate-400 font-mono mt-0.5">/100</span>
                 </div>
               </div>
             ) : (
-              <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-full border-3 border-dashed border-slate-200 flex flex-col items-center justify-center p-2 sm:p-3 text-center">
-                <UploadCloud className="h-6 w-6 sm:h-7 sm:w-7 text-slate-300 mb-1" />
-                <span className="text-[9.5px] sm:text-[10px] text-slate-400 font-medium leading-tight">
-                  Upload scan to generate score
+              <div className="w-20 h-20 sm:w-32 sm:h-32 rounded-full border-2 border-dashed border-slate-200 flex flex-col items-center justify-center p-2 text-center">
+                <UploadCloud className="h-5 w-5 sm:h-7 sm:w-7 text-slate-300 mb-0.5" />
+                <span className="text-[8.5px] sm:text-[10px] text-slate-400 font-medium leading-tight">
+                  No score
                 </span>
               </div>
             )}
           </div>
 
-          <div className="w-full pt-4 border-t border-slate-100">
+          <div className="w-full pt-2 sm:pt-3 border-t border-slate-100">
             {totalBiomarkers > 0 ? (
-              <div className="flex items-center justify-between text-xs text-slate-600">
-                <span className="flex items-center gap-1.5 text-teal-700 font-semibold">
-                  <TrendingUp className="h-3.5 w-3.5" />
-                  Trending Up
+              <div className="flex items-center justify-center sm:justify-between text-[10px] sm:text-xs text-slate-600">
+                <span className="flex items-center gap-1 text-teal-700 font-semibold truncate">
+                  <TrendingUp className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0" />
+                  <span className="truncate">Optimal Track</span>
                 </span>
-                <span className="text-slate-400 font-mono">
+                <span className="hidden sm:inline text-slate-400 font-mono">
                   {totalBiomarkers} markers
                 </span>
               </div>
             ) : (
               <button
                 onClick={() => onNavigate("upload")}
-                className="w-full py-2 bg-teal-50 hover:bg-teal-100 text-teal-700 text-xs font-bold rounded-xl transition-all"
+                className="w-full py-1.5 bg-teal-50 hover:bg-teal-100 text-teal-700 text-[10px] sm:text-xs font-bold rounded-lg transition-all"
               >
-                Upload First Report
+                Upload Lab
               </button>
             )}
           </div>
         </div>
 
-        {/* SECTION C: Key Biomarkers Table (5 cols) */}
-        <div className="lg:col-span-5 panel-card p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <h3 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                <Activity className="h-4 w-4 text-teal-600" />
-                <span>Your Key Biomarkers</span>
-              </h3>
-              <button
-                onClick={() => onNavigate("trends")}
-                className="text-[11px] font-bold text-teal-700 hover:underline cursor-pointer"
-              >
-                View all &rarr;
-              </button>
-            </div>
-
-            <div className="divide-y divide-slate-100 mt-1 sm:mt-2">
-              {biomarkersLoading ? (
-                <div className="py-8 flex justify-center items-center">
-                  <Loader2 className="h-6 w-6 text-teal-600 animate-spin" />
-                </div>
-              ) : biomarkers && biomarkers.length > 0 ? (
-                biomarkers.slice(0, 4).map((b) => (
-                  <div key={b.name} className="py-2.5 sm:py-3 flex items-center justify-between gap-2.5 sm:gap-3 group">
-                    <div className="min-w-0">
-                      <p className="text-xs font-bold text-slate-900 truncate">{b.name}</p>
-                      <p className="text-[10px] text-slate-400 font-mono truncate">Ref: {b.reference_range || "Standard interval"}</p>
-                    </div>
-
-                    <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-                      <div className="text-right">
-                        <span className="text-xs font-mono font-bold text-slate-900">{b.value}</span>
-                        <span className="text-[10px] text-slate-400 ml-1 font-mono">{b.unit}</span>
-                      </div>
-                      {getStatusBadge(b.status)}
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="py-6 sm:py-8 text-center text-xs text-slate-400">
-                  No biomarkers logged yet. Upload a lab panel to extract metrics.
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
-            <span>Last checked from active lab panels</span>
-            <button 
-              onClick={() => onNavigate("trends")}
-              className="font-bold text-teal-700 hover:underline"
-            >
-              Analyze Trends
-            </button>
-          </div>
-        </div>
-
-        {/* SECTION E: Intelligent AI Insight Panel (4 cols) */}
-        <div className="lg:col-span-4 panel-card p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-sm flex flex-col justify-between bg-gradient-to-br from-white via-white to-teal-50/30">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div className="flex items-center gap-2 text-teal-700">
-                <Sparkles className="h-4 w-4" />
-                <h3 className="text-sm font-bold tracking-tight">AI Health Insight</h3>
+        {/* SECTION E: Intelligent AI Insight Panel */}
+        <div className="col-span-1 lg:col-span-8 panel-card p-3 sm:p-6 rounded-xl sm:rounded-3xl border border-slate-200/80 shadow-2xs flex flex-col justify-between bg-gradient-to-br from-white via-white to-teal-50/40">
+          <div className="space-y-1.5 sm:space-y-3">
+            <div className="flex items-center justify-between pb-1.5 sm:pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-1.5 text-teal-700">
+                <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+                <h3 className="text-xs sm:text-sm font-bold tracking-tight">AI Health Insight</h3>
               </div>
-              <span className="text-[10px] font-mono text-teal-700 font-bold bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200/60">
+              <span className="hidden sm:inline text-[10px] font-mono text-teal-700 font-bold bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200/60">
                 Clinical Context
               </span>
             </div>
 
             {latestReport?.summary ? (
-              <div className="space-y-2.5 sm:space-y-3">
-                <p className="text-xs text-slate-700 leading-relaxed font-medium line-clamp-4 sm:line-clamp-5">
+              <div className="space-y-1.5 sm:space-y-2">
+                <p className="text-[11px] sm:text-xs text-slate-700 leading-snug sm:leading-relaxed font-medium line-clamp-3 sm:line-clamp-4">
                   {latestReport.summary}
                 </p>
                 {latestReport.biomarkers && latestReport.biomarkers.some(b => b.status === "high") && (
-                  <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200/70 text-[11px] text-rose-800 flex items-start gap-2">
-                    <AlertTriangle className="h-3.5 w-3.5 text-rose-600 shrink-0 mt-0.5" />
-                    <span>HealthLens noticed elevated cardiovascular / metabolic indicators. Consult your clinician.</span>
+                  <div className="p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl bg-rose-50 border border-rose-200/70 text-[10px] sm:text-[11px] text-rose-800 flex items-start gap-1.5">
+                    <AlertTriangle className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-rose-600 shrink-0 mt-0.5" />
+                    <span className="line-clamp-2">Elevated metabolic indicators found. Review with doctor.</span>
                   </div>
                 )}
               </div>
             ) : (
-              <div className="py-4 sm:py-6 text-center space-y-2 text-xs text-slate-500">
-                <Sparkles className="h-7 w-7 sm:h-8 sm:w-8 text-teal-500/40 mx-auto mb-1 sm:mb-2" />
-                <p>HealthLens AI analyzes every uploaded document to provide plain-language takeaways.</p>
+              <div className="py-2 sm:py-6 text-center space-y-1 text-slate-500">
+                <Sparkles className="h-5 w-5 sm:h-8 sm:w-8 text-teal-500/40 mx-auto" />
+                <p className="text-[10px] sm:text-xs">Upload your lab test to activate automated clinical interpretations.</p>
               </div>
             )}
           </div>
 
-          <div className="pt-3 sm:pt-4 border-t border-slate-100 flex items-center justify-between">
+          <div className="pt-2 sm:pt-3 border-t border-slate-100 flex items-center justify-between">
             <button
               onClick={() => {
                 if (latestReport) {
@@ -370,136 +313,163 @@ export const HealthCommandCenter: React.FC<HealthCommandCenterProps> = ({
                   onNavigate("chat");
                 }
               }}
-              className="text-xs font-bold text-teal-700 hover:text-teal-800 flex items-center gap-1 cursor-pointer"
+              className="text-[10px] sm:text-xs font-bold text-teal-700 hover:text-teal-800 flex items-center gap-1 cursor-pointer"
             >
-              <span>View details</span>
-              <ArrowRight className="h-3.5 w-3.5" />
+              <span>Details</span>
+              <ArrowRight className="h-3 w-3" />
             </button>
             <button
               onClick={() => onNavigate("chat")}
-              className="text-xs font-semibold text-slate-500 hover:text-slate-800"
+              className="text-[10px] sm:text-xs font-semibold text-slate-600 hover:text-slate-900"
             >
-              Ask Questions
+              Ask AI &rarr;
             </button>
           </div>
         </div>
 
       </div>
 
-      {/* ================= SECTION B & D: HEALTH STORY & LATEST REPORT ================= */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
-        
-        {/* SECTION B: Health Story ("What Changed?") */}
-        <div className="lg:col-span-7 panel-card p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-sm space-y-3 sm:space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-            <div>
-              <span className="text-[10px] font-mono uppercase tracking-wider text-teal-700 font-bold">Health Story</span>
-              <h3 className="text-sm sm:text-base font-heading font-bold text-slate-900">What Changed In Your Health?</h3>
-            </div>
-            <button
-              onClick={() => onNavigate("trends")}
-              className="text-xs font-bold text-teal-700 hover:underline"
-            >
-              Interactive Charts &rarr;
-            </button>
-          </div>
-
-          <div className="space-y-2 sm:space-y-3">
-            {abnormalBiomarkers.length > 0 ? (
-              abnormalBiomarkers.map((b) => (
-                <div key={b.id} className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-slate-50/70 border border-slate-200/70 flex items-center justify-between gap-3 sm:gap-4">
-                  <div className="space-y-0.5 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-slate-900 truncate">{b.name}</span>
-                      {getStatusBadge(b.status)}
-                    </div>
-                    <p className="text-[10px] sm:text-[11px] text-slate-500 truncate">
-                      Standard Reference Target: <span className="font-mono text-slate-700">{b.reference_range || "Established bounds"}</span>
-                    </p>
-                  </div>
-
-                  <div className="text-right shrink-0">
-                    <div className="text-xs sm:text-sm font-bold font-mono text-slate-900">
-                      {b.value} <span className="text-[10px] sm:text-xs font-normal text-slate-400">{b.unit}</span>
-                    </div>
-                    <button
-                      onClick={() => onAskMore(b.name, b.value, b.unit)}
-                      className="text-[10px] font-bold text-teal-700 hover:underline mt-0.5 block"
-                    >
-                      Ask More
-                    </button>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="py-6 sm:py-8 text-center text-xs text-slate-500 space-y-2">
-                <CheckCircle2 className="h-7 w-7 sm:h-8 sm:w-8 text-teal-600/40 mx-auto mb-1" />
-                <p className="font-semibold text-slate-700">No abnormal variances detected.</p>
-                <p className="text-[11px] text-slate-400 max-w-sm mx-auto">
-                  As you upload more reports over time, HealthLens will compare progressive changes across panels.
-                </p>
-              </div>
-            )}
-          </div>
+      {/* ================= ROW 2: KEY BIOMARKERS (2x2 MICRO-GRID ON MOBILE) ================= */}
+      <div className="panel-card p-3 sm:p-6 rounded-xl sm:rounded-3xl border border-slate-200/80 shadow-2xs">
+        <div className="flex items-center justify-between pb-2.5 sm:pb-3 border-b border-slate-100">
+          <h3 className="text-xs sm:text-sm font-bold text-slate-900 tracking-tight flex items-center gap-1.5 sm:gap-2">
+            <Activity className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-teal-600" />
+            <span>Key Biomarkers</span>
+          </h3>
+          <button
+            onClick={() => onNavigate("trends")}
+            className="text-[10px] sm:text-[11px] font-bold text-teal-700 hover:underline cursor-pointer"
+          >
+            View all &rarr;
+          </button>
         </div>
 
-        {/* SECTION D: Latest Report Quick Card */}
-        <div className="lg:col-span-5 panel-card p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-sm flex flex-col justify-between space-y-3 sm:space-y-4">
-          <div className="space-y-2.5 sm:space-y-3">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div className="flex items-center gap-2">
-                <FileText className="h-4 w-4 text-teal-600" />
-                <h3 className="text-sm sm:text-base font-heading font-bold text-slate-900">Latest Processed Scan</h3>
+        {biomarkersLoading ? (
+          <div className="py-6 flex justify-center items-center">
+            <Loader2 className="h-5 w-5 text-teal-600 animate-spin" />
+          </div>
+        ) : biomarkers && biomarkers.length > 0 ? (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 pt-2.5">
+            {biomarkers.slice(0, 4).map((b) => (
+              <div 
+                key={b.name} 
+                onClick={() => onAskMore(b.name, b.value, b.unit)}
+                className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-slate-50/80 hover:bg-teal-50/50 border border-slate-200/70 hover:border-teal-300 transition-all cursor-pointer flex flex-col justify-between"
+              >
+                <div className="flex items-center justify-between gap-1 mb-1">
+                  <p className="text-[11px] sm:text-xs font-bold text-slate-900 truncate">{b.name}</p>
+                  {getStatusBadge(b.status)}
+                </div>
+                <div className="flex items-baseline justify-between mt-0.5">
+                  <span className="text-xs sm:text-sm font-bold font-mono text-slate-900">{b.value}</span>
+                  <span className="text-[9.5px] text-slate-400 font-mono truncate">{b.unit}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="py-4 text-center text-xs text-slate-400">
+            No biomarkers logged yet. Upload a lab panel to extract metrics.
+          </div>
+        )}
+      </div>
+
+      {/* ================= ROW 3: LATEST SCAN + HEALTH STORY (SIDE BY SIDE ON MOBILE) ================= */}
+      <div className="grid grid-cols-2 lg:grid-cols-12 gap-2.5 sm:gap-6">
+        
+        {/* Latest Report Quick Card */}
+        <div className="col-span-1 lg:col-span-6 panel-card p-3 sm:p-6 rounded-xl sm:rounded-3xl border border-slate-200/80 shadow-2xs flex flex-col justify-between">
+          <div className="space-y-1.5 sm:space-y-2.5">
+            <div className="flex items-center justify-between pb-1.5 sm:pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-1.5 text-slate-900">
+                <FileText className="h-3.5 w-3.5 text-teal-600 shrink-0" />
+                <h3 className="text-xs sm:text-sm font-bold truncate">Latest Scan</h3>
               </div>
               {latestReport && (
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span className="px-1.5 py-0.5 rounded-md text-[9px] font-bold font-mono bg-emerald-50 text-emerald-700 border border-emerald-200">
                   {latestReport.status}
                 </span>
               )}
             </div>
 
             {latestReport ? (
-              <div className="space-y-2 sm:space-y-3">
-                <div>
-                  <h4 className="text-sm font-bold text-slate-900 truncate">{latestReport.file_name}</h4>
-                  <div className="flex items-center gap-2 sm:gap-3 text-xs text-slate-400 font-mono mt-1">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="h-3.5 w-3.5 text-teal-600" />
-                      {latestReport.recorded_at}
-                    </span>
-                    <span>·</span>
-                    <span>{latestReport.mime_type.split("/")[1]?.toUpperCase() || "PDF"}</span>
-                  </div>
+              <div className="space-y-1">
+                <h4 className="text-[11px] sm:text-sm font-bold text-slate-900 truncate">{latestReport.file_name}</h4>
+                <div className="flex items-center gap-1 text-[10px] text-slate-400 font-mono truncate">
+                  <Calendar className="h-3 w-3 text-teal-600 shrink-0" />
+                  <span>{latestReport.recorded_at}</span>
                 </div>
-
-                <p className="text-xs text-slate-600 leading-relaxed line-clamp-3">
-                  {latestReport.summary || "Structured extraction completed with full biomarker parameters cataloged."}
-                </p>
               </div>
             ) : (
-              <div className="py-6 text-center text-xs text-slate-400">
-                No reports uploaded yet.
+              <div className="py-3 text-center text-[10px] text-slate-400">
+                No reports yet.
               </div>
             )}
           </div>
 
-          <div className="pt-3 sm:pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+          <div className="pt-2 sm:pt-3 border-t border-slate-100 mt-2">
             {latestReport ? (
               <button
                 onClick={() => onNavigate("history", latestReport.id)}
-                className="flex-1 py-2.5 px-3 sm:px-4 bg-slate-900 hover:bg-slate-950 text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-1.5 sm:py-2 px-2 bg-slate-900 hover:bg-slate-950 text-white text-[10px] sm:text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1"
               >
-                <span>View Full Report</span>
-                <ArrowRight className="h-3.5 w-3.5" />
+                <span>View Report</span>
+                <ArrowRight className="h-3 w-3" />
               </button>
-            ) : null}
+            ) : (
+              <button
+                onClick={() => onNavigate("upload")}
+                className="w-full py-1.5 sm:py-2 px-2 bg-teal-600 hover:bg-teal-700 text-white text-[10px] sm:text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1"
+              >
+                <UploadCloud className="h-3 w-3" />
+                <span>Upload</span>
+              </button>
+            )}
+          </div>
+        </div>
 
+        {/* Health Story ("What Changed?") */}
+        <div className="col-span-1 lg:col-span-6 panel-card p-3 sm:p-6 rounded-xl sm:rounded-3xl border border-slate-200/80 shadow-2xs flex flex-col justify-between">
+          <div className="space-y-1.5 sm:space-y-2.5">
+            <div className="flex items-center justify-between pb-1.5 sm:pb-3 border-b border-slate-100">
+              <span className="text-[9.5px] sm:text-[10.5px] font-mono uppercase tracking-wider text-teal-700 font-bold truncate">
+                Health Story
+              </span>
+              <button
+                onClick={() => onNavigate("trends")}
+                className="text-[10px] font-bold text-teal-700 hover:underline shrink-0"
+              >
+                Trends &rarr;
+              </button>
+            </div>
+
+            <div>
+              {abnormalBiomarkers.length > 0 ? (
+                <div className="space-y-1">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs sm:text-sm font-bold text-rose-600">
+                      {abnormalBiomarkers.length} Variances
+                    </span>
+                  </div>
+                  <p className="text-[10px] sm:text-[11px] text-slate-500 line-clamp-2">
+                    {abnormalBiomarkers.slice(0, 2).map(b => b.name).join(", ")} flagged outside range.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-1 text-center py-1">
+                  <p className="text-xs font-bold text-emerald-700">All Optimal</p>
+                  <p className="text-[10px] text-slate-400 line-clamp-2">No abnormal flags recorded.</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="pt-2 sm:pt-3 border-t border-slate-100 mt-2">
             <button
-              onClick={() => onNavigate("upload")}
-              className="py-2.5 px-3 sm:px-4 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              onClick={() => onNavigate("trends")}
+              className="w-full py-1.5 sm:py-2 px-2 bg-teal-50 hover:bg-teal-100 text-teal-700 text-[10px] sm:text-xs font-bold rounded-lg transition-all text-center"
             >
-              <UploadCloud className="h-3.5 w-3.5" />
-              <span>Upload Scan</span>
+              Analyze Trends
             </button>
           </div>
         </div>
