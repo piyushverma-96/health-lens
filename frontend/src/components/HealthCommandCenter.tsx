@@ -9,11 +9,10 @@ import {
   Sparkles, 
   ArrowRight, 
   TrendingUp, 
-  CheckCircle2, 
   Activity, 
-  Calendar,
-  ChevronRight,
-  UploadCloud,
+  Calendar, 
+  ChevronRight, 
+  UploadCloud, 
   Loader2
 } from "lucide-react";
 
