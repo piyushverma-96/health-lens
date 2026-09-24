@@ -48,6 +48,7 @@ export const Dashboard: React.FC = () => {
       setSelectedReportId(reportId);
     }
     setSearchParams({ tab: tabId });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
@@ -124,13 +125,13 @@ export const Dashboard: React.FC = () => {
           <HealthAssistant 
             preloadedPrompt={chatPreload} 
             onClearPreload={() => setChatPreload(null)} 
-            onNavigate={(tabId) => handleTabChange(tabId)}
+            onNavigate={(tabId, reportId) => handleTabChange(tabId, reportId)}
           />
         );
       case "upload":
         return (
           <div className="max-w-4xl mx-auto py-2 px-2 sm:px-4 animate-fade-in">
-            <ReportUploader onUploadSuccess={() => handleTabChange("history")} />
+            <ReportUploader onUploadSuccess={(reportId) => handleTabChange("history", reportId)} />
           </div>
         );
       case "history":

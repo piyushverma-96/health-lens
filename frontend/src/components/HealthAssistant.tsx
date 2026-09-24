@@ -27,7 +27,7 @@ import { useBiomarkers } from "../hooks/useBiomarkers";
 interface HealthAssistantProps {
   preloadedPrompt: string | null;
   onClearPreload: () => void;
-  onNavigate: (tabId: string) => void;
+  onNavigate: (tabId: string, reportId?: string) => void;
 }
 
 export const HealthAssistant: React.FC<HealthAssistantProps> = ({ 
@@ -917,7 +917,7 @@ export const HealthAssistant: React.FC<HealthAssistantProps> = ({
                   </div>
                 </div>
 
-                <ReportUploader onUploadSuccess={() => onNavigate("history")} />
+                <ReportUploader onUploadSuccess={(reportId) => onNavigate("history", reportId)} />
               </div>
             </div>
           )}

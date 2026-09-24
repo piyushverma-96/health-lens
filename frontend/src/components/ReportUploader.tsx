@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../hooks/useAuth";
 import { supabase } from "../services/supabase";
 import { api } from "../services/api";
@@ -18,7 +19,7 @@ import {
 } from "lucide-react";
 
 interface ReportUploaderProps {
-  onUploadSuccess: () => void;
+  onUploadSuccess: (reportId?: string) => void;
 }
 
 interface DemoReportInfo {
@@ -66,6 +67,7 @@ const DEMO_REPORTS: DemoReportInfo[] = [
 
 export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess }) => {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [file, setFile] = useState<File | null>(null);
@@ -179,7 +181,7 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
       await new Promise((r) => setTimeout(r, 150));
       setPipelineStep(3);
 
-      await api.post("/reports", {
+      const createdReport = await api.post<any>("/reports", {
         file_path: filePath,
         file_name: demo.fileName,
         mime_type: "application/pdf",
@@ -191,10 +193,13 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
       await new Promise((r) => setTimeout(r, 150));
       setPipelineStep(5);
 
-      setSuccess(`Report "${demo.title}" parsed successfully!`);
+      queryClient.invalidateQueries({ queryKey: ["reports"] });
+      queryClient.invalidateQueries({ queryKey: ["biomarkers"] });
+
+      setSuccess(`Report "${demo.title}" parsed successfully! Opening analysis...`);
       setTimeout(() => {
-        onUploadSuccess();
-      }, 400);
+        onUploadSuccess(createdReport?.id);
+      }, 350);
     } catch (err: any) {
       setError(err.message || "Failed to analyze demo report.");
       console.error("Demo analysis error:", err);
@@ -240,7 +245,7 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
       await new Promise((r) => setTimeout(r, 150));
       setPipelineStep(3);
 
-      await api.post("/reports", {
+      const createdReport = await api.post<any>("/reports", {
         file_path: filePath,
         file_name: file.name,
         mime_type: file.type || "application/octet-stream",
@@ -252,13 +257,16 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onUploadSuccess 
       await new Promise((r) => setTimeout(r, 150));
       setPipelineStep(5);
 
-      setSuccess("Report uploaded successfully! Added to your health intelligence timeline.");
+      queryClient.invalidateQueries({ queryKey: ["reports"] });
+      queryClient.invalidateQueries({ queryKey: ["biomarkers"] });
+
+      setSuccess("Report uploaded & analyzed successfully! Opening analysis...");
       setFile(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
       
       setTimeout(() => {
-        onUploadSuccess();
-      }, 400);
+        onUploadSuccess(createdReport?.id);
+      }, 350);
     } catch (err: any) {
       setError(err.message || "Failed to process and upload document.");
       console.error("Upload error details:", err);

@@ -41,6 +41,7 @@ export const ReportHistory: React.FC<ReportHistoryProps> = ({
   useEffect(() => {
     if (initialSelectedReportId) {
       setSelectedReportId(initialSelectedReportId);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   }, [initialSelectedReportId]);
 
