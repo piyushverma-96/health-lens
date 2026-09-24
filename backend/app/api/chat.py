@@ -349,28 +349,17 @@ def send_chat_message(
         # Append user query
         messages_payload.append({"role": "user", "content": user_query})
 
-        # 7. Call Groq model with resilient fallback and safe token limits
-        # Model order: fastest/most available first, heaviest last.
-        # Token limits are kept conservative to stay within free-tier OTPM limits.
-        candidate_models = []
-        primary = getattr(settings, "GROQ_MODEL", "openai/gpt-oss-20b") or "openai/gpt-oss-20b"
-        # Prefer gpt-oss-20b first for chat (faster + generous limits), then 120b, then qwen fallback
-        ordered_fallbacks = ["openai/gpt-oss-20b", "openai/gpt-oss-120b", "qwen/qwen3.8-27b"]
-        # Put primary model first if not already in list
-        if primary not in ordered_fallbacks:
-            candidate_models.append(primary)
-        for fb in ordered_fallbacks:
-            if fb not in candidate_models:
-                candidate_models.append(fb)
+        # 7. Call Groq model with resilient fallback and safe token limits.
+        # IMPORTANT: qwen/qwen3.8-27b is intentionally excluded from chat.
+        # qwen has a shared 1000 OTPM limit across report analysis + chat combined —
+        # this causes constant 429 rate limit errors. Only gpt-oss models are used here.
+        # gpt-oss-20b: fast, generous limits — primary chat model
+        # gpt-oss-120b: higher quality — fallback if 20b fails
+        candidate_models = ["openai/gpt-oss-20b", "openai/gpt-oss-120b"]
 
         def _chat_max_tokens(model_name: str) -> int:
-            """Return a safe max_tokens for each model within free-tier OTPM limits."""
-            name = model_name.lower()
-            if "qwen" in name:
-                return 700   # qwen free tier: 1000 OTPM hard cap — keep well under
-            if "20b" in name:
-                return 1000  # gpt-oss-20b: generous limits, 1000 is safe
-            return 1000      # gpt-oss-120b: also 1000 to avoid burst OTPM issues
+            """Return a safe max_tokens for each model."""
+            return 1200  # Both gpt-oss models handle 1200 tokens comfortably
 
         assistant_reply = None
         last_error = None
