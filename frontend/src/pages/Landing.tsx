@@ -441,13 +441,9 @@ export const Landing: React.FC = () => {
                   <ArrowRight className="h-4 w-4 transform group-hover:translate-x-1 transition-transform" />
                 </button>
 
-                <button 
-                  onClick={() => navigate("/login?auto=1")}
-                  className="px-8 py-4 rounded-full bg-white hover:bg-slate-50 text-slate-800 text-sm font-bold tracking-wide border border-slate-200 shadow-xs hover:shadow-md transition-all active:scale-[0.98] cursor-pointer flex items-center gap-2"
-                >
-                  <Sparkles className="h-4 w-4 text-[#0D9488]" />
-                  <span>Try Demo Free</span>
-                </button>
+                <span className="text-sm text-slate-500 font-medium">
+                  No credit card needed · 100% free
+                </span>
               </div>
 
             </div>
