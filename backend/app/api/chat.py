@@ -350,16 +350,17 @@ def send_chat_message(
         messages_payload.append({"role": "user", "content": user_query})
 
         # 7. Call Groq model with resilient fallback and safe token limits.
-        # IMPORTANT: qwen/qwen3.8-27b is intentionally excluded from chat.
-        # qwen has a shared 1000 OTPM limit across report analysis + chat combined —
-        # this causes constant 429 rate limit errors. Only gpt-oss models are used here.
-        # gpt-oss-20b: fast, generous limits — primary chat model
-        # gpt-oss-120b: higher quality — fallback if 20b fails
-        candidate_models = ["openai/gpt-oss-20b", "openai/gpt-oss-120b"]
+        # Order:
+        # 1. openai/gpt-oss-20b: fast, high throughput, generous limits
+        # 2. openai/gpt-oss-120b: higher reasoning capacity
+        # 3. qwen/qwen3.8-27b: emergency fallback with strict 450 max_tokens (well under 1000 OTPM)
+        candidate_models = ["openai/gpt-oss-20b", "openai/gpt-oss-120b", "qwen/qwen3.8-27b"]
 
         def _chat_max_tokens(model_name: str) -> int:
-            """Return a safe max_tokens for each model."""
-            return 1200  # Both gpt-oss models handle 1200 tokens comfortably
+            """Return a safe max_tokens for each model tier to prevent 429 errors."""
+            if "qwen" in model_name.lower():
+                return 450  # Hard cap: keeps request well below 1000 OTPM free tier limit
+            return 800  # gpt-oss models deliver concise, fast responses within 800 tokens
 
         assistant_reply = None
         last_error = None
@@ -399,6 +400,9 @@ def send_chat_message(
                         break
             if assistant_reply:
                 break  # Got a reply — stop trying models
+
+        if not assistant_reply:
+            raise last_error or RuntimeError("Failed to generate response from all available AI models.")
 
 
         # 8. Record sources list to return to client
@@ -474,7 +478,7 @@ def send_chat_message(
     except Exception as e:
         err_msg = str(e)
         logger.error(f"Chat execution failed: {err_msg}")
-        if "rate_limit_exceeded" in err_msg or "429" in err_msg:
+        if any(term in err_msg.lower() for term in ["rate_limit", "429", "too large", "tokens per minute"]):
             user_facing = "AI consultation service is currently handling high volume. Please wait a few seconds and try again."
         else:
             user_facing = f"Assistant consultation encountered an issue: {err_msg}"

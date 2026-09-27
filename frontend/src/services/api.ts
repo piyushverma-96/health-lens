@@ -33,6 +33,26 @@ async function getAuthHeader(): Promise<Record<string, string>> {
   return {};
 }
 
+async function extractErrorMessage(response: Response): Promise<string> {
+  try {
+    const errorText = await response.text();
+    if (!errorText) return `Request failed with status ${response.status}`;
+    try {
+      const parsed = JSON.parse(errorText);
+      if (parsed) {
+        if (typeof parsed.detail === "string") return parsed.detail;
+        if (typeof parsed.message === "string") return parsed.message;
+        if (typeof parsed.error === "string") return parsed.error;
+      }
+    } catch {
+      // Non-JSON plain text
+    }
+    return errorText;
+  } catch {
+    return `Request failed with status ${response.status}`;
+  }
+}
+
 export const api = {
   async get<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
     const authHeader = await getAuthHeader();
@@ -51,8 +71,8 @@ export const api = {
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(errorText || `GET request failed with status ${response.status}`);
+      const errorMsg = await extractErrorMessage(response);
+      throw new Error(errorMsg);
     }
 
     return response.json();
@@ -82,8 +102,8 @@ export const api = {
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(errorText || `POST request failed with status ${response.status}`);
+      const errorMsg = await extractErrorMessage(response);
+      throw new Error(errorMsg);
     }
 
     return response.json();
@@ -113,8 +133,8 @@ export const api = {
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(errorText || `PUT request failed with status ${response.status}`);
+      const errorMsg = await extractErrorMessage(response);
+      throw new Error(errorMsg);
     }
 
     return response.json();
@@ -138,8 +158,8 @@ export const api = {
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(errorText || `DELETE request failed with status ${response.status}`);
+      const errorMsg = await extractErrorMessage(response);
+      throw new Error(errorMsg);
     }
 
     if (response.status === 204) {

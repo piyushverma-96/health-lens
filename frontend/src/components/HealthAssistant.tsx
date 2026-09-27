@@ -726,17 +726,26 @@ export const HealthAssistant: React.FC<HealthAssistantProps> = ({
         {/* Chat Messages Log OR Welcome View */}
         <div className="flex-1 overflow-y-auto pt-3 sm:pt-6 pb-28 sm:pb-32 px-2.5 sm:px-6 space-y-4 sm:space-y-6 bg-[#FAF9F6]/30">
           {chatError && (
-            <div className="p-4 bg-red-50 border border-red-200 text-red-700 text-xs rounded-2xl flex items-start justify-between gap-3 max-w-2xl mx-auto shadow-xs">
+            <div className="p-4 bg-amber-50 border border-amber-200 text-amber-900 text-xs rounded-2xl flex items-start justify-between gap-3 max-w-2xl mx-auto shadow-xs">
               <div className="flex items-start gap-2.5">
-                <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-red-500" />
+                <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-amber-600" />
                 <div>
-                  <p className="font-bold">Assistant Request Error</p>
-                  <p className="text-[11px] text-red-600 mt-0.5">{chatError}</p>
+                  <p className="font-bold text-amber-900">
+                    {chatError.toLowerCase().includes("rate") || chatError.includes("429") || chatError.includes("too large")
+                      ? "High AI Consultation Traffic"
+                      : "Assistant Notice"}
+                  </p>
+                  <p className="text-[11px] text-amber-700 mt-0.5 leading-relaxed">
+                    {chatError.toLowerCase().includes("rate") || chatError.includes("429") || chatError.includes("too large")
+                      ? "The AI assistant is temporarily handling high volume on the API. Please wait a few seconds and try sending your question again."
+                      : chatError}
+                  </p>
                 </div>
               </div>
               <button
                 onClick={() => setChatError(null)}
-                className="text-red-400 hover:text-red-700 p-1 cursor-pointer"
+                className="text-amber-500 hover:text-amber-800 p-1 cursor-pointer"
+                title="Dismiss"
               >
                 <X className="h-4 w-4" />
               </button>
